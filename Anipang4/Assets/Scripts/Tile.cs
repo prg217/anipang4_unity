@@ -5,7 +5,7 @@ public class Tile : MonoBehaviour
 {
     enum TileType
     {
-        NULL, // 블록이 없는 상태
+        NULL = -1, // 블록이 없는 상태
         MOVABLE, // 움직일 수 있는 상태
         IMMOVABLE, // 움직일 수 없는 상태
     }
@@ -82,5 +82,11 @@ public class Tile : MonoBehaviour
         }
 
         return true;
+    }
+
+    // 생성 타일일 때 블록을 랜덤 생성
+    void CreateBlock()
+    { 
+
     }
 }
