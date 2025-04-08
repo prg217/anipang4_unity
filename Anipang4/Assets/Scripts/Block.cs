@@ -1,10 +1,11 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Block : MonoBehaviour
 {
     enum BlockType
     {
-        NONE = -1,
+        NONE,
 
         // 기본 블록
         MOUSE,
@@ -43,19 +44,52 @@ public class Block : MonoBehaviour
     {
         m_blockType = _type;
 
-        /*
-         * 블록 타입에 따라 스프라이트(애니메이션) 바뀌게 하기
-        */
-
-        switch(m_blockType)
+        // 특수 블록 여부
+        if ((int)m_blockType >= (int)BlockType.CROSS)
         {
-            case BlockType.CROSS:
-            case BlockType.SUN:
-            case BlockType.RANDOM:
-            case BlockType.COSMIC:
-            case BlockType.MOON:
-                m_isSpecial = true;
-                break;
+            m_isSpecial = true;
         }
+        else
+        {
+            m_isSpecial = false;
+        }
+
+        // 블록 타입에 따라 애니메이터 컨트롤러가 바뀜
+        RuntimeAnimatorController controller = null;
+        string path = "Animation/";
+
+        if (m_isSpecial)
+        {
+            // 특수 블록 전용
+            switch (m_blockType)
+            {
+                case BlockType.CROSS:
+                    path += "cross";
+                    break;
+                case BlockType.SUN:
+                    path += "sun";
+                    break;
+                case BlockType.RANDOM:
+                    path += "random";
+                    break;
+                case BlockType.COSMIC:
+                    path += "cosmic";
+                    break;
+                case BlockType.MOON:
+                    path += "moon";
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            path += "block";
+            int number = (int)m_blockType;
+            path += number.ToString();
+            controller = Resources.Load<RuntimeAnimatorController>(path);
+        }
+        path += "_aniCtrl.controller";
+        GetComponent<Animator>().runtimeAnimatorController = controller;
     }
 }

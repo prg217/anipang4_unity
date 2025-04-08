@@ -22,6 +22,15 @@ public class Tile : MonoBehaviour
     GameObject m_myBackObstacle;
     // ==========================================
 
+    // ====== 자신의 위치(행렬) ======
+    [SerializeField]
+    int m_myRow;
+    [SerializeField]
+    int m_myCol;
+    // ===============================
+    
+    // 클릭 되어 있는지 확인
+    bool m_clicked = false;
 
     void Awake()
     {
