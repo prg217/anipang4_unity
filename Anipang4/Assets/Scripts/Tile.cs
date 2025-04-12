@@ -3,37 +3,69 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
+    #region 변수
+
     enum TileType
     {
-        NULL = -1, // 블록이 없는 상태
-        MOVABLE, // 움직일 수 있는 상태
-        IMMOVABLE, // 움직일 수 없는 상태
+        NULL = -1, // 블록이 없는 상태(움직일 수도 없음)
+        IMMOVABLE = 0, // 움직일 수 없는 상태
+        MOVABLE = 1, // 움직일 수 있는 상태
     }
+    [SerializeField]
     TileType m_tileType = TileType.NULL;
 
     [SerializeField]
     // 타일에 블록이 없을 때 어느 타일에서 블록을 받아올지 셋팅
     // 만약 값이 nullptr이라면 "생성 타일"로 본다.
-    GameObject m_upTile; 
+    GameObject m_upTile;
 
-    // ====== 타일이 보유 한 자식 오브젝트 ======
+    #region 타일이 보유 한 자식 오브젝트
+    [SerializeField]
     GameObject m_myBlock;
     GameObject m_myFrontObstacle;
     GameObject m_myBackObstacle;
-    // ==========================================
+    #endregion
 
-    // ====== 자신의 위치(행렬) ======
+    #region 자신의 위치(행렬)
     [SerializeField]
     int m_myRow;
     [SerializeField]
     int m_myCol;
-    // ===============================
-    
-    // 클릭 되어 있는지 확인
-    bool m_clicked = false;
+    #endregion
+
+    #endregion 변수 끝
+
+    #region Get함수
+    public GameObject GetMyBlock() {  return m_myBlock; }
+    // -1 : 블록 없음, 0 : 움직일 수 없음, 1 : 움직일 수 있음
+    public int GetTileType() { return (int)m_tileType; }
+    #endregion
+
+    #region Set함수
+
+    #endregion
 
     void Awake()
     {
+        Refresh();
+    }
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+   
+    }
+
+    // 자신의 정보 새로고침
+    public void Refresh()
+    {
+        #region 자식 오브젝트를 변수에 넣기
         Transform child = transform.Find("Block");
         if (child != null)
         {
@@ -54,8 +86,9 @@ public class Tile : MonoBehaviour
         {
             m_myBackObstacle = child.gameObject;
         }
+        #endregion
 
-        // 타일 안의 블록이 움직일 수 있는 상태인가 초기 설정
+        #region 타일 안의 블록이 움직일 수 있는 상태인가
         if (CheckMove())
         {
             m_tileType = TileType.MOVABLE;
@@ -64,18 +97,7 @@ public class Tile : MonoBehaviour
         {
             m_tileType = TileType.IMMOVABLE;
         }
-    }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        #endregion
     }
 
     // 블록이 이동할 수 있는지에 대해 반환
@@ -85,7 +107,17 @@ public class Tile : MonoBehaviour
         {
             return false;
         }
-        if (m_myFrontObstacle != null)
+
+        // 움직일 수 없는 장애물이 있나 판단
+        bool isEmpty = m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty();
+        if (!isEmpty)
+        {
+            return false;
+        }
+
+        // 블록이 비어 있는 경우
+        isEmpty = m_myBlock.GetComponent<Block>().GetIsEmpty();
+        if (isEmpty)
         {
             return false;
         }
@@ -98,4 +130,6 @@ public class Tile : MonoBehaviour
     { 
 
     }
+
+
 }

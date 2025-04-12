@@ -1,8 +1,12 @@
+using NUnit;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class Block : MonoBehaviour
 {
+    #region 변수
+
     enum BlockType
     {
         NONE,
@@ -28,6 +32,47 @@ public class Block : MonoBehaviour
     [SerializeField]
     bool m_isSpecial = false;
 
+    #region 움직이기 위한 변수
+    bool m_moving = false;
+
+    Vector3 m_start;
+    Vector3 m_goal;
+
+    GameObject m_goalTile;
+
+    float m_moveDurationTime = 0.5f;
+    float m_time = 0f;
+    #endregion
+
+    #endregion 변수 끝
+
+    #region Get함수
+    public bool GetIsEmpty()
+    {
+        if (m_blockType == BlockType.NONE)
+        {
+            return true;
+        }
+        return false;
+    }
+    #endregion
+
+    #region Set함수
+    public void SetMove(GameObject _goalTile)
+    {
+        // 타일 오브젝트가 맞는지 확인
+        if (_goalTile.GetComponent<Tile>() == null)
+        {
+            return;
+        }
+
+        m_moving = true;
+        m_start = transform.position;
+        m_goal = _goalTile.transform.position;
+        m_goalTile = _goalTile;
+    }
+    #endregion
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -37,7 +82,8 @@ public class Block : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        // 교환을 위한 이동
+        ChangeMoving();
     }
 
     void SetBlockType(BlockType _type)
@@ -54,7 +100,7 @@ public class Block : MonoBehaviour
             m_isSpecial = false;
         }
 
-        // 블록 타입에 따라 애니메이터 컨트롤러가 바뀜
+        #region 블록 타입에 따라 애니메이터 컨트롤러가 바뀌게 함
         RuntimeAnimatorController controller = null;
         string path = "Animation/";
 
@@ -91,5 +137,33 @@ public class Block : MonoBehaviour
         }
         path += "_aniCtrl.controller";
         GetComponent<Animator>().runtimeAnimatorController = controller;
+        #endregion
+    }
+
+
+
+    // 교환을 위한 이동
+    void ChangeMoving()
+    {
+        if (m_moving)
+        {
+            if (m_time < m_moveDurationTime)
+            {
+                m_time += Time.deltaTime;
+                float normalizedTime = m_time / m_moveDurationTime;
+                transform.position = Vector3.Lerp(m_start, m_goal, normalizedTime);
+
+                return;
+            }
+
+            // 위치 이동이 끝난 후에 부모 변경
+            transform.SetParent(m_goalTile.transform);
+            transform.localPosition = Vector3.zero; // 새 부모 기준 정렬
+
+            m_moving = false;
+
+            // 매니저에 이동 완료 신호 보냄
+            MoveMgr.Instance.MoveComplete();
+        }
     }
 }
