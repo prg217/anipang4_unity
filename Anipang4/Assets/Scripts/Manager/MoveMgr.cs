@@ -111,8 +111,8 @@ public class MoveMgr : MonoBehaviour
     {
         #region 둘 중 하나라도 움직일 수 없는 상태인지 확인
         // -1 : 블록 없음, 0 : 움직일 수 없음, 1 : 움직일 수 있음
-        int tileType1 = m_pClickedTile1.GetComponent<Tile>().GetTileType();
-        int tileType2 = m_pClickedTile2.GetComponent<Tile>().GetTileType();
+        int tileType1 = (int)m_pClickedTile1.GetComponent<Tile>().GetTileType();
+        int tileType2 = (int)m_pClickedTile2.GetComponent<Tile>().GetTileType();
 
         // 둘 중 하나라도 움직일 수 없는 상태라면 움직이지 않음
         if (tileType1 < 1 || tileType2 < 1)
@@ -126,7 +126,6 @@ public class MoveMgr : MonoBehaviour
         #endregion
 
         #region 블록 움직이기
-        // 블록에게 상대 타일로 움직이라고 신호를 보냄
         // 타일이 가지고 있는 블록에게 상대 타일쪽으로 움직이라고 함
         GameObject block1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlock();
         GameObject block2 = m_pClickedTile2.GetComponent<Tile>().GetMyBlock();
@@ -146,6 +145,8 @@ public class MoveMgr : MonoBehaviour
             // 타일들 정보 새로고침
             m_pClickedTile1.GetComponent<Tile>().Refresh();
             m_pClickedTile2.GetComponent<Tile>().Refresh();
+
+            // 매치 시도 후 매치가 안 되면 원상복구
 
             m_moving = false;
             m_pClickedTile1 = null;

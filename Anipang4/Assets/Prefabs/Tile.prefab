@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7157561898829927868}
   m_Layer: 0
   m_Name: Tile
-  m_TagString: Untagged
+  m_TagString: Tile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -109,7 +109,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ef4337dafdd4c846879057703b1a48e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_tileType: -1
   m_upTile: {fileID: 0}
+  m_myBlock: {fileID: 0}
   m_myRow: 0
   m_myCol: 0
 --- !u!61 &7157561898829927868

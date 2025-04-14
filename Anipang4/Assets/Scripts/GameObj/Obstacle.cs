@@ -9,8 +9,10 @@ public class Obstacle : MonoBehaviour
         NONE,
 
         // 앞 장애물
+        PRISON, // 감옥
 
         // 뒤 장애물
+        PAINT, // 페인트
     }
 
     [SerializeField]

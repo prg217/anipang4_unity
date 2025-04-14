@@ -5,12 +5,6 @@ public class Tile : MonoBehaviour
 {
     #region 변수
 
-    enum TileType
-    {
-        NULL = -1, // 블록이 없는 상태(움직일 수도 없음)
-        IMMOVABLE = 0, // 움직일 수 없는 상태
-        MOVABLE = 1, // 움직일 수 있는 상태
-    }
     [SerializeField]
     TileType m_tileType = TileType.NULL;
 
@@ -28,9 +22,7 @@ public class Tile : MonoBehaviour
 
     #region 자신의 위치(행렬)
     [SerializeField]
-    int m_myRow;
-    [SerializeField]
-    int m_myCol;
+    Vector2Int m_matrix;
     #endregion
 
     #endregion 변수 끝
@@ -38,7 +30,9 @@ public class Tile : MonoBehaviour
     #region Get함수
     public GameObject GetMyBlock() {  return m_myBlock; }
     // -1 : 블록 없음, 0 : 움직일 수 없음, 1 : 움직일 수 있음
-    public int GetTileType() { return (int)m_tileType; }
+    public TileType GetTileType() { return m_tileType; }
+    public Vector2Int GetMatrix() { return m_matrix; }
+    public BlockType GetMyBlockType() { return m_myBlock.GetComponent<Block>().GetBlockType(); }
     #endregion
 
     #region Set함수

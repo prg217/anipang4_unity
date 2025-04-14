@@ -7,26 +7,6 @@ public class Block : MonoBehaviour
 {
     #region 변수
 
-    enum BlockType
-    {
-        NONE,
-
-        // 기본 블록
-        MOUSE,
-        DOG,
-        RABBIT,
-        MONGKEY,
-        CHICK,
-        CAT,
-
-        // 특수 블록
-        CROSS, // 십자 모양으로 블록 제거
-        SUN, // 폭탄 블록
-        RANDOM, // 무지개 블록, 겹친 블록들을 제거
-        COSMIC, // 모두 다 제거
-        MOON, // 클리어 조건 블록을 추적해서 제거
-    }
-
     [SerializeField]
     BlockType m_blockType;
     [SerializeField]
@@ -55,10 +35,11 @@ public class Block : MonoBehaviour
         }
         return false;
     }
+    public BlockType GetBlockType() { return m_blockType; }
     #endregion
 
     #region Set함수
-    public void SetMove(GameObject _goalTile)
+    public void SetMove(in GameObject _goalTile)
     {
         // 타일 오브젝트가 맞는지 확인
         if (_goalTile.GetComponent<Tile>() == null)
@@ -86,7 +67,7 @@ public class Block : MonoBehaviour
         ChangeMoving();
     }
 
-    void SetBlockType(BlockType _type)
+    void SetBlockType(in BlockType _type)
     {
         m_blockType = _type;
 
@@ -160,6 +141,7 @@ public class Block : MonoBehaviour
             transform.SetParent(m_goalTile.transform);
             transform.localPosition = Vector3.zero; // 새 부모 기준 정렬
 
+            m_time = 0f;
             m_moving = false;
 
             // 매니저에 이동 완료 신호 보냄
