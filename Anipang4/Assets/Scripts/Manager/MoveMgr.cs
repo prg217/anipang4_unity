@@ -147,6 +147,14 @@ public class MoveMgr : MonoBehaviour
             m_pClickedTile2.GetComponent<Tile>().Refresh();
 
             // 매치 시도 후 매치가 안 되면 원상복구
+            bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1);
+            bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2);
+
+            // 둘 다 매치가 되지 않았다면
+            if (!match1 && !match2)
+            {
+                // 원상복구
+            }
 
             m_moving = false;
             m_pClickedTile1 = null;
