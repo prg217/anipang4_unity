@@ -52,24 +52,11 @@ public class Block : MonoBehaviour
         m_goal = _goalTile.transform.position;
         m_goalTile = _goalTile;
     }
-    #endregion
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void SetBlockType(in BlockType _Type)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        // 교환을 위한 이동
-        ChangeMoving();
-    }
-
-    void SetBlockType(in BlockType _type)
-    {
-        m_blockType = _type;
+        GetComponent<Renderer>().enabled = true;
+        m_blockType = _Type;
 
         // 특수 블록 여부
         if ((int)m_blockType >= (int)BlockType.CROSS)
@@ -111,6 +98,12 @@ public class Block : MonoBehaviour
         }
         else
         {
+            // 안 보이게 함
+            if (m_blockType == BlockType.NONE)
+            {
+                GetComponent<Renderer>().enabled = false;
+            }
+
             path += "block";
             int number = (int)m_blockType;
             path += number.ToString();
@@ -120,6 +113,21 @@ public class Block : MonoBehaviour
         GetComponent<Animator>().runtimeAnimatorController = controller;
         #endregion
     }
+    #endregion
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        // 교환을 위한 이동
+        ChangeMoving();
+    }
+
 
 
 

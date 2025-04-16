@@ -35,18 +35,15 @@ public class StageMgr : MonoBehaviour
 
         #region 타일 정보 등록
         // 보드의 자식인 라인들 불러오기
-        Transform[] lines = m_Board.transform.GetComponentsInChildren<Transform>();
-        foreach (Transform line in lines)
+        for (int i = 0; i < m_Board.transform.childCount; i++)
         {
-            if (line == m_Board.transform)
-            {
-                continue; // 자기 자신 제외
-            }
+            Transform line = m_Board.transform.GetChild(i);
 
             // 라인의 자식인 타일들 등록
-            Transform[] tiles = line.transform.GetComponentsInChildren<Transform>();
-            foreach (Transform tile in tiles)
+            for (int j = 0; j < line.transform.childCount; j++)
             {
+                Transform tile = line.transform.GetChild(j);
+
                 if (tile.CompareTag("Tile"))
                 {
                     Vector2Int matrix = tile.GetComponent<Tile>().GetMatrix();
@@ -67,7 +64,7 @@ public class StageMgr : MonoBehaviour
     #endregion 변수 끝
 
     #region Get함수
-    public GameObject GetTile(Vector2Int _Matrix) { return m_Tiles[_Matrix]; }
+    public GameObject GetTile(in Vector2Int _Matrix) { return m_Tiles[_Matrix]; }
     #endregion
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

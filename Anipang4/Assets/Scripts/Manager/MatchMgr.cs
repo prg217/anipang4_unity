@@ -38,10 +38,12 @@ public class MatchMgr : MonoBehaviour
 
     Vector2Int m_targetMatrix;
     BlockType m_targetType;
+    GameObject m_targetTile;
 
     int m_matchCount = 1; // 본인 포함으로 계산
-    int m_saveMatchCount = 0; 
-    List<GameObject> m_matchTiles; // 매치가 되는 타일들 저장(후에 터트림)
+    int m_saveMatchCount = 1; 
+    List<GameObject> m_matchTiles = new List<GameObject>(); // 매치가 되는 타일들 저장(후에 터트림)
+    List<GameObject> m_saveMatchTiles = new List<GameObject>();
 
     BlockType m_newBlock = BlockType.NONE; // 특수 블록의 조건에 맞을 경우 생성될 블럭
 
@@ -79,13 +81,23 @@ public class MatchMgr : MonoBehaviour
         6. 총 3개 이상->기본
         */
 
+        m_targetTile = _Tile;
         m_targetMatrix = _Tile.GetComponent<Tile>().GetMatrix();
         m_targetType = _Tile.GetComponent<Tile>().GetMyBlockType();
+
+        // 특수 블록인 경우 특수 블록을 바로 터트림
+        if (m_targetType >= BlockType.CROSS )
+        {
+            // 특수 블록 터트리는 함수
+
+            return true;
+        }
 
         // 상하 검사
         UpDownInspect();
         // 여기서 특수 블록 조건 맞으면 일단 저장 후 좌우 검사 때 추가로 블록 더 없으면...
         m_saveMatchCount = m_matchCount;
+        m_saveMatchTiles = m_matchTiles;
         switch (m_matchCount)
         {
             case 4:
@@ -118,18 +130,29 @@ public class MatchMgr : MonoBehaviour
         if (m_newBlock >= BlockType.CROSS)
         {
             // 특수 블록 조건 만족함
+            Explode();
+
             return true;
         }
 
         // 만약 특수 블록에 해당되지 않는다면 MOON 검사 실시
         if (m_newBlock == BlockType.NONE)
         {
-            MoonInspect();
+            if (MoonInspect())
+            {
+                // 터트리는 함수
+                Explode();
+
+                return true;
+            }
         }
 
         // MOON의 조건에도 되지 않는다면 기본으로 터트림
         if (m_matchCount == 3)
         {
+            // 터트리는 함수
+            Explode();
+
             return true;
         }
 
@@ -187,9 +210,9 @@ public class MatchMgr : MonoBehaviour
         }
 
         // 매치가 안 되는 상황이라면 m_matchTiles를 이전 상태로 돌림
-        if (m_matchCount < 2 && m_matchCount > 0)
+        if (m_matchCount < 3 && m_matchCount > 1)
         {
-            m_matchTiles.RemoveRange(m_matchCount - m_matchCount, m_matchCount);
+            m_matchTiles.Clear();
             m_matchCount = 1;
         }
     }
@@ -245,15 +268,15 @@ public class MatchMgr : MonoBehaviour
         }
 
         // 매치가 안 되는 상황이라면 m_matchTiles를 이전 상태로 돌림
-        int count = m_matchCount - m_saveMatchCount;
-        if (count < 2 && count > 0)
+        int count = m_matchCount - m_saveMatchCount - 1;
+        if (count < 3 && count > 1)
         {
-            m_matchTiles.RemoveRange(m_matchCount - count, count);
+            m_matchTiles = m_saveMatchTiles;
             m_matchCount = m_saveMatchCount;
         }
     }
 
-    void MoonInspect()
+    bool MoonInspect()
     {
         /*
             1. 대각선 왼쪽 위, 오른쪽 위, 왼쪽 아래, 오른쪽 아래에 동일한 타입이 있는지 검사
@@ -261,31 +284,99 @@ public class MatchMgr : MonoBehaviour
             3. 만약 m_matchCount가 3이라면 그거 포함해서 터트리고(MOON인데 터트릴 것이 5개인 경우), 아니라면 여기서 추가 검사한 것만 터트림(4개)
         */
 
-        if (DiagonalInspect(new Vector2Int(1, 1)))
+        if (Inspect(new Vector2Int(1, 1)))
         {
-            // 오른쪽 한 칸, 위쪽 한 칸 검사
-            // 그것들도 똑같은 타입이면 MOON
-            // m_matchTiles에 넣어주는데, 중복되는지 검사하고 넣어줘야 함
+            MoonAddInspect(new Vector2Int(1, 1));
+            return true;
+        }
+        else if (Inspect(new Vector2Int(-1, 1)))
+        {
+            MoonAddInspect(new Vector2Int(-1, 1));
+            return true;
+        }
+        else if(Inspect(new Vector2Int(1, -1)))
+        {
+            MoonAddInspect(new Vector2Int(1, -1));
+            return true;
+        }
+        else if (Inspect(new Vector2Int(-1, -1)))
+        {
+            MoonAddInspect(new Vector2Int(-1, -1));
+            return true;
         }
 
-        DiagonalInspect(new Vector2Int(-1, 1));
-        DiagonalInspect(new Vector2Int(1, -1));
-        DiagonalInspect(new Vector2Int(-1, -1));
+        return false;
     }
 
-    bool DiagonalInspect(Vector2Int _AddMatrix)
+    // _AddMatrix만큼 합한 행렬의 타일의 타입 검사
+    bool Inspect(Vector2Int _AddMatrix)
     {
         Vector2Int matrix = m_targetMatrix;
 
-        // 오른쪽 위
         matrix += _AddMatrix;
         GameObject tile = StageMgr.Instance.GetTile(matrix);
+        if (tile == null)
+        {
+            return false;
+        }
+
         BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
         if (type == m_targetType)
         {
             return true;
         }
         return false;
+    }
+
+    // 대각선 타일이 동일한 타입일 때 양옆 추가 검사
+    void MoonAddInspect(Vector2Int _AddMatrix)
+    {
+        if (Inspect(new Vector2Int(_AddMatrix.x, 0)) == true && Inspect(new Vector2Int(0, _AddMatrix.y)) == true)
+        {
+            m_newBlock = BlockType.MOON;
+
+            Vector2Int matrix = m_targetMatrix;
+            matrix += new Vector2Int(1, 1);
+            GameObject tile = StageMgr.Instance.GetTile(matrix);
+            m_matchTiles.Add(tile);
+
+            // 중복 검사 후 매치 타일들에 넣어주기
+            matrix = m_targetMatrix;
+            matrix += new Vector2Int(_AddMatrix.x, 0);
+            tile = StageMgr.Instance.GetTile(matrix);
+            if (!m_matchTiles.Contains(tile))
+            {
+                m_matchTiles.Add(tile);
+            }
+
+            matrix = m_targetMatrix;
+            matrix += new Vector2Int(0, _AddMatrix.y);
+            tile = StageMgr.Instance.GetTile(matrix);
+            if (!m_matchTiles.Contains(tile))
+            {
+                m_matchTiles.Add(tile);
+            }
+        }
+    }
+
+    void Explode()
+    {
+        // 특수 블록 조건에 해당 될 경우
+        if (m_newBlock >= BlockType.CROSS)
+        {
+            m_targetTile.GetComponent<Tile>().SetMyBlockType(m_newBlock);
+        }
+        // 아닌 경우 블록 : NONE
+        else
+        {
+            m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        }
+
+        // m_matchTiles에 등록된 타일들의 블록 : NONE
+        foreach (GameObject tile in m_matchTiles)
+        {
+            tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        }
     }
 
     public bool SimulationMatch(in GameObject _Tile)

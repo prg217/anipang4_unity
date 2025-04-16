@@ -36,7 +36,10 @@ public class Tile : MonoBehaviour
     #endregion
 
     #region SetÇÔ¼ö
-
+    public void SetMyBlockType(in BlockType _BlockType)
+    {
+        m_myBlock.GetComponent<Block>().SetBlockType(_BlockType);
+    }
     #endregion
 
     void Awake()

@@ -151,7 +151,7 @@ public class MoveMgr : MonoBehaviour
             bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2);
 
             // 둘 다 매치가 되지 않았다면
-            if (!match1 && !match2)
+            if (match1 == false && match2 == false)
             {
                 // 원상복구
             }
