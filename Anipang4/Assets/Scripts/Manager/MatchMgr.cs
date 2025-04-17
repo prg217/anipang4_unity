@@ -81,9 +81,18 @@ public class MatchMgr : MonoBehaviour
         6. 총 3개 이상->기본
         */
 
+        #region 초기화
+        m_matchTiles.Clear();
+        m_saveMatchTiles.Clear();
+        m_matchCount = 1;
+        m_saveMatchCount = 1;
+        #endregion
+
+        #region 타겟 타일 변수 세팅
         m_targetTile = _Tile;
         m_targetMatrix = _Tile.GetComponent<Tile>().GetMatrix();
         m_targetType = _Tile.GetComponent<Tile>().GetMyBlockType();
+        #endregion
 
         // 특수 블록인 경우 특수 블록을 바로 터트림
         if (m_targetType >= BlockType.CROSS )
@@ -142,7 +151,6 @@ public class MatchMgr : MonoBehaviour
             {
                 // 터트리는 함수
                 Explode();
-
                 return true;
             }
         }
@@ -152,7 +160,6 @@ public class MatchMgr : MonoBehaviour
         {
             // 터트리는 함수
             Explode();
-
             return true;
         }
 
@@ -268,7 +275,7 @@ public class MatchMgr : MonoBehaviour
         }
 
         // 매치가 안 되는 상황이라면 m_matchTiles를 이전 상태로 돌림
-        int count = m_matchCount - m_saveMatchCount - 1;
+        int count = m_matchCount - m_saveMatchCount + 1;
         if (count < 3 && count > 1)
         {
             m_matchTiles = m_saveMatchTiles;
@@ -286,23 +293,31 @@ public class MatchMgr : MonoBehaviour
 
         if (Inspect(new Vector2Int(1, 1)))
         {
-            MoonAddInspect(new Vector2Int(1, 1));
-            return true;
+            if (MoonAddInspect(new Vector2Int(1, 1)))
+            {
+                return true;
+            }
         }
         else if (Inspect(new Vector2Int(-1, 1)))
         {
-            MoonAddInspect(new Vector2Int(-1, 1));
-            return true;
+            if (MoonAddInspect(new Vector2Int(-1, 1)))
+            {
+                return true;
+            }
         }
         else if(Inspect(new Vector2Int(1, -1)))
         {
-            MoonAddInspect(new Vector2Int(1, -1));
-            return true;
+            if (MoonAddInspect(new Vector2Int(1, -1)))
+            {
+                return true;
+            }
         }
         else if (Inspect(new Vector2Int(-1, -1)))
         {
-            MoonAddInspect(new Vector2Int(-1, -1));
-            return true;
+            if (MoonAddInspect(new Vector2Int(-1, -1)))
+            {
+                return true;
+            }
         }
 
         return false;
@@ -329,7 +344,7 @@ public class MatchMgr : MonoBehaviour
     }
 
     // 대각선 타일이 동일한 타입일 때 양옆 추가 검사
-    void MoonAddInspect(Vector2Int _AddMatrix)
+    bool MoonAddInspect(Vector2Int _AddMatrix)
     {
         if (Inspect(new Vector2Int(_AddMatrix.x, 0)) == true && Inspect(new Vector2Int(0, _AddMatrix.y)) == true)
         {
@@ -356,7 +371,11 @@ public class MatchMgr : MonoBehaviour
             {
                 m_matchTiles.Add(tile);
             }
+
+            return true;
         }
+
+        return false;
     }
 
     void Explode()
@@ -369,12 +388,14 @@ public class MatchMgr : MonoBehaviour
         // 아닌 경우 블록 : NONE
         else
         {
+            Debug.Log("타겟 없앰 " + m_targetTile.name);
             m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
         }
 
         // m_matchTiles에 등록된 타일들의 블록 : NONE
         foreach (GameObject tile in m_matchTiles)
         {
+            Debug.Log("없앰 " + tile.name);
             tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
         }
     }

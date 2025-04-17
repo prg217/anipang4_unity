@@ -64,7 +64,15 @@ public class StageMgr : MonoBehaviour
     #endregion 변수 끝
 
     #region Get함수
-    public GameObject GetTile(in Vector2Int _Matrix) { return m_Tiles[_Matrix]; }
+    public GameObject GetTile(in Vector2Int _Matrix)
+    { 
+        if (m_Tiles.ContainsKey(_Matrix))
+        {
+            return m_Tiles[_Matrix];
+        }
+
+        return null;
+    }
     #endregion
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
