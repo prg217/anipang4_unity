@@ -42,7 +42,20 @@ public class MoveMgr : MonoBehaviour
     bool m_moving = false;
     int m_completeCount = 0;
 
+    // 되돌리기
+    bool m_reMoving = false;
+
     #endregion 변수 끝
+
+    #region Set함수
+    public void SetClickedTileAndMoving(in GameObject _tile1, in GameObject _tile2)
+    {
+        m_pClickedTile1 = _tile1;
+        m_pClickedTile2 = _tile2;
+
+        Moving();
+    }
+    #endregion 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -69,7 +82,6 @@ public class MoveMgr : MonoBehaviour
                 Transform clickedTransform = hit.collider.transform;
                 if (m_pClickedTile1 == null)
                 {
-                    Debug.Log("m_pClickedTile1: " + clickedTransform.name);
                     m_pClickedTile1 = clickedTransform.gameObject;
                 }
                 else
@@ -80,9 +92,7 @@ public class MoveMgr : MonoBehaviour
                         return;
                     }
 
-                    Debug.Log("m_pClickedTile2: " + clickedTransform.name);
                     m_pClickedTile2 = clickedTransform.gameObject;
-                    m_moving = true;
 
                     /* 
                      * 블록을 바꾸는 함수가 들어갈 자리
@@ -102,13 +112,14 @@ public class MoveMgr : MonoBehaviour
                 Transform clickedTransform = hit.collider.transform;
                 m_pClickedTile1 = null;
                 m_pClickedTile2 = null;
-                Debug.Log("리셋");
             }
         }
     }
 
     void Moving()
     {
+        m_moving = true;
+
         #region 둘 중 하나라도 움직일 수 없는 상태인지 확인
         // -1 : 블록 없음, 0 : 움직일 수 없음, 1 : 움직일 수 있음
         int tileType1 = (int)m_pClickedTile1.GetComponent<Tile>().GetTileType();
@@ -146,21 +157,37 @@ public class MoveMgr : MonoBehaviour
             m_pClickedTile1.GetComponent<Tile>().Refresh();
             m_pClickedTile2.GetComponent<Tile>().Refresh();
 
-            // 매치 시도 후 매치가 안 되면 원상복구
-            bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1);
-            bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2);
-
-            // 둘 다 매치가 되지 않았다면
-            if (match1 == false && match2 == false)
+            if (!m_reMoving)
             {
-                // 원상복구
+                // 매치 시도 후 매치가 안 되면 원상복구
+                bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1);
+                bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2);
+
+                // 둘 다 매치가 되지 않았다면
+                if (match1 == false && match2 == false)
+                {
+                    // 원상복구
+                    m_reMoving = true;
+                    GameObject tempTile = m_pClickedTile1;
+                    m_pClickedTile1 = m_pClickedTile2;
+                    m_pClickedTile2 = tempTile;
+                    Moving();
+
+                    m_moving = false;
+                    m_completeCount = 0;
+                    return;
+                }
             }
 
             m_moving = false;
             m_pClickedTile1 = null;
             m_pClickedTile2 = null;
+            m_reMoving = false;
 
             m_completeCount = 0;
+
+            // 스테이지 매니저에 스테이지 검사 요구
+            StageMgr.Instance.CheckStage();
         }
     }
 }

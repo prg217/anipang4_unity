@@ -105,11 +105,12 @@ public class Block : MonoBehaviour
             }
 
             path += "block";
-            int number = (int)m_blockType;
+            int number = (int)m_blockType + 1;
             path += number.ToString();
-            controller = Resources.Load<RuntimeAnimatorController>(path);
         }
-        path += "_aniCtrl.controller";
+
+        path += "_aniCtrl";
+        controller = Resources.Load<RuntimeAnimatorController>(path);
         GetComponent<Animator>().runtimeAnimatorController = controller;
         #endregion
     }

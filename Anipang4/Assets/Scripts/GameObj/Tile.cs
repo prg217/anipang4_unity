@@ -33,6 +33,14 @@ public class Tile : MonoBehaviour
     public TileType GetTileType() { return m_tileType; }
     public Vector2Int GetMatrix() { return m_matrix; }
     public BlockType GetMyBlockType() { return m_myBlock.GetComponent<Block>().GetBlockType(); }
+    public bool IsBlockEmpty()
+    {
+        if (GetMyBlockType() == BlockType.NONE)
+        {
+            return true;
+        }
+        return false;
+    }
     #endregion
 
     #region Set함수
@@ -124,9 +132,28 @@ public class Tile : MonoBehaviour
 
     // 생성 타일일 때 블록을 랜덤 생성
     void CreateBlock()
-    { 
+    {
+        if (m_myBlock == null)
+        {
+            return;
+        }
 
+        // StageMgr에서 설정된 블록 값으로 랜덤한 값
+        int maxRandom = StageMgr.Instance.GetMaxBlockType();
+        int random = Random.Range(0, maxRandom + 1);
+        m_myBlock.GetComponent<Block>().SetBlockType((BlockType)random);
     }
 
-
+    public void EmptyMoving()
+    {
+        Debug.Log(m_matrix);
+        if (m_upTile != null)
+        {
+            MoveMgr.Instance.SetClickedTileAndMoving(transform.gameObject, m_upTile);
+        }
+        else
+        {
+            CreateBlock();
+        }
+    }
 }
