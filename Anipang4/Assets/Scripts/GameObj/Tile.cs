@@ -6,7 +6,7 @@ public class Tile : MonoBehaviour
     #region 변수
 
     [SerializeField]
-    TileType m_tileType = TileType.NULL;
+    TileType m_tileType = TileType.MOVABLE;
 
     [SerializeField]
     // 타일에 블록이 없을 때 어느 타일에서 블록을 받아올지 셋팅
@@ -35,10 +35,8 @@ public class Tile : MonoBehaviour
     public BlockType GetMyBlockType() { return m_myBlock.GetComponent<Block>().GetBlockType(); }
     public bool IsBlockEmpty()
     {
-        if (GetMyBlockType() == BlockType.NONE)
-        {
-            return true;
-        }
+        if (m_myBlock == null) { return false; }
+        if (GetMyBlockType() == BlockType.NONE) { return true; }
         return false;
     }
     #endregion
@@ -120,9 +118,9 @@ public class Tile : MonoBehaviour
             return false;
         }
 
-        // 블록이 비어 있는 경우
-        isEmpty = m_myBlock.GetComponent<Block>().GetIsEmpty();
-        if (isEmpty)
+        // 블록이 NULL인 경우
+        BlockType type = m_myBlock.GetComponent<Block>().GetBlockType();
+        if (type == BlockType.NULL)
         {
             return false;
         }
@@ -140,16 +138,20 @@ public class Tile : MonoBehaviour
 
         // StageMgr에서 설정된 블록 값으로 랜덤한 값
         int maxRandom = StageMgr.Instance.GetMaxBlockType();
-        int random = Random.Range(0, maxRandom + 1);
+        int random = Random.Range(0, maxRandom);
         m_myBlock.GetComponent<Block>().SetBlockType((BlockType)random);
     }
 
     public void EmptyMoving()
     {
-        Debug.Log(m_matrix);
+        // 윗 타일이 있거나, 움직일 수 있는 타일인 경우에만 윗 타일에서 블럭을 받아온다
         if (m_upTile != null)
         {
             MoveMgr.Instance.SetClickedTileAndMoving(transform.gameObject, m_upTile);
+        }
+        else if (m_upTile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE)
+        {
+            CreateBlock();
         }
         else
         {

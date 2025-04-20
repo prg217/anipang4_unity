@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using static Unity.VisualScripting.Metadata;
+using System.Collections;
 
 public class StageMgr : MonoBehaviour
 {
@@ -93,6 +94,7 @@ public class StageMgr : MonoBehaviour
         return null;
     }
     public int GetMaxBlockType() { return m_MaxBlockType; }
+    public Vector2Int GetMaxMatrix() { return m_MaxMatrix; }
     #endregion
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -109,25 +111,6 @@ public class StageMgr : MonoBehaviour
 
     public void CheckStage()
     {
-        // 아래쪽부터 모든 타일들에게 빈 공간 체크하게 한 뒤 위 타일에서 블록 받아옴(MoveMgr 활용)
-        for (int i = m_MaxMatrix.y; i >= 0; i--)
-        {
-            for (int j = 0; j < m_MaxMatrix.x; j++)
-            {
-                Vector2Int matrix = new Vector2Int(i, j);
-                GameObject tile = m_Tiles[matrix];
 
-                // 타일이 비었을 경우 등록된 윗 타일에서 블록을 내려받음
-                if (tile.GetComponent<Tile>().IsBlockEmpty())
-                {
-                    tile.GetComponent<Tile>().EmptyMoving();
-                }
-            }
-        }
-
-        // 그리고 매치 체크
-
-
-        // 앞으로 매치가 가능한지 체크
     }
 }
