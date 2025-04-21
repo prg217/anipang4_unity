@@ -86,6 +86,7 @@ public class MatchMgr : MonoBehaviour
         m_saveMatchTiles.Clear();
         m_matchCount = 1;
         m_saveMatchCount = 1;
+        m_newBlock = BlockType.NONE;
         #endregion
 
         #region 타겟 타일 변수 세팅

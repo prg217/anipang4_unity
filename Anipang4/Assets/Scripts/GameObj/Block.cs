@@ -51,6 +51,8 @@ public class Block : MonoBehaviour
         m_start = transform.position;
         m_goal = _goalTile.transform.position;
         m_goalTile = _goalTile;
+
+        transform.SetParent(m_goalTile.transform);
     }
 
     public void SetBlockType(in BlockType _Type)
@@ -129,9 +131,6 @@ public class Block : MonoBehaviour
         ChangeMoving();
     }
 
-
-
-
     // 교환을 위한 이동
     void ChangeMoving()
     {
@@ -146,9 +145,8 @@ public class Block : MonoBehaviour
                 return;
             }
 
-            // 위치 이동이 끝난 후에 부모 변경
-            transform.SetParent(m_goalTile.transform);
-            transform.localPosition = Vector3.zero; // 새 부모 기준 정렬
+            // 정렬
+            transform.localPosition = Vector3.zero;
 
             m_time = 0f;
             m_moving = false;

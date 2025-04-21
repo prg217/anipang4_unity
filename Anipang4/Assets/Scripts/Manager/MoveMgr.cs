@@ -117,9 +117,16 @@ public class MoveMgr : MonoBehaviour
 
     void Moving()
     {
+        if (m_pClickedTile1 == null || m_pClickedTile2 == null)
+        {
+            return;
+        }
+
         m_moving = true;
 
         #region 둘 중 하나라도 움직일 수 없는 상태인지 확인
+        //Debug.Log(m_pClickedTile1);
+        //Debug.Log(m_pClickedTile2);
         TileType tileType1 = m_pClickedTile1.GetComponent<Tile>().GetTileType();
         TileType tileType2 = m_pClickedTile2.GetComponent<Tile>().GetTileType();
 
@@ -142,6 +149,10 @@ public class MoveMgr : MonoBehaviour
         block1.GetComponent<Block>().SetMove(m_pClickedTile2);
         block2.GetComponent<Block>().SetMove(m_pClickedTile1);
         #endregion
+
+        // 타일들 정보 새로고침
+        m_pClickedTile1.GetComponent<Tile>().Refresh();
+        m_pClickedTile2.GetComponent<Tile>().Refresh();
     }
 
     public void MoveComplete()
@@ -151,10 +162,6 @@ public class MoveMgr : MonoBehaviour
         // 블록 교환이 둘 다 완료가 되었다면
         if (m_completeCount >= 2)
         {
-            // 타일들 정보 새로고침
-            m_pClickedTile1.GetComponent<Tile>().Refresh();
-            m_pClickedTile2.GetComponent<Tile>().Refresh();
-
             if (!m_reMoving)
             {
                 // 매치 시도 후 매치가 안 되면 원상복구
@@ -163,7 +170,6 @@ public class MoveMgr : MonoBehaviour
 
                 if (!m_emptyMoving)
                 {
-                    //Debug.LogError("m_emptyMoving : " + m_emptyMoving);
                     // 둘 다 매치가 되지 않았다면
                     if (match1 == false && match2 == false)
                     {
@@ -191,8 +197,9 @@ public class MoveMgr : MonoBehaviour
             // 빈 공간 채우기
             if (!m_emptyMoving)
             {
-                StartCoroutine(CheckEmpty());
+                //StartCoroutine(CheckEmpty());
             }
+            StartCoroutine(CheckEmpty());
             // 스테이지 매니저에 스테이지 검사 요구
             StageMgr.Instance.CheckStage();
         }
@@ -206,6 +213,7 @@ public class MoveMgr : MonoBehaviour
         // 아래쪽부터 모든 타일들에게 빈 공간 체크하게 한 뒤 위 타일에서 블록 받아옴
         for (int i = maxMatrix.y; i >= 0; i--)
         {
+            bool isEmpty = false;
             for (int j = 0; j <= maxMatrix.x; j++)
             {
                 Vector2Int matrix = new Vector2Int(j, i);
@@ -214,18 +222,34 @@ public class MoveMgr : MonoBehaviour
                 if (tile.GetComponent<Tile>().IsBlockEmpty())
                 {
                     tile.GetComponent<Tile>().EmptyMoving();
-                    //Debug.Log(m_emptyMoving);
+                    isEmpty = true;
                 }
             }
-            // 코루틴으로 움직임 완료 신호를 받고 난 후에 진행되게 함
-            yield return new WaitUntil(() => !m_moving);
+            // 코루틴으로 시간 지난 뒤 진행되게 함
+            if (isEmpty)
+            {
+                yield return new WaitForSeconds(0.3f);
+            }
         }
 
         // 그리고 매치 체크
-
+        for (int i = maxMatrix.y; i >= 0; i--)
+        {
+            for (int j = 0; j <= maxMatrix.x; j++)
+            {
+                Vector2Int matrix = new Vector2Int(j, i);
+                GameObject tile = StageMgr.Instance.GetTile(matrix);
+                bool match = MatchMgr.Instance.CheckMatch(tile);
+                if (match)
+                {
+                    //m_emptyMoving = false;
+                    //yield break;
+                }
+            }
+        }
 
         // 앞으로 매치가 가능한지 체크
-        Debug.LogWarning("bool");
+
         m_emptyMoving = false;
     }
 }

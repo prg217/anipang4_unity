@@ -147,11 +147,13 @@ public class Tile : MonoBehaviour
         // 윗 타일이 있거나, 움직일 수 있는 타일인 경우에만 윗 타일에서 블럭을 받아온다
         if (m_upTile != null)
         {
+            if (m_upTile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE)
+            {
+                CreateBlock();
+                return;
+            }
+
             MoveMgr.Instance.SetClickedTileAndMoving(transform.gameObject, m_upTile);
-        }
-        else if (m_upTile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE)
-        {
-            CreateBlock();
         }
         else
         {
