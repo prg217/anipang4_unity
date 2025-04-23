@@ -9,8 +9,7 @@ public class Tile : MonoBehaviour
     TileType m_tileType = TileType.MOVABLE;
 
     [SerializeField]
-    // 타일에 블록이 없을 때 어느 타일에서 블록을 받아올지 셋팅
-    // 만약 값이 nullptr이라면 "생성 타일"로 본다.
+    // 블록이 비었을 때 어떤 타일에서 받아올지?
     GameObject m_upTile;
 
     #region 타일이 보유 한 자식 오브젝트
@@ -24,6 +23,10 @@ public class Tile : MonoBehaviour
     [SerializeField]
     Vector2Int m_matrix;
     #endregion
+
+    // 생성 타일 여부
+    [SerializeField]
+    bool m_createTile = false;
 
     #endregion 변수 끝
 
@@ -62,7 +65,7 @@ public class Tile : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-   
+        // 블록이 비었는지 체크 후 MoveMgr에 신호?
     }
 
     // 자신의 정보 새로고침
@@ -142,18 +145,19 @@ public class Tile : MonoBehaviour
         m_myBlock.GetComponent<Block>().SetBlockType((BlockType)random);
     }
 
-    public void EmptyMoving()
+    public void EmptyMoving(GameObject _tile)
     {
         // 윗 타일이 있거나, 움직일 수 있는 타일인 경우에만 윗 타일에서 블럭을 받아온다
-        if (m_upTile != null)
+        if (_tile != null)
         {
-            if (m_upTile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE)
+            // 둘 중 하나가 움직일 수 없으면
+            if (_tile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE || GetTileType() == TileType.IMMOVABLE)
             {
-                CreateBlock();
+                //CreateBlock();
                 return;
             }
 
-            MoveMgr.Instance.SetClickedTileAndMoving(transform.gameObject, m_upTile);
+            MoveMgr.Instance.SetClickedTileAndMoving(transform.gameObject, _tile);
         }
         else
         {

@@ -107,7 +107,7 @@ public class MatchMgr : MonoBehaviour
         UpDownInspect();
         // 여기서 특수 블록 조건 맞으면 일단 저장 후 좌우 검사 때 추가로 블록 더 없으면...
         m_saveMatchCount = m_matchCount;
-        m_saveMatchTiles = m_matchTiles;
+        m_saveMatchTiles = new List<GameObject>(m_matchTiles);
         switch (m_matchCount)
         {
             case 4:
@@ -227,6 +227,7 @@ public class MatchMgr : MonoBehaviour
 
     void LeftRightInspect()
     {
+        int count = 1;
         for (int i = 1; i <= 2; i++)
         {
             Vector2Int matrix = m_targetMatrix;
@@ -244,6 +245,7 @@ public class MatchMgr : MonoBehaviour
             {
                 m_matchTiles.Add(tile);
                 m_matchCount++;
+                count++;
             }
             else
             {
@@ -268,6 +270,7 @@ public class MatchMgr : MonoBehaviour
             {
                 m_matchTiles.Add(tile);
                 m_matchCount++;
+                count++;
             }
             else
             {
@@ -276,10 +279,9 @@ public class MatchMgr : MonoBehaviour
         }
 
         // 매치가 안 되는 상황이라면 m_matchTiles를 이전 상태로 돌림
-        int count = m_matchCount - m_saveMatchCount + 1;
         if (count < 3 && count > 1)
         {
-            m_matchTiles = m_saveMatchTiles;
+            m_matchTiles = new List<GameObject>(m_saveMatchTiles);
             m_matchCount = m_saveMatchCount;
         }
     }
