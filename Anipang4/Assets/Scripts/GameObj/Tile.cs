@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using System.Collections;
 
 public class Tile : MonoBehaviour
 {
@@ -132,13 +133,19 @@ public class Tile : MonoBehaviour
     }
 
     // 생성 타일일 때 블록을 랜덤 생성
-    void CreateBlock()
+    IEnumerator CreateBlock()
     {
-        if (m_myBlock == null)
+        if (m_myBlock == null || !m_createTile)
         {
-            return;
+            yield break;
         }
 
+        if (!IsBlockEmpty())
+        {
+            yield break;
+        }
+
+        yield return new WaitForSeconds(0.3f);
         // StageMgr에서 설정된 블록 값으로 랜덤한 값
         int maxRandom = StageMgr.Instance.GetMaxBlockType();
         int random = Random.Range(0, maxRandom);
@@ -147,21 +154,20 @@ public class Tile : MonoBehaviour
 
     public void EmptyMoving(GameObject _tile)
     {
-        // 윗 타일이 있거나, 움직일 수 있는 타일인 경우에만 윗 타일에서 블럭을 받아온다
         if (_tile != null)
         {
             // 둘 중 하나가 움직일 수 없으면
             if (_tile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE || GetTileType() == TileType.IMMOVABLE)
             {
-                //CreateBlock();
                 return;
             }
 
             MoveMgr.Instance.SetClickedTileAndMoving(transform.gameObject, _tile);
-        }
-        else
-        {
-            CreateBlock();
+
+            if (m_createTile)
+            {
+                StartCoroutine(CreateBlock());
+            }
         }
     }
 }

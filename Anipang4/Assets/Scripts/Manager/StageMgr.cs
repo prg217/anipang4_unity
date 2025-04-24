@@ -78,7 +78,7 @@ public class StageMgr : MonoBehaviour
     [SerializeField]
     int m_MaxBlockType = 5;
     [SerializeField]
-    int m_MaxMove = 20;
+    //int m_MaxMove = 20;
     #endregion
 
     #endregion º¯¼ö ³¡

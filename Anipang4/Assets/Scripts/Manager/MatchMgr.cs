@@ -281,7 +281,10 @@ public class MatchMgr : MonoBehaviour
         // 매치가 안 되는 상황이라면 m_matchTiles를 이전 상태로 돌림
         if (count < 3 && count > 1)
         {
-            m_matchTiles = new List<GameObject>(m_saveMatchTiles);
+            if (m_matchCount > 1)
+            {
+                m_matchTiles = new List<GameObject>(m_saveMatchTiles);
+            }
             m_matchCount = m_saveMatchCount;
         }
     }

@@ -42,6 +42,7 @@ public class MoveMgr : MonoBehaviour
     // 움직이는 중
     bool m_moving = false;
     int m_completeCount = 0;
+    bool m_isClickMoving = false;
 
     // 되돌리기
     bool m_reMoving = false;
@@ -97,6 +98,7 @@ public class MoveMgr : MonoBehaviour
 
                     m_pClickedTile2 = clickedTransform.gameObject;
 
+                    m_isClickMoving = true;
                     Moving();
                 }
             }
@@ -162,7 +164,7 @@ public class MoveMgr : MonoBehaviour
         // 블록 교환이 둘 다 완료가 되었다면
         if (m_completeCount >= 2)
         {
-            if (!m_reMoving && !m_emptyMoving)
+            if (!m_reMoving && m_isClickMoving && !m_emptyMoving)
             {
                 // 매치 시도 후 매치가 안 되면 원상복구
                 bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1);
@@ -185,13 +187,14 @@ public class MoveMgr : MonoBehaviour
                 }
 
                 // 매치 후 빈 공간 채우기 실행
-                StartCoroutine(MoveMgr.Instance.CheckEmpty());
+                StartCoroutine(CheckEmpty());
             }
 
             m_moving = false;
             m_pClickedTile1 = null;
             m_pClickedTile2 = null;
             m_reMoving = false;
+            m_isClickMoving = false;
 
             m_completeCount = 0;
 
@@ -205,116 +208,61 @@ public class MoveMgr : MonoBehaviour
         m_emptyMoving = true;
 
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
-        /*
-        // 아래쪽부터 모든 타일들에게 빈 공간 체크하게 한 뒤 위 타일에서 블록 받아옴
-        for (int length = 0; length <= maxMatrix.y; length++)
-        {
-            for (int i = maxMatrix.y; i >= 0; i--)
-            {
-                bool isEmpty = false;
-                for (int j = 0; j <= maxMatrix.x; j++)
-                {
-                    Vector2Int matrix = new Vector2Int(j, i);
-                    GameObject tile = StageMgr.Instance.GetTile(matrix);
-                    // 타일이 비었을 경우 등록된 윗 타일에서 블록을 내려받음
-                    if (tile.GetComponent<Tile>().IsBlockEmpty())
-                    {
-                        tile.GetComponent<Tile>().EmptyMoving();
-                        isEmpty = true;
-                    }
-                }
-                // 코루틴으로 시간 지난 뒤 진행되게 함
-                if (isEmpty)
-                {
-                    yield return new WaitForSeconds(0.3f);
-                }
-            }
-        }
-         */
 
-        // 위에부터 밑에 타일이 빈 블록인지 확인 후 그쪽으로 보냄(대각선도?)
+        // 위에부터 밑에 타일이 빈 블록인지 확인 후 그쪽으로 보냄
         /*
          * 1. 본인의 아래 블록이 있다->거기로 보냄
          * 2. 아래 블록이 있는데 대각선 아래가 비었다->그 아래의 위가 움직일 수 없는 타일이라면 그쪽으로 보냄
         */
-        for (int length = 0; length <= maxMatrix.y; length++)
+        for (int i = 0; i <= maxMatrix.y; i++)
         {
-            for (int i = 0; i <= maxMatrix.y; i++)
+            bool isEmpty = false;
+            for (int j = 0; j <= maxMatrix.x; j++)
             {
-                bool isEmpty = false;
-                for (int j = 0; j <= maxMatrix.x; j++)
+                // 본인
+                Vector2Int matrix = new Vector2Int(j, i);
+                GameObject tile = StageMgr.Instance.GetTile(matrix);
+
+                // 밑 타일
+                Vector2Int downMatrix = new Vector2Int(j, i + 1);
+                GameObject downTile = StageMgr.Instance.GetTile(downMatrix);
+
+                if (downTile != null)
                 {
-                    // 본인
-                    Vector2Int matrix = new Vector2Int(j, i);
-                    GameObject tile = StageMgr.Instance.GetTile(matrix);
-
-                    // 밑 타일
-                    Vector2Int downMatrix = new Vector2Int(j, i + 1);
-                    GameObject downTile = StageMgr.Instance.GetTile(downMatrix);
-
-                    if (downTile != null)
+                    if (downTile.GetComponent<Tile>().IsBlockEmpty())
                     {
-                        if (downTile.GetComponent<Tile>().IsBlockEmpty())
+                        // 바로 밑 블록이 비어있는 경우 자신의 블록을 밑으로 보냄
+                        tile.GetComponent<Tile>().EmptyMoving(downTile);
+                        isEmpty = true;
+                    }
+                    else
+                    {
+                        #region 왼쪽, 오른쪽 타일이 움직일 수 없는 경우 대각선 검사까지 함
+                        Vector2Int leftMatrix = new Vector2Int(j - 1, i);
+                        GameObject leftTile = StageMgr.Instance.GetTile(leftMatrix);
+                        Vector2Int rightMatrix = new Vector2Int(j + 1, i);
+                        GameObject rightTile = StageMgr.Instance.GetTile(rightMatrix);
+
+                        if (DiagonalTest(matrix, leftMatrix))
                         {
-                            // 바로 밑 블록이 비어있는 경우 자신의 블록을 밑으로 보냄
-                            tile.GetComponent<Tile>().EmptyMoving(downTile);
                             isEmpty = true;
                         }
                         else
                         {
-                            #region 왼쪽, 오른쪽 타일이 움직일 수 없는 경우 대각선 검사까지 함
-                            Vector2Int leftMatrix = new Vector2Int(j - 1, i);
-                            GameObject leftTile = StageMgr.Instance.GetTile(leftMatrix);
-                            Vector2Int rightMatrix = new Vector2Int(j + 1, i);
-                            GameObject rightTile = StageMgr.Instance.GetTile(rightMatrix);
-
-                            if (leftTile != null)
+                            if (DiagonalTest(matrix, rightMatrix))
                             {
-                                TileType leftType = leftTile.GetComponent<Tile>().GetTileType();
-                                if (leftType == TileType.IMMOVABLE)
-                                {
-                                    // 움직일 수 없는 경우 대각선 검사
-                                    Vector2Int leftDownMatrix = new Vector2Int(j - 1, i + 1);
-                                    GameObject leftDownTile = StageMgr.Instance.GetTile(leftDownMatrix);
-
-                                    if (leftDownTile != null)
-                                    {
-                                        if (leftDownTile.GetComponent<Tile>().IsBlockEmpty())
-                                        {
-                                            tile.GetComponent<Tile>().EmptyMoving(leftDownTile);
-                                            isEmpty = true;
-                                        }
-                                    }
-                                }
-                                else if (rightTile != null)
-                                {
-                                    TileType rightType = rightTile.GetComponent<Tile>().GetTileType();
-                                    if (rightType == TileType.IMMOVABLE)
-                                    {
-                                        // 움직일 수 없는 경우 대각선 검사
-                                        Vector2Int rightDownMatrix = new Vector2Int(j + 1, i + 1);
-                                        GameObject rightDownTile = StageMgr.Instance.GetTile(rightDownMatrix);
-
-                                        if (rightDownTile != null)
-                                        {
-                                            if (rightDownTile.GetComponent<Tile>().IsBlockEmpty())
-                                            {
-                                                tile.GetComponent<Tile>().EmptyMoving(rightDownTile);
-                                                isEmpty = true;
-                                            }
-                                        }
-                                    }
-                                }
+                                isEmpty = true;
                             }
-                            #endregion
                         }
+
+                        #endregion
                     }
                 }
-                // 코루틴으로 시간 지난 뒤 진행되게 함
-                if (isEmpty)
-                {
-                    yield return new WaitForSeconds(0.3f);
-                }
+            }
+            // 코루틴으로 시간 지난 뒤 진행되게 함
+            if (isEmpty)
+            {
+                yield return new WaitForSeconds(0.25f);
             }
         }
 
@@ -339,23 +287,77 @@ public class MoveMgr : MonoBehaviour
 
         // 빈 공간 없나 체크(재귀함수로 빈 공간 없을 때 까지 하기)
         // 만약 빈 공간이 있으나, 거기로 블록을 보낼 수 없는 경우(왼쪽 위, 위, 오른쪽 위가 모두 움직일 수 없는 타일) 패스
+        for (int i = 0; i <= maxMatrix.y; i++)
+        {
+            for (int j = 0; j <= maxMatrix.x; j++)
+            {
+                Vector2Int matrix = new Vector2Int(j, i);
+                GameObject tile = StageMgr.Instance.GetTile(matrix);
 
+                if (tile.GetComponent<Tile>().IsBlockEmpty())
+                {
+                    TileType tileType = tile.GetComponent<Tile>().GetTileType();
+                    if (tileType == TileType.MOVABLE)
+                    {
+                        #region 왼쪽 위, 위, 오른쪽 위가 모두 움직일 수 없나 체크
+                        Vector2Int leftUpMatrix = new Vector2Int(j - 1, i - 1);
+                        Vector2Int upMatrix = new Vector2Int(j, i - 1);
+                        Vector2Int rightUpMatrix = new Vector2Int(j + 1, i - 1);
+                        if (EmptySpaceTest(rightUpMatrix) && EmptySpaceTest(leftUpMatrix) && EmptySpaceTest(leftUpMatrix))
+                        {
+                            break;
+                        }
+                        #endregion
+
+                        StartCoroutine(CheckEmpty());
+                    }
+                }
+            }
+        }
 
         // 앞으로 매치가 가능한지 체크
 
-        //m_emptyMoving = false;
+        m_emptyMoving = false;
     }
 
-    bool TileTest(Vector2Int _matrix)
+    // CheckEmpty에서 대각선 검사할 때 사용
+    bool DiagonalTest(in Vector2Int _originalMatrix, in Vector2Int _checkMatrix)
+    {
+        GameObject originalTile = StageMgr.Instance.GetTile(_originalMatrix);
+        GameObject checkTile = StageMgr.Instance.GetTile(_checkMatrix);
+
+        if (originalTile != null && checkTile != null)
+        {
+            TileType type = checkTile.GetComponent<Tile>().GetTileType();
+            if (type == TileType.IMMOVABLE)
+            {
+                // 움직일 수 없는 경우 밑 검사
+                Vector2Int downMatrix = new Vector2Int(_checkMatrix.x, _checkMatrix.y + 1);
+                GameObject downTile = StageMgr.Instance.GetTile(downMatrix);
+
+                if (downTile != null)
+                {
+                    if (downTile.GetComponent<Tile>().IsBlockEmpty())
+                    {
+                        originalTile.GetComponent<Tile>().EmptyMoving(downTile);
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // CheckEmpty에서 빈 공간 검사 : 타일이 움직일 수 없나 검사
+    bool EmptySpaceTest(in Vector2Int _matrix)
     {
         GameObject tile = StageMgr.Instance.GetTile(_matrix);
-
         if (tile != null)
         {
-            if (tile.GetComponent<Tile>().IsBlockEmpty())
+            TileType type = tile.GetComponent<Tile>().GetTileType();
+            if (type == TileType.IMMOVABLE)
             {
-                // 바로 밑 블록이 비어있는 경우 자신의 블록을 밑으로 보냄
-                tile.GetComponent<Tile>().EmptyMoving(tile);
                 return true;
             }
         }
