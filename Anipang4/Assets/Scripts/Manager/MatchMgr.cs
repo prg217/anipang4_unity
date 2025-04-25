@@ -61,9 +61,9 @@ public class MatchMgr : MonoBehaviour
 
     }
 
-    public bool CheckMatch(in GameObject _Tile)
+    public bool CheckMatch(in GameObject _tile, in bool _explode = true)
     {
-        if (_Tile == null)
+        if (_tile == null)
         {
             return false;
         }
@@ -90,9 +90,12 @@ public class MatchMgr : MonoBehaviour
         #endregion
 
         #region 타겟 타일 변수 세팅
-        m_targetTile = _Tile;
-        m_targetMatrix = _Tile.GetComponent<Tile>().GetMatrix();
-        m_targetType = _Tile.GetComponent<Tile>().GetMyBlockType();
+        if (_explode)
+        {
+            m_targetTile = _tile;
+            m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
+            m_targetType = _tile.GetComponent<Tile>().GetMyBlockType();
+        }
         #endregion
 
         // 특수 블록인 경우 특수 블록을 바로 터트림
@@ -140,7 +143,10 @@ public class MatchMgr : MonoBehaviour
         if (m_newBlock >= BlockType.CROSS)
         {
             // 특수 블록 조건 만족함
-            Explode();
+            if (_explode)
+            {
+                Explode();
+            }
 
             return true;
         }
@@ -151,7 +157,10 @@ public class MatchMgr : MonoBehaviour
             if (MoonInspect())
             {
                 // 터트리는 함수
-                Explode();
+                if (_explode)
+                {
+                    Explode();
+                }
                 return true;
             }
         }
@@ -160,7 +169,10 @@ public class MatchMgr : MonoBehaviour
         if (m_matchCount == 3)
         {
             // 터트리는 함수
-            Explode();
+            if (_explode)
+            {
+                Explode();
+            }
             return true;
         }
 
@@ -406,14 +418,84 @@ public class MatchMgr : MonoBehaviour
         }
     }
 
-    public bool SimulationMatch(in GameObject _Tile)
+    public bool SimulationMatch(in GameObject _tile)
     {
         // 상하좌우로 이동시켜서 매치가 되는지 테스트
-        if (_Tile == null)
+        if (_tile == null)
         {
             return false;
         }
 
-        return true;
+        // 움직일 수 없는 타일 일 경우 매치 시도 불가능
+        if (_tile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE)
+        {
+            return false;
+        }
+
+        Vector2Int matrix = _tile.GetComponent<Tile>().GetMatrix();
+        // 블록 타입을 고정
+        m_targetType = _tile.GetComponent<Tile>().GetMyBlockType();
+
+        #region 위 검사
+        Vector2Int upMatrix = new Vector2Int(matrix.x, matrix.y - 1);
+        GameObject upTile = StageMgr.Instance.GetTile(upMatrix);
+        if (upTile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
+        {
+            m_targetTile = upTile;
+            m_targetMatrix = upMatrix;
+
+            if (CheckMatch(m_targetTile, false))
+            {
+                return true;
+            }
+        }
+        #endregion
+
+        #region 아래 검사
+        Vector2Int downMatrix = new Vector2Int(matrix.x, matrix.y + 1);
+        GameObject downTile = StageMgr.Instance.GetTile(downMatrix);
+        if (downTile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
+        {
+            m_targetTile = downTile;
+            m_targetMatrix = downMatrix;
+
+            if (CheckMatch(m_targetTile, false))
+            {
+                return true;
+            }
+        }
+        #endregion
+
+        #region 왼쪽 검사
+        Vector2Int leftMatrix = new Vector2Int(matrix.x - 1, matrix.y);
+        GameObject leftTile = StageMgr.Instance.GetTile(leftMatrix);
+        if (leftTile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
+        {
+            m_targetTile = leftTile;
+            m_targetMatrix = leftMatrix;
+
+            if (CheckMatch(m_targetTile, false))
+            {
+                return true;
+            }
+        }
+        #endregion
+
+        #region 오른쪽 검사
+        Vector2Int rightMatrix = new Vector2Int(matrix.x + 1, matrix.y);
+        GameObject rightTile = StageMgr.Instance.GetTile(rightMatrix);
+        if (rightTile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
+        {
+            m_targetTile = rightTile;
+            m_targetMatrix = rightMatrix;
+
+            if (CheckMatch(m_targetTile, false))
+            {
+                return true;
+            }
+        }
+        #endregion
+
+        return false;
     }
 }

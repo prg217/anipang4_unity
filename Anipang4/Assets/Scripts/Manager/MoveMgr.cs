@@ -199,7 +199,7 @@ public class MoveMgr : MonoBehaviour
             m_completeCount = 0;
 
             // 스테이지 매니저에 스테이지 검사 요구
-            StageMgr.Instance.CheckStage();
+            StageMgr.Instance.CheckPossibleMatch();
         }
     }
 
@@ -316,6 +316,7 @@ public class MoveMgr : MonoBehaviour
         }
 
         // 앞으로 매치가 가능한지 체크
+        StageMgr.Instance.CheckPossibleMatch();
 
         m_emptyMoving = false;
     }
