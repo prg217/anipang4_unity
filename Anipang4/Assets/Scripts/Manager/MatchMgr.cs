@@ -41,7 +41,7 @@ public class MatchMgr : MonoBehaviour
     GameObject m_targetTile;
 
     int m_matchCount = 1; // 본인 포함으로 계산
-    int m_saveMatchCount = 1; 
+    int m_saveMatchCount = 1;
     List<GameObject> m_matchTiles = new List<GameObject>(); // 매치가 되는 타일들 저장(후에 터트림)
     List<GameObject> m_saveMatchTiles = new List<GameObject>();
 
@@ -52,7 +52,7 @@ public class MatchMgr : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -98,10 +98,20 @@ public class MatchMgr : MonoBehaviour
         }
         #endregion
 
+        // 타입이 비어 있는 경우 return
+        if (m_targetType == BlockType.NONE)
+        {
+            return false;
+        }
+
         // 특수 블록인 경우 특수 블록을 바로 터트림
-        if (m_targetType >= BlockType.CROSS )
+        if (m_targetType >= BlockType.CROSS)
         {
             // 특수 블록 터트리는 함수
+            if (_explode)
+            {
+                SpecialExplode();
+            }
 
             return true;
         }
@@ -110,6 +120,7 @@ public class MatchMgr : MonoBehaviour
         UpDownInspect();
         // 여기서 특수 블록 조건 맞으면 일단 저장 후 좌우 검사 때 추가로 블록 더 없으면...
         m_saveMatchCount = m_matchCount;
+        m_saveMatchTiles.Clear();
         m_saveMatchTiles = new List<GameObject>(m_matchTiles);
         switch (m_matchCount)
         {
@@ -142,7 +153,7 @@ public class MatchMgr : MonoBehaviour
 
         if (m_newBlock >= BlockType.CROSS)
         {
-            // 특수 블록 조건 만족함
+            // 특수 블록 생성 조건 만족함
             if (_explode)
             {
                 Explode();
@@ -323,7 +334,7 @@ public class MatchMgr : MonoBehaviour
                 return true;
             }
         }
-        else if(Inspect(new Vector2Int(1, -1)))
+        else if (Inspect(new Vector2Int(1, -1)))
         {
             if (MoonAddInspect(new Vector2Int(1, -1)))
             {
@@ -398,22 +409,21 @@ public class MatchMgr : MonoBehaviour
 
     void Explode()
     {
+        Debug.Log("터지는 타입 : " + m_targetType);
         // 특수 블록 조건에 해당 될 경우
         if (m_newBlock >= BlockType.CROSS)
         {
             m_targetTile.GetComponent<Tile>().SetMyBlockType(m_newBlock);
         }
-        // 아닌 경우 블록 : NONE
+        // 아닌 경우 블록 타입 변경 : NONE
         else
         {
-            Debug.Log("타겟 없앰 " + m_targetTile.name);
             m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
         }
 
-        // m_matchTiles에 등록된 타일들의 블록 : NONE
+        // m_matchTiles에 등록된 타일들의 블록 타입 변경 : NONE
         foreach (GameObject tile in m_matchTiles)
         {
-            Debug.Log("없앰 " + tile.name);
             tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
         }
     }
@@ -432,70 +442,186 @@ public class MatchMgr : MonoBehaviour
             return false;
         }
 
+        // 빈 블록일 경우 매치 시도 불가능
+        if (_tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NONE)
+        {
+            return false;
+        }
+
         Vector2Int matrix = _tile.GetComponent<Tile>().GetMatrix();
         // 블록 타입을 고정
         m_targetType = _tile.GetComponent<Tile>().GetMyBlockType();
 
-        #region 위 검사
         Vector2Int upMatrix = new Vector2Int(matrix.x, matrix.y - 1);
-        GameObject upTile = StageMgr.Instance.GetTile(upMatrix);
-        if (upTile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
+        if (SimulationInspect(upMatrix))
         {
-            m_targetTile = upTile;
-            m_targetMatrix = upMatrix;
-
-            if (CheckMatch(m_targetTile, false))
-            {
-                return true;
-            }
+            return true;
         }
-        #endregion
 
-        #region 아래 검사
         Vector2Int downMatrix = new Vector2Int(matrix.x, matrix.y + 1);
-        GameObject downTile = StageMgr.Instance.GetTile(downMatrix);
-        if (downTile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
+        if (SimulationInspect(downMatrix))
         {
-            m_targetTile = downTile;
-            m_targetMatrix = downMatrix;
-
-            if (CheckMatch(m_targetTile, false))
-            {
-                return true;
-            }
+            return true;
         }
-        #endregion
 
-        #region 왼쪽 검사
         Vector2Int leftMatrix = new Vector2Int(matrix.x - 1, matrix.y);
-        GameObject leftTile = StageMgr.Instance.GetTile(leftMatrix);
-        if (leftTile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
+        if (SimulationInspect(leftMatrix))
         {
-            m_targetTile = leftTile;
-            m_targetMatrix = leftMatrix;
-
-            if (CheckMatch(m_targetTile, false))
-            {
-                return true;
-            }
+            return true;
         }
-        #endregion
 
-        #region 오른쪽 검사
         Vector2Int rightMatrix = new Vector2Int(matrix.x + 1, matrix.y);
-        GameObject rightTile = StageMgr.Instance.GetTile(rightMatrix);
-        if (rightTile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
+        if (SimulationInspect(rightMatrix))
         {
-            m_targetTile = rightTile;
-            m_targetMatrix = rightMatrix;
-
-            if (CheckMatch(m_targetTile, false))
-            {
-                return true;
-            }
+            return true;
         }
-        #endregion
 
         return false;
+    }
+
+    bool SimulationInspect(in Vector2Int _matrix)
+    {
+        GameObject tile = StageMgr.Instance.GetTile(_matrix);
+        if (tile != null)
+        {
+            if (tile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
+            {
+                m_targetTile = tile;
+                m_targetMatrix = _matrix;
+
+                if (CheckMatch(m_targetTile, false))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    void SpecialExplode()
+    {
+        switch (m_targetType)
+        {
+            case BlockType.CROSS:
+                CrossExplode();
+                break;
+            case BlockType.SUN:
+                SunExplode();
+                break;
+            case BlockType.RANDOM:
+                RandomExplode();
+                break;
+            case BlockType.COSMIC:
+                CosmicExplode();
+                break;
+            case BlockType.MOON:
+                MoonExplode();
+                break;
+            default:
+                break;
+        }
+    }
+
+    void CrossExplode()
+    {
+        // 가로 세로 다 없앰
+        Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
+
+        for (int i = 0; i <= maxMatrix.x; i++)
+        {
+            GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(i, m_targetMatrix.y));
+            if (tile != null)
+            {
+                tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+            }
+        }
+
+        for (int i = 0; i <= maxMatrix.y; i++)
+        {
+            GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x, i));
+            if (tile != null)
+            {
+                tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+            }
+        }
+    }
+
+    void SunExplode()
+    {
+        // 5x5 파괴
+        // 왼쪽 오른쪽 2
+        // 위 아래 2
+        for (int x = -2; x <= 2; x++)
+        {
+            for (int y = -2;  y <= 2; y++)
+            {
+                GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x + x, m_targetMatrix.y + y));
+                if (tile != null)
+                {
+                    tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+                }
+            }
+        }
+    }
+
+    void RandomExplode()
+    {
+        // 교차 시킨 블록 타입 정보 알아야 함
+        // 그 블록 타입들 서치해서 제거
+
+    }
+
+    void CosmicExplode()
+    {
+        // 전부 제거
+        Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
+
+        for (int i = 0; i <= maxMatrix.x; i++)
+        {
+            for (int j = 0; j <= maxMatrix.y; j++)
+            {
+                GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(i, j));
+                if (tile != null)
+                {
+                    tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+                }
+            }
+        }
+    }
+
+    void MoonExplode()
+    {
+        // 십자칸 파괴 후 클리어 조건 중 하나 랜덤으로 가서 파괴
+        #region 십자칸 파괴
+        // 본인 파괴
+        m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+
+        // 상하좌우 파괴
+        GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x - 1, m_targetMatrix.y));
+        if (tile != null)
+        {
+            tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        }
+        tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x + 1, m_targetMatrix.y));
+        if (tile != null)
+        {
+            tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        }
+        tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x, m_targetMatrix.y - 1));
+        if (tile != null)
+        {
+            tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        }
+        tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x, m_targetMatrix.y + 1));
+        if (tile != null)
+        {
+            tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        }
+        #endregion
+
+        #region 클리어 조건 중 하나 랜덤으로 가서 파괴
+
+        #endregion
     }
 }

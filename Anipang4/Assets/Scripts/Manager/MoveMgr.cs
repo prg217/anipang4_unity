@@ -84,6 +84,10 @@ public class MoveMgr : MonoBehaviour
             if (hit.collider != null)
             {
                 Transform clickedTransform = hit.collider.transform;
+
+                // 특수 블록인 경우 마우스 한 번 클릭에도 매치(Random 제외)
+                /* 코드 추가 예정 */
+
                 if (m_pClickedTile1 == null)
                 {
                     m_pClickedTile1 = clickedTransform.gameObject;
@@ -127,8 +131,6 @@ public class MoveMgr : MonoBehaviour
         m_moving = true;
 
         #region 둘 중 하나라도 움직일 수 없는 상태인지 확인
-        //Debug.Log(m_pClickedTile1);
-        //Debug.Log(m_pClickedTile2);
         TileType tileType1 = m_pClickedTile1.GetComponent<Tile>().GetTileType();
         TileType tileType2 = m_pClickedTile2.GetComponent<Tile>().GetTileType();
 
@@ -166,6 +168,9 @@ public class MoveMgr : MonoBehaviour
         {
             if (!m_reMoving && m_isClickMoving && !m_emptyMoving)
             {
+                // 둘 다 특수 블록인 경우->특수 블록 합성
+                /* 코드 추가 예정 */
+
                 // 매치 시도 후 매치가 안 되면 원상복구
                 bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1);
                 bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2);
@@ -275,11 +280,11 @@ public class MoveMgr : MonoBehaviour
                 {
                     Vector2Int matrix = new Vector2Int(j, i);
                     GameObject tile = StageMgr.Instance.GetTile(matrix);
-                    bool match = MatchMgr.Instance.CheckMatch(tile);
-                    if (match)
+                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+                    // 특수 블록이 아닐 경우에만 매치 판정을 함
+                    if (type < BlockType.CROSS)
                     {
-                        //m_emptyMoving = false;
-                        //yield break;
+                        MatchMgr.Instance.CheckMatch(tile);
                     }
                 }
             }
@@ -303,7 +308,7 @@ public class MoveMgr : MonoBehaviour
                         Vector2Int leftUpMatrix = new Vector2Int(j - 1, i - 1);
                         Vector2Int upMatrix = new Vector2Int(j, i - 1);
                         Vector2Int rightUpMatrix = new Vector2Int(j + 1, i - 1);
-                        if (EmptySpaceTest(rightUpMatrix) && EmptySpaceTest(leftUpMatrix) && EmptySpaceTest(leftUpMatrix))
+                        if (EmptySpaceTest(rightUpMatrix) && EmptySpaceTest(upMatrix) && EmptySpaceTest(leftUpMatrix))
                         {
                             break;
                         }
