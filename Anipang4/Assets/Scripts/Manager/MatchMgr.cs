@@ -158,7 +158,10 @@ public class MatchMgr : MonoBehaviour
             {
                 Explode();
             }
-
+            else
+            {
+                StageMgr.Instance.SetMatchOK(m_matchTiles);
+            }
             return true;
         }
 
@@ -172,6 +175,10 @@ public class MatchMgr : MonoBehaviour
                 {
                     Explode();
                 }
+                else
+                {
+                    StageMgr.Instance.SetMatchOK(m_matchTiles);
+                }
                 return true;
             }
         }
@@ -183,6 +190,10 @@ public class MatchMgr : MonoBehaviour
             if (_explode)
             {
                 Explode();
+            }
+            else
+            {
+                StageMgr.Instance.SetMatchOK(m_matchTiles);
             }
             return true;
         }
@@ -559,7 +570,17 @@ public class MatchMgr : MonoBehaviour
                 GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x + x, m_targetMatrix.y + y));
                 if (tile != null)
                 {
-                    tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+                    // 일반 블록인 경우
+                    if (tile.GetComponent<Tile>().GetMyBlockType() < BlockType.CROSS)
+                    {
+                        tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+                    }
+                    // 특수 블록인 경우
+                    else
+                    {
+                        // 특수 블록의 위치 기준으로 매치 실행
+                        CheckMatch(tile);
+                    }
                 }
             }
         }
@@ -601,22 +622,62 @@ public class MatchMgr : MonoBehaviour
         GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x - 1, m_targetMatrix.y));
         if (tile != null)
         {
-            tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+            // 일반 블록인 경우
+            if (tile.GetComponent<Tile>().GetMyBlockType() < BlockType.CROSS)
+            {
+                tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+            }
+            // 특수 블록인 경우
+            else
+            {
+                // 특수 블록의 위치 기준으로 매치 실행
+                CheckMatch(tile);
+            }
         }
         tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x + 1, m_targetMatrix.y));
         if (tile != null)
         {
-            tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+            // 일반 블록인 경우
+            if (tile.GetComponent<Tile>().GetMyBlockType() < BlockType.CROSS)
+            {
+                tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+            }
+            // 특수 블록인 경우
+            else
+            {
+                // 특수 블록의 위치 기준으로 매치 실행
+                CheckMatch(tile);
+            }
         }
         tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x, m_targetMatrix.y - 1));
         if (tile != null)
         {
-            tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+            // 일반 블록인 경우
+            if (tile.GetComponent<Tile>().GetMyBlockType() < BlockType.CROSS)
+            {
+                tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+            }
+            // 특수 블록인 경우
+            else
+            {
+                // 특수 블록의 위치 기준으로 매치 실행
+                CheckMatch(tile);
+            }
         }
         tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x, m_targetMatrix.y + 1));
         if (tile != null)
         {
-            tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+            // 일반 블록인 경우
+            if (tile.GetComponent<Tile>().GetMyBlockType() < BlockType.CROSS)
+            {
+                tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+            }
+            // 특수 블록인 경우
+            else
+            {
+                // 특수 블록의 위치 기준으로 매치 실행
+                CheckMatch(tile);
+            }
         }
         #endregion
 

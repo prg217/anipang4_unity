@@ -25693,9 +25693,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a26672f1f481050469bee862ca396bfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Board: {fileID: 70911196}
-  m_MaxBlockType: 5
-  m_MaxMove: 20
+  m_board: {fileID: 70911196}
+  m_maxBlockType: 5
+  m_matchOK: []
 --- !u!224 &2125766134 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7215217717676188513, guid: 5cc9f60b52098a844892d9097db0982f, type: 3}

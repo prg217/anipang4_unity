@@ -310,6 +310,7 @@ public class MoveMgr : MonoBehaviour
                         Vector2Int rightUpMatrix = new Vector2Int(j + 1, i - 1);
                         if (EmptySpaceTest(rightUpMatrix) && EmptySpaceTest(upMatrix) && EmptySpaceTest(leftUpMatrix))
                         {
+                            Debug.Log("üũ");
                             break;
                         }
                         #endregion
