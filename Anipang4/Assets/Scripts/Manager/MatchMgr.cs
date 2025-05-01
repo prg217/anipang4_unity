@@ -437,10 +437,12 @@ public class MatchMgr : MonoBehaviour
         {
             tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
         }
+
+        StageMgr.Instance.OffOutline();
     }
 
     public bool SimulationMatch(in GameObject _tile)
-    {
+    {// 본인, 본인, 2칸 밑 이렇게 3칸이 정상 매치로 판정되는 상황->오류
         // 상하좌우로 이동시켜서 매치가 되는지 테스트
         if (_tile == null)
         {
@@ -464,54 +466,69 @@ public class MatchMgr : MonoBehaviour
         m_targetType = _tile.GetComponent<Tile>().GetMyBlockType();
 
         Vector2Int upMatrix = new Vector2Int(matrix.x, matrix.y - 1);
-        if (SimulationInspect(upMatrix))
+        if (SimulationInspect(matrix, upMatrix))
         {
+            Debug.Log("위");
             return true;
         }
 
         Vector2Int downMatrix = new Vector2Int(matrix.x, matrix.y + 1);
-        if (SimulationInspect(downMatrix))
+        if (SimulationInspect(matrix, downMatrix))
         {
+            Debug.Log("아래");
             return true;
         }
 
         Vector2Int leftMatrix = new Vector2Int(matrix.x - 1, matrix.y);
-        if (SimulationInspect(leftMatrix))
+        if (SimulationInspect(matrix, leftMatrix))
         {
+            Debug.Log("왼");
             return true;
         }
 
         Vector2Int rightMatrix = new Vector2Int(matrix.x + 1, matrix.y);
-        if (SimulationInspect(rightMatrix))
+        if (SimulationInspect(matrix, rightMatrix))
         {
+            Debug.Log("오");
             return true;
         }
 
         return false;
     }
 
-    bool SimulationInspect(in Vector2Int _matrix)
+    bool SimulationInspect(in Vector2Int _originalMatrix, in Vector2Int _changeMatrix)
     {
-        GameObject tile = StageMgr.Instance.GetTile(_matrix);
-        if (tile != null)
-        {
-            if (tile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
-            {
-                m_targetTile = tile;
-                m_targetMatrix = _matrix;
+        // 본인이 바뀌면 그 바뀐 타일의 타입도 다르게 해줘야 함!
+        // 즉, 일시적으로만 서로 타입을 바꾼 채로 두고 return 후에 다시 돌려놔야 함
+        GameObject originalTile = StageMgr.Instance.GetTile(_originalMatrix);
+        GameObject changeTile = StageMgr.Instance.GetTile(_changeMatrix);
 
-                if (CheckMatch(m_targetTile, false))
+        if (changeTile != null)
+        {
+            if (changeTile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
+            {
+                BlockType saveType = changeTile.GetComponent<Tile>().GetMyBlockType();
+                originalTile.GetComponent<Tile>().SetMyBlockType(saveType);
+
+                m_targetTile = changeTile;
+                m_targetMatrix = _changeMatrix;
+
+                if (CheckMatch(changeTile, false))
                 {
+                    originalTile.GetComponent<Tile>().SetMyBlockType(m_targetType);
                     return true;
                 }
             }
         }
 
+        originalTile.GetComponent<Tile>().SetMyBlockType(m_targetType);
         return false;
     }
 
     void SpecialExplode()
     {
+        StageMgr.Instance.OffOutline();
+
         switch (m_targetType)
         {
             case BlockType.CROSS:

@@ -85,6 +85,7 @@ public class StageMgr : MonoBehaviour
     // 매치가 가능한 블록들 저장
     List<GameObject> m_matchOK = new List<GameObject>();
     bool m_hint = false;
+    bool m_hintStart = false;
 
     #endregion 변수 끝
 
@@ -103,35 +104,62 @@ public class StageMgr : MonoBehaviour
     #endregion
 
     #region Set함수
-    public void SetMatchOK(List<GameObject> _matchOK)
+    public void SetMatchOK(in List<GameObject> _matchOK)
     {
         m_matchOK.Clear();
-        m_matchOK = new List<GameObject>(m_matchOK);
+        m_matchOK = new List<GameObject>(_matchOK);
     }
     #endregion
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        //StartCoroutine(Hint());
+        // 시작 시 맵 체크(스테이지 블록 구성을 랜덤으로 했을 경우 대비)
+        CheckPossibleMatch();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (m_hint && !m_hintStart)
+        {
+            StartCoroutine(Hint());
+        }
     }
 
     IEnumerator Hint()
     {
-        while (true) // 무한 반복
-        {
-            // 매치가 된다면 어디가 매치 되는지 저장했다가 몇 초 마다 알려주기
-            if (m_hint)
-            {
+        m_hintStart = true;
+        yield return new WaitForSeconds(10f); // 10초 대기 
 
+        // 매치가 된다면 어디가 매치 되는지 저장했다가 몇 초 마다 알려주기
+        if (m_matchOK.Count >= 3)
+        {
+            // 외곽선 추가(스프라이트 추가)
+            foreach (GameObject tile in m_matchOK)
+            {
+                tile.GetComponent<Tile>().SetMyBlockSetOutline(true);
             }
-            yield return new WaitForSeconds(3f); // 3초 대기
+
+            yield return new WaitForSeconds(5f); // 2초 대기
+
+            // 외곽선 끄기(삭제)
+            foreach (GameObject tile in m_matchOK)
+            {
+                tile.GetComponent<Tile>().SetMyBlockSetOutline(false);
+            }
         }
+        yield return new WaitForSeconds(5f); // 5초 대기
+        m_hintStart = false;
+    }
+
+    public void OffOutline()
+    {
+        foreach (GameObject tile in m_matchOK)
+        {
+            tile.GetComponent<Tile>().SetMyBlockSetOutline(false);
+        }
+        m_hintStart = false;
     }
 
     // 움직여서 매치가 될 수 있나 확인
@@ -140,6 +168,7 @@ public class StageMgr : MonoBehaviour
         // 움직일 수 있는 타일의 블록을 상하좌우로 움직인(임시로) 다음 매치가 되는지 체크
         // 매치가 하나라도 된다면 바로 return
         // 모두 매치가 안 된다면 움직일 수 없는 타일을 제외하고 블록 타입 개수를 수집한 뒤, 랜덤으로 배분하고 블록을 바꿈
+        m_hint = false;
 
         for (int i = 0; i <= m_maxMatrix.y; i++)
         {
@@ -150,12 +179,14 @@ public class StageMgr : MonoBehaviour
 
                 if (MatchMgr.Instance.SimulationMatch(tile))
                 {
+                    Debug.Log("매치 가능");
+                    m_matchOK.Add(tile);
                     m_hint = true;
                     return;
                 }
             }
         }
-        m_hint = false;
+        Debug.Log("매치 불가능");
         RandomPlacement();
     }
 

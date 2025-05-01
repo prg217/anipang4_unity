@@ -1,4 +1,5 @@
 using NUnit;
+using System.IO;
 using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
@@ -11,6 +12,8 @@ public class Block : MonoBehaviour
     BlockType m_blockType;
     [SerializeField]
     bool m_isSpecial = false;
+
+    GameObject m_outline;
 
     #region 움직이기 위한 변수
     bool m_moving = false;
@@ -70,9 +73,12 @@ public class Block : MonoBehaviour
             m_isSpecial = false;
         }
 
-        #region 블록 타입에 따라 애니메이터 컨트롤러가 바뀌게 함
+        #region 블록 타입에 따라 애니메이터 컨트롤러, 스프라이트가 바뀌게 함
         RuntimeAnimatorController controller = null;
-        string path = "Animation/";
+        string aniPath = "Animation/";
+
+        SpriteRenderer sr = m_outline.GetComponent<SpriteRenderer>();
+        string srPath = "BlockOutline/";
 
         if (m_isSpecial)
         {
@@ -80,19 +86,19 @@ public class Block : MonoBehaviour
             switch (m_blockType)
             {
                 case BlockType.CROSS:
-                    path += "cross";
+                    aniPath += "cross";
                     break;
                 case BlockType.SUN:
-                    path += "sun";
+                    aniPath += "sun";
                     break;
                 case BlockType.RANDOM:
-                    path += "random";
+                    aniPath += "random";
                     break;
                 case BlockType.COSMIC:
-                    path += "cosmic";
+                    aniPath += "cosmic";
                     break;
                 case BlockType.MOON:
-                    path += "moon";
+                    aniPath += "moon";
                     break;
                 default:
                     break;
@@ -106,17 +112,38 @@ public class Block : MonoBehaviour
                 GetComponent<Renderer>().enabled = false;
             }
 
-            path += "block";
             int number = (int)m_blockType + 1;
-            path += number.ToString();
+
+            aniPath += "block";
+            aniPath += number.ToString();
+
+            srPath += "FX1_block_0";
+            srPath += number.ToString();
         }
 
-        path += "_aniCtrl";
-        controller = Resources.Load<RuntimeAnimatorController>(path);
+        aniPath += "_aniCtrl";
+        controller = Resources.Load<RuntimeAnimatorController>(aniPath);
         GetComponent<Animator>().runtimeAnimatorController = controller;
+
+        Sprite outlineSprite = Resources.Load<Sprite>(srPath);
+        sr.sprite = outlineSprite; // 스프라이트 지정
+        sr.sortingOrder = 1; // 렌더 순서 조정 (필요하면)
         #endregion
     }
+
+    public void SetOutline(in bool _active)
+    {
+        m_outline.SetActive(_active);
+    }
     #endregion
+
+    private void Awake()
+    {
+        m_outline = transform.Find("Outline").GameObject();
+        m_outline.SetActive(false);
+        // 내 블록 타입으로 한 번 세팅
+        SetBlockType(m_blockType);
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -155,4 +182,5 @@ public class Block : MonoBehaviour
             MoveMgr.Instance.MoveComplete();
         }
     }
+
 }

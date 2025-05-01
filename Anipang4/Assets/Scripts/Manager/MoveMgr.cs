@@ -256,6 +256,7 @@ public class MoveMgr : MonoBehaviour
                         {
                             if (DiagonalTest(matrix, rightMatrix))
                             {
+                                //Debug.Log("오른쪽 아래 갔음");
                                 isEmpty = true;
                             }
                         }
