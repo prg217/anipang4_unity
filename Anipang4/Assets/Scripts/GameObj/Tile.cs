@@ -50,9 +50,9 @@ public class Tile : MonoBehaviour
     {
         m_myBlock.GetComponent<Block>().SetBlockType(_BlockType);
     }
-    public void SetMyBlockSetOutline(in bool _Active)
+    public void SetMyBlockActiveOutline()
     {
-        m_myBlock.GetComponent<Block>().SetOutline(_Active);
+       StartCoroutine(m_myBlock.GetComponent<Block>().ActiveOutline());
     }
     #endregion
 

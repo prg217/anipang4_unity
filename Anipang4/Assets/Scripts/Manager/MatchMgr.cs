@@ -118,7 +118,7 @@ public class MatchMgr : MonoBehaviour
 
         // 상하 검사
         UpDownInspect();
-        // 여기서 특수 블록 조건 맞으면 일단 저장 후 좌우 검사 때 추가로 블록 더 없으면...
+        // 특수 블록 조건 맞으면 일단 저장
         m_saveMatchCount = m_matchCount;
         m_saveMatchTiles.Clear();
         m_saveMatchTiles = new List<GameObject>(m_matchTiles);
@@ -437,8 +437,6 @@ public class MatchMgr : MonoBehaviour
         {
             tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
         }
-
-        StageMgr.Instance.OffOutline();
     }
 
     public bool SimulationMatch(in GameObject _tile)
@@ -527,8 +525,6 @@ public class MatchMgr : MonoBehaviour
 
     void SpecialExplode()
     {
-        StageMgr.Instance.OffOutline();
-
         switch (m_targetType)
         {
             case BlockType.CROSS:

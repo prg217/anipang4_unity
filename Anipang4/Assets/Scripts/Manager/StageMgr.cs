@@ -135,30 +135,13 @@ public class StageMgr : MonoBehaviour
         // 매치가 된다면 어디가 매치 되는지 저장했다가 몇 초 마다 알려주기
         if (m_matchOK.Count >= 3)
         {
-            // 외곽선 추가(스프라이트 추가)
+            // 외곽선 실행
             foreach (GameObject tile in m_matchOK)
             {
-                tile.GetComponent<Tile>().SetMyBlockSetOutline(true);
-            }
-
-            yield return new WaitForSeconds(5f); // 2초 대기
-
-            // 외곽선 끄기(삭제)
-            foreach (GameObject tile in m_matchOK)
-            {
-                tile.GetComponent<Tile>().SetMyBlockSetOutline(false);
+                tile.GetComponent<Tile>().SetMyBlockActiveOutline();
             }
         }
         yield return new WaitForSeconds(5f); // 5초 대기
-        m_hintStart = false;
-    }
-
-    public void OffOutline()
-    {
-        foreach (GameObject tile in m_matchOK)
-        {
-            tile.GetComponent<Tile>().SetMyBlockSetOutline(false);
-        }
         m_hintStart = false;
     }
 
@@ -224,23 +207,31 @@ public class StageMgr : MonoBehaviour
         }
         saveBlockTypes = new List<BlockType>(blockTypes);
 
-        // 무작위 배치 실행
-        foreach (GameObject tile in tiles)
+        bool loof = false;
+        do
         {
-            int random = Random.Range(0, blockTypes.Count);
-            tile.GetComponent<Tile>().SetMyBlockType(blockTypes[random]);
-            blockTypes.RemoveAt(random);
-
-            // 만약 바로 매치가 된다면 무작위 배치 재실행
-            if (MatchMgr.Instance.CheckMatch(tile, false))
+            // 무작위 배치 실행
+            foreach (GameObject tile in tiles)
             {
-                blockTypes = new List<BlockType>(saveBlockTypes);
-                RandomPlacement();
-                return;
-            }
-        }
+                int random = Random.Range(0, blockTypes.Count);
+                tile.GetComponent<Tile>().SetMyBlockType(blockTypes[random]);
+                blockTypes.RemoveAt(random);
 
-        // 다시 빈 타일 없나 확인
+                // 만약 바로 매치가 된다면 재실행
+                if (MatchMgr.Instance.CheckMatch(tile, false))
+                {
+                    blockTypes = new List<BlockType>(saveBlockTypes);
+                    // 만약 시도해도 안 된다면 무작위 배치를 재실행(은 이 방법이 안 되면 시도할 것)
+                    //RandomPlacement();
+                    //return;
+                    loof = true;
+                    break;
+                }
+            }
+            loof = false;
+        } while (loof);
+
+        // 다시 움직여서 매치가 될 수 있는지 확인
         CheckPossibleMatch();
     }
 

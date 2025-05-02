@@ -202,9 +202,6 @@ public class MoveMgr : MonoBehaviour
             m_isClickMoving = false;
 
             m_completeCount = 0;
-
-            // 스테이지 매니저에 스테이지 검사 요구
-            StageMgr.Instance.CheckPossibleMatch();
         }
     }
 
@@ -256,7 +253,7 @@ public class MoveMgr : MonoBehaviour
                         {
                             if (DiagonalTest(matrix, rightMatrix))
                             {
-                                //Debug.Log("오른쪽 아래 갔음");
+                                Debug.Log("오른쪽 아래 갔음");
                                 isEmpty = true;
                             }
                         }
@@ -311,12 +308,12 @@ public class MoveMgr : MonoBehaviour
                         Vector2Int rightUpMatrix = new Vector2Int(j + 1, i - 1);
                         if (EmptySpaceTest(rightUpMatrix) && EmptySpaceTest(upMatrix) && EmptySpaceTest(leftUpMatrix))
                         {
-                            Debug.Log("체크");
                             break;
                         }
                         #endregion
 
                         StartCoroutine(CheckEmpty());
+                        yield break;
                     }
                 }
             }

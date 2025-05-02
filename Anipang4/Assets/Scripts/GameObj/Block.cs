@@ -2,6 +2,7 @@ using NUnit;
 using System.IO;
 using Unity.VisualScripting;
 using UnityEngine;
+using System.Collections;
 using static UnityEngine.GraphicsBuffer;
 
 public class Block : MonoBehaviour
@@ -131,10 +132,6 @@ public class Block : MonoBehaviour
         #endregion
     }
 
-    public void SetOutline(in bool _active)
-    {
-        m_outline.SetActive(_active);
-    }
     #endregion
 
     private void Awake()
@@ -156,6 +153,13 @@ public class Block : MonoBehaviour
     {
         // 교환을 위한 이동
         ChangeMoving();
+    }
+
+    public IEnumerator ActiveOutline()
+    {
+        m_outline.SetActive(true);
+        yield return new WaitForSeconds(2f);
+        m_outline.SetActive(false);
     }
 
     // 교환을 위한 이동
