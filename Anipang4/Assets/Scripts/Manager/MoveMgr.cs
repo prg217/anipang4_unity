@@ -207,6 +207,9 @@ public class MoveMgr : MonoBehaviour
 
     public IEnumerator CheckEmpty()
     {
+        // 이거 하는 중에는 스테이지 매니저에 힌트를 못 하게 하기
+        StageMgr.Instance.SetHint(false);
+
         m_emptyMoving = true;
 
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
@@ -312,6 +315,7 @@ public class MoveMgr : MonoBehaviour
                         }
                         #endregion
 
+                        // 빈 공간이 있을 때 다시 처음부터
                         StartCoroutine(CheckEmpty());
                         yield break;
                     }
@@ -321,7 +325,7 @@ public class MoveMgr : MonoBehaviour
 
         // 앞으로 매치가 가능한지 체크
         StageMgr.Instance.CheckPossibleMatch();
-
+        StageMgr.Instance.SetHint(true);
         m_emptyMoving = false;
     }
 
@@ -354,7 +358,7 @@ public class MoveMgr : MonoBehaviour
         return false;
     }
 
-    // CheckEmpty에서 빈 공간 검사 : 타일이 움직일 수 없나 검사
+    // CheckEmpty에서 빈 공간 검사 : 타일이 움직일 수 없나 검사(움직일 수 없을 때 true)
     bool EmptySpaceTest(in Vector2Int _matrix)
     {
         GameObject tile = StageMgr.Instance.GetTile(_matrix);
@@ -365,8 +369,12 @@ public class MoveMgr : MonoBehaviour
             {
                 return true;
             }
+            else
+            {
+                return false;
+            }
         }
 
-        return false;
+        return true;
     }
 }

@@ -131,7 +131,10 @@ public class Block : MonoBehaviour
         sr.sortingOrder = 1; // 렌더 순서 조정 (필요하면)
         #endregion
     }
-
+    public void SetOutline(in bool _setting)
+    {
+        m_outline.SetActive(_setting);
+    }
     #endregion
 
     private void Awake()

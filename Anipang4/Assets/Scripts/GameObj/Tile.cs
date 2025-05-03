@@ -54,6 +54,10 @@ public class Tile : MonoBehaviour
     {
        StartCoroutine(m_myBlock.GetComponent<Block>().ActiveOutline());
     }
+    public void SetMyBlockSetOutline(in bool _setting)
+    {
+        m_myBlock.GetComponent<Block>().SetOutline(_setting);
+    }
     #endregion
 
     void Awake()
