@@ -315,6 +315,7 @@ public class MoveMgr : MonoBehaviour
                         }
                         #endregion
 
+                        Debug.Log("빈 공간 다시");
                         // 빈 공간이 있을 때 다시 처음부터
                         StartCoroutine(CheckEmpty());
                         yield break;
