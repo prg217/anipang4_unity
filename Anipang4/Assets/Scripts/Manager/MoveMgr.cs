@@ -207,7 +207,7 @@ public class MoveMgr : MonoBehaviour
 
     public IEnumerator CheckEmpty()
     {
-        // 이거 하는 중에는 스테이지 매니저에 힌트를 못 하게 하기
+        // 빈 공간 체크하는 중에는 스테이지 매니저에 힌트를 못 하게 전달
         StageMgr.Instance.SetHint(false);
 
         m_emptyMoving = true;
@@ -326,6 +326,7 @@ public class MoveMgr : MonoBehaviour
 
         // 앞으로 매치가 가능한지 체크
         StageMgr.Instance.CheckPossibleMatch();
+        // 다시 힌트를 줄 수 있게 설정
         StageMgr.Instance.SetHint(true);
         m_emptyMoving = false;
     }

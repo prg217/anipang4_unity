@@ -215,7 +215,7 @@ public class MatchMgr : MonoBehaviour
         for (int i = 1; i <= 2; i++)
         {
             Vector2Int matrix = m_targetMatrix;
-            matrix.y += i;
+            matrix.y = m_targetMatrix.y + i;
 
             GameObject tile = StageMgr.Instance.GetTile(matrix);
             // 타일이 없을 경우 패스
@@ -239,7 +239,7 @@ public class MatchMgr : MonoBehaviour
         for (int i = 1; i <= 2; i++)
         {
             Vector2Int matrix = m_targetMatrix;
-            matrix.y -= i;
+            matrix.y = m_targetMatrix.y - i;
 
             GameObject tile = StageMgr.Instance.GetTile(matrix);
             // 타일이 없을 경우 패스
@@ -274,7 +274,7 @@ public class MatchMgr : MonoBehaviour
         for (int i = 1; i <= 2; i++)
         {
             Vector2Int matrix = m_targetMatrix;
-            matrix.x -= i;
+            matrix.x = m_targetMatrix.x - i;
 
             GameObject tile = StageMgr.Instance.GetTile(matrix);
             // 타일이 없을 경우 패스
@@ -299,7 +299,7 @@ public class MatchMgr : MonoBehaviour
         for (int i = 1; i <= 2; i++)
         {
             Vector2Int matrix = m_targetMatrix;
-            matrix.x += i;
+            matrix.x = m_targetMatrix.x + i;
 
             GameObject tile = StageMgr.Instance.GetTile(matrix);
             // 타일이 없을 경우 패스
@@ -478,28 +478,24 @@ public class MatchMgr : MonoBehaviour
         Vector2Int upMatrix = new Vector2Int(matrix.x, matrix.y - 1);
         if (SimulationInspect(matrix, upMatrix))
         {
-            Debug.Log("위");
             return true;
         }
 
         Vector2Int downMatrix = new Vector2Int(matrix.x, matrix.y + 1);
         if (SimulationInspect(matrix, downMatrix))
         {
-            Debug.Log("아래");
             return true;
         }
 
         Vector2Int leftMatrix = new Vector2Int(matrix.x - 1, matrix.y);
         if (SimulationInspect(matrix, leftMatrix))
         {
-            Debug.Log("왼");
             return true;
         }
 
         Vector2Int rightMatrix = new Vector2Int(matrix.x + 1, matrix.y);
         if (SimulationInspect(matrix, rightMatrix))
         {
-            Debug.Log("오");
             return true;
         }
 
@@ -567,11 +563,13 @@ public class MatchMgr : MonoBehaviour
         for (int i = 0; i <= maxMatrix.x; i++)
         {
             GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(i, m_targetMatrix.y));
+
             if (tile != null)
             {
                 // 일반 블록인 경우
                 if (tile.GetComponent<Tile>().GetMyBlockType() < BlockType.CROSS)
                 {
+                    
                     tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
                 }
                 // 특수 블록인 경우
