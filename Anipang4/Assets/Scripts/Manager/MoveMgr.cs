@@ -35,10 +35,11 @@ public class MoveMgr : MonoBehaviour
 
     #region 변수
 
-    // ====== 클릭 된 타일 1, 2 ======
+    // ====== 드래그 클릭 된 타일 1, 2 ======
     GameObject m_pClickedTile1;
     GameObject m_pClickedTile2;
-    // ===============================
+    // ======================================
+    bool m_specialClicked = false;
     // 움직이는 중
     bool m_moving = false;
     int m_completeCount = 0;
@@ -85,12 +86,16 @@ public class MoveMgr : MonoBehaviour
             {
                 Transform clickedTransform = hit.collider.transform;
 
-                // 특수 블록인 경우 마우스 한 번 클릭에도 매치(Random 제외)
-                /* 코드 추가 예정 */
-
                 if (m_pClickedTile1 == null)
                 {
                     m_pClickedTile1 = clickedTransform.gameObject;
+
+                    // 특수 블록인 경우 마우스 한 번 클릭에도 매치(Random 제외)
+                    BlockType type = m_pClickedTile1.GetComponent<Tile>().GetMyBlockType();
+                    if (type >= BlockType.CROSS && type != BlockType.RANDOM)
+                    {
+                        m_specialClicked = true;
+                    }
                 }
                 else
                 {
@@ -102,6 +107,7 @@ public class MoveMgr : MonoBehaviour
 
                     m_pClickedTile2 = clickedTransform.gameObject;
 
+                    m_specialClicked = false;
                     m_isClickMoving = true;
                     Moving();
                 }
@@ -114,7 +120,14 @@ public class MoveMgr : MonoBehaviour
 
             if (hit.collider != null)
             {
-                Transform clickedTransform = hit.collider.transform;
+                // 특수 블록을 한 번 클릭했을 경우
+                if (m_specialClicked)
+                {
+                    m_specialClicked = false;
+                    m_isClickMoving = true;
+                    MatchMgr.Instance.CheckMatch(m_pClickedTile1);
+                }
+
                 m_pClickedTile1 = null;
                 m_pClickedTile2 = null;
             }
