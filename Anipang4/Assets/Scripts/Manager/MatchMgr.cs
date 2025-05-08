@@ -765,6 +765,8 @@ public class MatchMgr : MonoBehaviour
 
         #region 클리어 조건 중 하나 랜덤으로 가서 파괴
 
+        /* 추가 예정 */
+
         #endregion
     }
 }

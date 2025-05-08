@@ -124,7 +124,7 @@ public class Tile : MonoBehaviour
         }
 
         // 움직일 수 없는 장애물이 있나 판단
-        bool isEmpty = m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty();
+        bool isEmpty = m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmptyFront();
         if (!isEmpty)
         {
             return false;

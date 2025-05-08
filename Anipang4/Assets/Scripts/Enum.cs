@@ -26,3 +26,19 @@ public enum TileType
     IMMOVABLE = 0, // 움직일 수 없는 상태
     MOVABLE = 1, // 움직일 수 있는 상태
 }
+
+public enum FrontObstacleType
+{
+    NONE,
+
+    // 앞 장애물
+    PRISON, // 감옥
+}
+
+public enum BackObstacleType
+{
+    NONE,
+
+    // 뒤 장애물
+    PAINT, // 페인트
+}
