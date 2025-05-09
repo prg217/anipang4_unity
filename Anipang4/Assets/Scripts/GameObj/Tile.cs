@@ -124,7 +124,7 @@ public class Tile : MonoBehaviour
         }
 
         // 움직일 수 없는 장애물이 있나 판단
-        bool isEmpty = m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmptyFront();
+        bool isEmpty = m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty();
         if (!isEmpty)
         {
             return false;
@@ -176,6 +176,19 @@ public class Tile : MonoBehaviour
             {
                 StartCoroutine(CreateBlock());
             }
+        }
+    }
+
+    public void Explode()
+    {
+        BlockType type = GetMyBlockType();
+
+        SetMyBlockType(BlockType.NONE);
+
+        // 장애물이 있는 경우
+        if (m_myFrontObstacle != null)
+        {
+            m_myFrontObstacle.GetComponent<Obstacle>().AddLevel(-1);
         }
     }
 }

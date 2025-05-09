@@ -6,12 +6,9 @@ public class Obstacle : MonoBehaviour
     #region 변수
 
     [SerializeField]
-    FrontObstacleType m_fObstacleType;
-    [SerializeField]
-    BackObstacleType m_bObstacleType;
+    ObstacleType m_ObstacleType;
 
-    Obstacle m_fScript = null;
-    Obstacle m_bScript = null;
+    Obstacle m_script = null;
 
     [SerializeField]
     protected int m_level = 1; // 장애물 단계
@@ -20,17 +17,9 @@ public class Obstacle : MonoBehaviour
 
     #region Get함수
     // 앞 장애물 비어있으면 true
-    public bool GetIsEmptyFront()
+    public bool GetIsEmpty()
     {
-        if (m_fObstacleType == FrontObstacleType.NONE)
-        {
-            return true;
-        }
-        return false;
-    }
-    public bool GetIsEmptyBack()
-    {
-        if (m_bObstacleType == BackObstacleType.NONE)
+        if (m_ObstacleType == ObstacleType.NONE)
         {
             return true;
         }
@@ -39,14 +28,9 @@ public class Obstacle : MonoBehaviour
     #endregion
 
     #region Set함수
-    public void SetFrontObstacle(FrontObstacleType _type)
+    public void SetObstacle(ObstacleType _type)
     {
-        m_fScript = _type;
-        SetTypeScript();
-    }
-    public void SetBackObstacle(BackObstacleType _type)
-    {
-        m_bScript = _type;
+        m_ObstacleType = _type;
         SetTypeScript();
     }
 
@@ -54,6 +38,20 @@ public class Obstacle : MonoBehaviour
     public virtual void SetLevel(int _level)
     {
         m_level = _level;
+        if (m_level < 0)
+        {
+            m_level = 0;
+            SetTypeScript();
+        }
+    }
+    public virtual void AddLevel(int _addLevel)
+    {
+        m_level += _addLevel;
+        if (m_level < 0)
+        {
+            m_level = 0;
+            SetTypeScript();
+        }
     }
     #endregion
 
@@ -77,40 +75,51 @@ public class Obstacle : MonoBehaviour
 
     void SetTypeScript()
     {
-        if (m_fObstacleType == FrontObstacleType.NONE && m_bObstacleType == BackObstacleType.NONE)
+        if (m_ObstacleType == ObstacleType.NONE)
         {
+            if (m_script != null)
+            {
+                Destroy(m_script);
+                m_script = null;
+            }
             return;
         }
 
-        // 자신이 보유하지 않은 장애물 스크립트는 지워버림
-        switch (m_fObstacleType)
+        // 보유하지 않은 장애물 스크립트는 지워버림
+        switch (m_ObstacleType)
         {
-            case FrontObstacleType.PRISON:
-                Prison script = m_fScript as Prison;
-                if (script == null)
+            case ObstacleType.PRISON:
                 {
-                    Destroy(m_fScript);
-                    transform.AddComponent<Prison>();
+                    Prison script = m_script as Prison;
+                    if (script == null)
+                    {
+                        Destroy(m_script);
+                        transform.AddComponent<Prison>();
+                    }
+                }
+                break;
+            case ObstacleType.PAINT:
+                {
+                    Paint script = m_script as Paint;
+                    if (script == null)
+                    {
+                        Destroy(m_script);
+                        transform.AddComponent<Paint>();
+                    }
                 }
                 break;
             default:
+                {
+                    // 비었을 경우 제거
+                    if (m_script != null)
+                    {
+                        Destroy(m_script);
+                        m_script = null;
+                    }
+                }
                 break;
         }
 
-        switch (m_bObstacleType)
-        {
-            case BackObstacleType.PAINT:
-                Paint script = m_bScript as Paint;
-                if (script == null)
-                {
-                    Destroy(m_bScript);
-                    transform.AddComponent<Paint>();
-                }
-                break;
-            default:
-                break;
         }
     }
 
-
-}
