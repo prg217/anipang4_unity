@@ -105,12 +105,13 @@ public class MatchMgr : MonoBehaviour
         }
 
         // 특수 블록인 경우 특수 블록을 바로 터트림
-        if (m_targetType >= BlockType.CROSS)
+        if (m_targetType >= BlockType.CROSS && m_targetType != BlockType.NULL)
         {
             // 특수 블록 터트리는 함수
             if (_explode)
             {
-                SpecialExplode();
+                m_targetTile.GetComponent<Tile>().Explode();
+                //SpecialExplode();
             }
 
             return true;
@@ -436,7 +437,7 @@ public class MatchMgr : MonoBehaviour
         // 특수 블록 조건에 해당 될 경우
         if (m_newBlock >= BlockType.CROSS)
         {
-            m_targetTile.GetComponent<Tile>().SetMyBlockType(m_newBlock);
+            m_targetTile.GetComponent<Tile>().Explode(m_newBlock);
         }
         // 아닌 경우 터트림
         else
@@ -534,7 +535,7 @@ public class MatchMgr : MonoBehaviour
         return false;
     }
 
-    void SpecialExplode()
+    public void SpecialExplode()
     {
         switch (m_targetType)
         {

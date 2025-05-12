@@ -60,6 +60,13 @@ public class Tile : MonoBehaviour
     }
     #endregion
 
+    #region 이벤트
+    void HandleSetTileTypeExecution(TileType _type)
+    {
+        m_tileType = _type;
+    }
+    #endregion
+
     void Awake()
     {
         Refresh();
@@ -179,16 +186,36 @@ public class Tile : MonoBehaviour
         }
     }
 
-    public void Explode()
+    public void Explode(BlockType _newBlockType = BlockType.NONE)
     {
+        // 장애물이 있는 경우
+        if (!m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty())
+        {
+            Obstacle fo = m_myFrontObstacle.GetComponent<Obstacle>();
+            // Obstacle이 가지고 있는 자식 장애물 쪽으로 이벤트를 연결해줌
+            fo.GetChildObstacle().OnTileTypeExecuted += HandleSetTileTypeExecution;
+
+            fo.AddLevel(-1);
+
+            if (fo.GetLevel() > 0)
+            {
+                return;
+            }
+        }
         BlockType type = GetMyBlockType();
 
-        SetMyBlockType(BlockType.NONE);
-
-        // 장애물이 있는 경우
-        if (m_myFrontObstacle != null)
+        // 특수 블록인 경우
+        if (type >= BlockType.CROSS && type != BlockType.NULL)
         {
-            m_myFrontObstacle.GetComponent<Obstacle>().AddLevel(-1);
+            // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
+            SetMyBlockType(BlockType.NONE);
+            MatchMgr.Instance.SpecialExplode();
+
+            return;
         }
+
+        SetMyBlockType(_newBlockType);
     }
+
+
 }

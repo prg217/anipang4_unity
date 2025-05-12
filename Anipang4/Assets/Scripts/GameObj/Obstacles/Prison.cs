@@ -1,8 +1,12 @@
+using System;
 using UnityEngine;
 
 public class Prison : Obstacle
 {
-
+    #region 이벤트
+    // 레벨 동기화
+    public event Action<int> OnLevelSyncExecuted;
+    #endregion
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -22,17 +26,15 @@ public class Prison : Obstacle
         m_level = _level;
 
         ChangeSprite();
+        OnLevelSyncExecuted?.Invoke(m_level);
     }
 
     public override void AddLevel(int _addLevel)
     {
         m_level += _addLevel;
-        if (m_level < 0)
-        {
-            m_level = 0;
-        }
 
         ChangeSprite();
+        OnLevelSyncExecuted?.Invoke(m_level);
     }
 
     void ChangeSprite()
@@ -40,24 +42,21 @@ public class Prison : Obstacle
         if (m_level == 0)
         {
             // 스프라이트 안 보이게 함
-            GetComponent<Renderer>().enabled = false;
+            GetComponent<SpriteRenderer>().sprite = null;
 
             // 타일을 움직일 수 있는 상태로 만들기
-            /* 추가 예정 */
+            SetTileType(TileType.MOVABLE);
 
             return;
         }
 
-        GetComponent<Renderer>().enabled = true;
-
         string spritePath = "Obstacle/Prison/prison_";
         spritePath += m_level.ToString();
-        spritePath += ".png";
 
-        Sprite sprite = Resources.Load<Sprite>(spritePath);
-        if (sprite != null)
+        Sprite newSprite = Resources.Load<Sprite>(spritePath);
+        if (newSprite != null)
         {
-            //targetImage.sprite = newSprite;
+            GetComponent<SpriteRenderer>().sprite = newSprite;
         }
     }
 }

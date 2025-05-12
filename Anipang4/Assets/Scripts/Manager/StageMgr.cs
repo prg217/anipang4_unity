@@ -162,7 +162,6 @@ public class StageMgr : MonoBehaviour
             foreach (GameObject tile in m_matchOKs[random])
             {
                 tile.GetComponent<Tile>().SetMyBlockActiveOutline();
-                Debug.Log(tile.GetComponent<Tile>().GetMatrix());
             }
         }
         yield return new WaitForSeconds(5f);

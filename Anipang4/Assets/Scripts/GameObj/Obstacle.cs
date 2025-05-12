@@ -1,3 +1,4 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -25,6 +26,8 @@ public class Obstacle : MonoBehaviour
         }
         return false;
     }
+    public int GetLevel() { return m_level; }
+    public Obstacle GetChildObstacle() { return m_script; }
     #endregion
 
     #region Set함수
@@ -37,7 +40,11 @@ public class Obstacle : MonoBehaviour
     // 장애물 단계 설정(가상함수)
     public virtual void SetLevel(int _level)
     {
-        m_level = _level;
+        if (m_script != null)
+        {
+            m_script.SetLevel(_level);
+        }
+
         if (m_level < 0)
         {
             m_level = 0;
@@ -46,12 +53,31 @@ public class Obstacle : MonoBehaviour
     }
     public virtual void AddLevel(int _addLevel)
     {
-        m_level += _addLevel;
+        if (m_script != null)
+        {
+            m_script.AddLevel(_addLevel);
+        }
+
         if (m_level < 0)
         {
             m_level = 0;
             SetTypeScript();
         }
+    }
+    protected void SetTileType(TileType _type)
+    {
+        OnTileTypeExecuted?.Invoke(_type);
+    }
+    #endregion
+
+
+    #region 이벤트
+    public event Action<TileType> OnTileTypeExecuted;
+
+    // 레벨 동기화
+    void HandleLevelSyncExecution(int _level)
+    {
+        m_level = _level;
     }
     #endregion
 
@@ -59,12 +85,14 @@ public class Obstacle : MonoBehaviour
     {
         // 기존에 가진 장애물 타입에 따라 자식 클래스 스크립트 부여
         SetTypeScript();
+        // 자식 클래스에 초기 세팅 레벨 정보 전달
+        SetLevel(m_level);
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -94,7 +122,11 @@ public class Obstacle : MonoBehaviour
                     if (script == null)
                     {
                         Destroy(m_script);
-                        transform.AddComponent<Prison>();
+
+                        m_script = transform.AddComponent<Prison>();
+
+                        Prison prison = m_script as Prison;
+                        prison.OnLevelSyncExecuted += HandleLevelSyncExecution;
                     }
                 }
                 break;
@@ -104,7 +136,8 @@ public class Obstacle : MonoBehaviour
                     if (script == null)
                     {
                         Destroy(m_script);
-                        transform.AddComponent<Paint>();
+
+                        m_script = transform.AddComponent<Paint>();
                     }
                 }
                 break;
@@ -119,7 +152,6 @@ public class Obstacle : MonoBehaviour
                 }
                 break;
         }
-
-        }
     }
+}
 

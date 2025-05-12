@@ -75,9 +75,11 @@ public class Block : MonoBehaviour
         }
 
         #region 블록 타입에 따라 애니메이터 컨트롤러, 스프라이트가 바뀌게 함
+        // 애니메이션
         RuntimeAnimatorController controller = null;
         string aniPath = "Animation/";
 
+        // 외곽선
         SpriteRenderer sr = m_outline.GetComponent<SpriteRenderer>();
         string srPath = "BlockOutline/";
 
@@ -126,9 +128,9 @@ public class Block : MonoBehaviour
         controller = Resources.Load<RuntimeAnimatorController>(aniPath);
         GetComponent<Animator>().runtimeAnimatorController = controller;
 
+        // 외곽선
         Sprite outlineSprite = Resources.Load<Sprite>(srPath);
         sr.sprite = outlineSprite; // 스프라이트 지정
-        sr.sortingOrder = 1; // 렌더 순서 조정 (필요하면)
         #endregion
     }
     public void SetOutline(in bool _setting)
