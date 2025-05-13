@@ -197,11 +197,12 @@ public class Tile : MonoBehaviour
 
             fo.AddLevel(-1);
 
-            if (fo.GetLevel() > 0)
+            if (fo.GetLevel() >= 0)
             {
                 return;
             }
         }
+
         BlockType type = GetMyBlockType();
 
         // 특수 블록인 경우

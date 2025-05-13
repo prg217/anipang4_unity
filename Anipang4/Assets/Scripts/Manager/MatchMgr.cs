@@ -601,7 +601,7 @@ public class MatchMgr : MonoBehaviour
                 // 일반 블록인 경우
                 if (type < BlockType.CROSS)
                 {
-                    tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+                    tile.GetComponent<Tile>().Explode();
                 }
                 // 특수 블록인 경우
                 else if (type != BlockType.NULL)

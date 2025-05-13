@@ -126,6 +126,8 @@ public class MoveMgr : MonoBehaviour
                     m_specialClicked = false;
                     m_isClickMoving = true;
                     MatchMgr.Instance.CheckMatch(m_pClickedTile1);
+                    // 매치 후 빈 공간 채우기 실행
+                    StartCoroutine(CheckEmpty());
                 }
 
                 m_pClickedTile1 = null;
@@ -191,7 +193,6 @@ public class MoveMgr : MonoBehaviour
                 // 둘 다 매치가 되지 않았다면
                 if (match1 == false && match2 == false)
                 {
-                    Debug.LogWarning("원상복구");
                     // 원상복구
                     m_reMoving = true;
                     GameObject tempTile = m_pClickedTile1;
