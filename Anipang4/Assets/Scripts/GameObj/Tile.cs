@@ -43,6 +43,20 @@ public class Tile : MonoBehaviour
         if (GetMyBlockType() == BlockType.NONE) { return true; }
         return false;
     }
+    // 전파되는 장애물
+    public ObstacleType GetPropagationObstacle()
+    {
+        if (m_myFrontObstacle.GetComponent<Obstacle>().IsPropagationObstacle())
+        {
+            return m_myFrontObstacle.GetComponent<Obstacle>().GetObstacleType();
+        }
+        if (m_myBackObstacle.GetComponent<Obstacle>().IsPropagationObstacle())
+        {
+            return m_myBackObstacle.GetComponent<Obstacle>().GetObstacleType();
+        }
+
+        return ObstacleType.NONE;
+    }
     #endregion
 
     #region Set함수
@@ -186,8 +200,18 @@ public class Tile : MonoBehaviour
         }
     }
 
-    public void Explode(BlockType _newBlockType = BlockType.NONE)
+    public void Explode(ObstacleType _addObstacleType, BlockType _newBlockType = BlockType.NONE)
     {
+        // 전달 받은 장애물이 있는 경우
+        if (_addObstacleType != ObstacleType.NONE)
+        {
+            // BackObstacle 인 경우
+            if (_addObstacleType > ObstacleType.FRONT_END)
+            {
+                m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_addObstacleType);
+            }
+        }
+
         // 장애물이 있는 경우
         if (!m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty())
         {

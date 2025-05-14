@@ -34,6 +34,10 @@ public enum ObstacleType
     // 앞 장애물
     PRISON, // 감옥
 
+    FRONT_END,
+
     // 뒤 장애물
     PAINT, // 페인트
+
+    BACK_END,
 }

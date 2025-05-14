@@ -125,6 +125,8 @@ public class MoveMgr : MonoBehaviour
                 {
                     m_specialClicked = false;
                     m_isClickMoving = true;
+
+                    ObstacleType obType = m_pClickedTile1.GetComponent<Tile>().GetPropagationObstacle();
                     MatchMgr.Instance.CheckMatch(m_pClickedTile1);
                     // 매치 후 빈 공간 채우기 실행
                     StartCoroutine(CheckEmpty());
@@ -183,26 +185,63 @@ public class MoveMgr : MonoBehaviour
         {
             if (!m_reMoving && m_isClickMoving && !m_emptyMoving)
             {
-                // 둘 다 특수 블록인 경우->특수 블록 합성
-                /* 코드 추가 예정 */
+                BlockType type1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlockType();
+                BlockType type2 = m_pClickedTile2.GetComponent<Tile>().GetMyBlockType();
 
-                // 매치 시도 후 매치가 안 되면 원상복구
-                bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1);
-                bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2);
+                #region 장애물 설정
+                ObstacleType obType1 = m_pClickedTile1.GetComponent<Tile>().GetPropagationObstacle();
+                ObstacleType obType2 = m_pClickedTile2.GetComponent<Tile>().GetPropagationObstacle();
+                ObstacleType obType = obType1;
 
-                // 둘 다 매치가 되지 않았다면
-                if (match1 == false && match2 == false)
+                if (obType1 != ObstacleType.NONE)
                 {
-                    // 원상복구
-                    m_reMoving = true;
-                    GameObject tempTile = m_pClickedTile1;
-                    m_pClickedTile1 = m_pClickedTile2;
-                    m_pClickedTile2 = tempTile;
-                    Moving();
+                    obType = obType1;
+                }
+                else if (obType2 != ObstacleType.NONE)
+                { 
+                    obType = obType2;
+                }
+                #endregion
 
-                    m_moving = false;
-                    m_completeCount = 0;
-                    return;
+                // 둘 다 특수 블록인 경우->특수 블록 합성
+                if (type1 >= BlockType.CROSS && type2 >= BlockType.CROSS)
+                {
+                    MatchMgr.Instance.SpecialCompositionExplode(type1, type2, obType);
+                }
+                else
+                {
+                    #region 랜덤+일반
+
+                    // 랜덤과 일반 블록인 경우->랜덤 Explode 실행
+                    if (type1 == BlockType.RANDOM)
+                    {
+                        MatchMgr.Instance.RandomExplode(type2, obType);
+                    }
+                    else if (type2 == BlockType.RANDOM)
+                    {
+                        MatchMgr.Instance.RandomExplode(type1, obType);
+                    }
+
+                    #endregion
+
+                    // 매치 시도 후 매치가 안 되면 원상복구
+                    bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1);
+                    bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2);
+
+                    // 둘 다 매치가 되지 않았다면
+                    if (match1 == false && match2 == false)
+                    {
+                        // 원상복구
+                        m_reMoving = true;
+                        GameObject tempTile = m_pClickedTile1;
+                        m_pClickedTile1 = m_pClickedTile2;
+                        m_pClickedTile2 = tempTile;
+                        Moving();
+
+                        m_moving = false;
+                        m_completeCount = 0;
+                        return;
+                    }
                 }
 
                 // 매치 후 빈 공간 채우기 실행
@@ -270,7 +309,6 @@ public class MoveMgr : MonoBehaviour
                         {
                             if (DiagonalTest(matrix, rightMatrix))
                             {
-                                Debug.Log("오른쪽 아래 갔음");
                                 isEmpty = true;
                             }
                         }

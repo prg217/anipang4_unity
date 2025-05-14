@@ -28,6 +28,19 @@ public class Obstacle : MonoBehaviour
     }
     public int GetLevel() { return m_level; }
     public Obstacle GetChildObstacle() { return m_script; }
+    // 전파되는 장애물
+    public bool IsPropagationObstacle()
+    {
+        switch (m_ObstacleType)
+        {
+            case ObstacleType.PAINT:
+                return true;
+            default:
+                break;
+        }
+        return false;
+    }
+    public ObstacleType GetObstacleType() { return m_ObstacleType; }
     #endregion
 
     #region Set함수
@@ -110,6 +123,10 @@ public class Obstacle : MonoBehaviour
                 Destroy(m_script);
                 m_script = null;
             }
+            else
+            {
+                m_script = null;
+            }
             return;
         }
 
@@ -127,6 +144,7 @@ public class Obstacle : MonoBehaviour
 
                         Prison prison = m_script as Prison;
                         prison.OnLevelSyncExecuted += HandleLevelSyncExecution;
+                        prison.OnDestroyObstacleExecuted += SetObstacle;
                     }
                 }
                 break;

@@ -6,6 +6,8 @@ public class Prison : Obstacle
     #region 이벤트
     // 레벨 동기화
     public event Action<int> OnLevelSyncExecuted;
+    // 장애물 삭제
+    public event Action<ObstacleType> OnDestroyObstacleExecuted;
     #endregion
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -46,6 +48,9 @@ public class Prison : Obstacle
 
             // 타일을 움직일 수 있는 상태로 만들기
             SetTileType(TileType.MOVABLE);
+
+            // 스스로를 제거
+            OnDestroyObstacleExecuted?.Invoke(ObstacleType.NONE);
 
             return;
         }
