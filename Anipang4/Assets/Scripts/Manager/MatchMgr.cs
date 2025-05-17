@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static UnityEngine.UI.Image;
 
 public class MatchMgr : MonoBehaviour
@@ -582,128 +583,127 @@ public class MatchMgr : MonoBehaviour
         }
     }
 
-    public void SpecialCompositionExplode(in BlockType _type1, in BlockType _type2, in ObstacleType _addObstacle)
+    public void SpecialCompositionExplode(in GameObject _tile1, in GameObject _tile2, in ObstacleType _addObstacle)
     {
         m_addObstacle = _addObstacle;
 
-        switch (_type1)
+        BlockType type1 = _tile1.GetComponent<Tile>().GetMyBlockType();
+        BlockType type2 = _tile2.GetComponent<Tile>().GetMyBlockType();
+
+        m_targetTile = _tile2;
+        m_targetMatrix = _tile2.GetComponent<Tile>().GetMatrix();
+
+        _tile1.GetComponent<Tile>().Explode(_addObstacle);
+        _tile2.GetComponent<Tile>().Explode(_addObstacle);
+
+        switch (type1)
         {
             case BlockType.CROSS:
-                
+                {
+                    switch (type2)
+                    {
+                        case BlockType.CROSS:
+                            DoubleCrossExplode();
+                            break;
+                        case BlockType.SUN:
+                            CrossSunExplode();
+                            break;
+                        case BlockType.COSMIC:
+                            CosmicExplode();
+                            break;
+                        case BlockType.MOON:
+                            SpecialMoonExplode(BlockType.CROSS);
+                            break;
+                        default:
+                            break;
+                    }
+                }                
                 break;
             case BlockType.SUN:
-                
-                break;
-            case BlockType.RANDOM:
-                
+                {
+                    switch (type2)
+                    {
+                        case BlockType.CROSS:
+                            CrossSunExplode();
+                            break;
+                        case BlockType.SUN:
+                            DoubleSunExplode();
+                            break;
+                        case BlockType.COSMIC:
+                            CosmicExplode();
+                            break;
+                        case BlockType.MOON:
+                            SpecialMoonExplode(BlockType.SUN);
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 break;
             case BlockType.COSMIC:
-               
+                {
+                    CosmicExplode();
+                }
                 break;
             case BlockType.MOON:
-                
+                {
+                    switch (type2)
+                    {
+                        case BlockType.CROSS:
+                            SpecialMoonExplode(BlockType.CROSS);
+                            break;
+                        case BlockType.SUN:
+                            SpecialMoonExplode(BlockType.SUN);
+                            break;
+                        case BlockType.COSMIC:
+                            CosmicExplode();
+                            break;
+                        case BlockType.MOON:
+                            SpecialMoonExplode(BlockType.MOON);
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 break;
             default:
                 break;
         }
     }
 
+    void DoubleCrossExplode()
+    {
+        // 가로 세로 3줄씩
+        LengthAndWidthExplode(1, 1);
+    }
+
+    void CrossSunExplode()
+    {
+        // 가로 세로 5줄씩
+        LengthAndWidthExplode(2, 2);
+    }
+
+    void DoubleSunExplode()
+    {
+        // 9x9
+        SurroundingsExplode(4, 4);
+    }
+
+    void SpecialMoonExplode(in BlockType _specialType)
+    {
+        // 주변 8곳 터트림
+        SurroundingsExplode(1, 1);
+    }
+
     void CrossExplode()
     {
-        // 가로 세로 다 없앰
-        Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
-
-        for (int i = 0; i <= maxMatrix.x; i++)
-        {
-            GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(i, m_targetMatrix.y));
-
-            if (tile != null)
-            {
-                BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-                // 일반 블록인 경우
-                if (type < BlockType.CROSS)
-                {
-                    tile.GetComponent<Tile>().Explode(m_addObstacle);
-                }
-                // 특수 블록인 경우
-                else if (type != BlockType.NULL)
-                {
-                    // 특수 블록의 위치 기준으로 매치 실행
-                    if (m_targetTile == tile)
-                    {
-                        tile.GetComponent<Tile>().Explode(m_addObstacle);
-                    }
-                    else
-                    {
-                        CheckMatch(tile);
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i <= maxMatrix.y; i++)
-        {
-            GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x, i));
-
-            if (tile != null)
-            {
-                BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-                // 일반 블록인 경우
-                if (type < BlockType.CROSS)
-                {
-                    tile.GetComponent<Tile>().Explode(m_addObstacle);
-                }
-                // 특수 블록인 경우
-                else if (type != BlockType.NULL)
-                {
-                    // 특수 블록의 위치 기준으로 매치 실행
-                    if (m_targetTile == tile)
-                    {
-                        tile.GetComponent<Tile>().Explode(m_addObstacle);
-                    }
-                    else
-                    {
-                        CheckMatch(tile);
-                    }
-                }
-            }
-        }
+        LengthAndWidthExplode(0, 0);
     }
 
     void SunExplode()
     {
         // 5x5 파괴
-        // 왼쪽 오른쪽 2
-        // 위 아래 2
-        for (int x = -2; x <= 2; x++)
-        {
-            for (int y = -2;  y <= 2; y++)
-            {
-                GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x + x, m_targetMatrix.y + y));
-                if (tile != null)
-                {
-                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-                    // 일반 블록인 경우
-                    if (type < BlockType.CROSS)
-                    {
-                        tile.GetComponent<Tile>().Explode(m_addObstacle);
-                    }
-                    // 특수 블록인 경우
-                    else if (type != BlockType.NULL)
-                    {
-                        // 특수 블록의 위치 기준으로 매치 실행
-                        if (m_targetTile == tile)
-                        {
-                            tile.GetComponent<Tile>().Explode(m_addObstacle);
-                        }
-                        else
-                        {
-                            CheckMatch(tile);
-                        }
-                    }
-                }
-            }
-        }
+        SurroundingsExplode(2, 2);
     }
 
     public void RandomExplode(in BlockType _type, in ObstacleType _addObstacle)
@@ -734,6 +734,11 @@ public class MatchMgr : MonoBehaviour
         #region 특수 블록일 경우
         if (_type >= BlockType.CROSS)
         {
+            if (_type == BlockType.RANDOM || _type == BlockType.COSMIC)
+            {
+                CosmicExplode();
+            }
+
             int randomType = Random.Range(0, StageMgr.Instance.GetMaxBlockType());
 
             for (int x = 0; x < maxMatrix.x; x++)
@@ -866,5 +871,122 @@ public class MatchMgr : MonoBehaviour
         /* 추가 예정 */
 
         #endregion
+    }
+
+    // 주변 터트림 : Sun 관련 함수에서 사용, 특수 블록 합성 Moon에서도 사용
+    void SurroundingsExplode(in int _x, in int _y) 
+    {
+        for (int x = -_x; x <= _x; x++)
+        {
+            for (int y = -_y; y <= _y; y++)
+            {
+                GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x + x, m_targetMatrix.y + y));
+                if (tile != null)
+                {
+                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+                    // 일반 블록인 경우
+                    if (type < BlockType.CROSS)
+                    {
+                        tile.GetComponent<Tile>().Explode(m_addObstacle);
+                    }
+                    // 특수 블록인 경우
+                    else if (type != BlockType.NULL)
+                    {
+                        // 특수 블록의 위치 기준으로 매치 실행
+                        if (m_targetTile == tile)
+                        {
+                            tile.GetComponent<Tile>().Explode(m_addObstacle);
+                        }
+                        else
+                        {
+                            CheckMatch(tile);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 가로세로 터트림 : Cross 관련 함수에서 사용
+    void LengthAndWidthExplode(in int _x, in int _y)
+    {
+        Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
+
+        // 이미 처리한 타일 저장
+        HashSet<GameObject> processedTile = new HashSet<GameObject>();
+
+        for (int y = -_y; y <= _y; y++)
+        {
+            for (int x = 0; x <= maxMatrix.x; x++)
+            {
+                GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(x, m_targetMatrix.y + y));
+
+                if (tile != null)
+                {
+                    // 이미 처리한 타일 건너뜀
+                    if (processedTile.Contains(tile))
+                        continue;
+
+                    processedTile.Add(tile);
+
+                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+                    // 일반 블록인 경우
+                    if (type < BlockType.CROSS)
+                    {
+                        tile.GetComponent<Tile>().Explode(m_addObstacle);
+                    }
+                    // 특수 블록인 경우
+                    else if (type != BlockType.NULL)
+                    {
+                        // 특수 블록의 위치 기준으로 매치 실행
+                        if (m_targetTile == tile)
+                        {
+                            tile.GetComponent<Tile>().Explode(m_addObstacle);
+                        }
+                        else
+                        {
+                            CheckMatch(tile);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int x = -_x; x <= _x; x++)
+        {
+            for (int y = 0; y <= maxMatrix.y; y++)
+            {
+                GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x + x, y));
+
+                if (tile != null)
+                {
+                    // 이미 처리한 타일 건너뜀
+                    if (processedTile.Contains(tile))
+                        continue;
+
+                    processedTile.Add(tile);
+
+                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+                    // 일반 블록인 경우
+                    if (type < BlockType.CROSS)
+                    {
+                        tile.GetComponent<Tile>().Explode(m_addObstacle);
+                    }
+                    // 특수 블록인 경우
+                    else if (type != BlockType.NULL)
+                    {
+                        // 특수 블록의 위치 기준으로 매치 실행
+                        if (m_targetTile == tile)
+                        {
+                            tile.GetComponent<Tile>().Explode(m_addObstacle);
+                        }
+                        else
+                        {
+                            CheckMatch(tile);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

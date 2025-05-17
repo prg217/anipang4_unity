@@ -80,6 +80,24 @@ public class StageMgr : MonoBehaviour
     int m_maxBlockType = 5;
     [SerializeField]
     //int m_maxMove = 20;
+
+    // 스테이지 클리어 조건
+    struct StageClearConditions
+    {
+        // 타입과 개수 설정, List로 여러 개 설정 가능
+        List<NumberOfClearBlockType> blockTypes;
+        List<NumberOfClearObstacleType> ObstacleTypes;
+
+    }
+    // 클리어에 필요한 타일 타입과 개수
+    struct NumberOfClearBlockType
+    {
+        Dictionary<BlockType, int> type;
+    }
+    struct NumberOfClearObstacleType
+    {
+        Dictionary<ObstacleType, int> type;
+    }
     #endregion
 
     #region Hint 관련 변수

@@ -206,8 +206,9 @@ public class MoveMgr : MonoBehaviour
                 // 둘 다 특수 블록인 경우->특수 블록 합성
                 if (type1 >= BlockType.CROSS && type2 >= BlockType.CROSS)
                 {
-                    MatchMgr.Instance.SpecialCompositionExplode(type1, type2, obType);
+                    MatchMgr.Instance.SpecialCompositionExplode(m_pClickedTile1, m_pClickedTile2, obType);
                 }
+                // 아닌경우
                 else
                 {
                     #region 랜덤+일반
