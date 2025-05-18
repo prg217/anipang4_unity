@@ -4,6 +4,38 @@ using Unity.VisualScripting;
 using static Unity.VisualScripting.Metadata;
 using System.Collections;
 using Unity.Burst.CompilerServices;
+using System;
+
+using Random = UnityEngine.Random;
+
+// 스테이지 클리어 조건
+[Serializable]
+struct StageClearConditions
+{
+    // 타입과 개수 설정, List로 여러 개 설정 가능
+    [SerializeField]
+    public List<NumberOfClearBlockType> blockTypes;
+    [SerializeField]
+    public List<NumberOfClearObstacleType> ObstacleTypes;
+
+}
+// 클리어에 필요한 타일 타입과 개수
+[Serializable]
+struct NumberOfClearBlockType
+{
+    [SerializeField]
+    public BlockType type;
+    [SerializeField]
+    public int count;
+}
+[Serializable]
+struct NumberOfClearObstacleType
+{
+    [SerializeField]
+    public ObstacleType type;
+    [SerializeField]
+    public int count;
+}
 
 public class StageMgr : MonoBehaviour
 {
@@ -79,25 +111,16 @@ public class StageMgr : MonoBehaviour
     [SerializeField]
     int m_maxBlockType = 5;
     [SerializeField]
-    //int m_maxMove = 20;
+    int m_maxMoveCount = 20;
 
-    // 스테이지 클리어 조건
-    struct StageClearConditions
-    {
-        // 타입과 개수 설정, List로 여러 개 설정 가능
-        List<NumberOfClearBlockType> blockTypes;
-        List<NumberOfClearObstacleType> ObstacleTypes;
+    [SerializeField]
+    StageClearConditions m_stageClearConditions;
+    #endregion
 
-    }
-    // 클리어에 필요한 타일 타입과 개수
-    struct NumberOfClearBlockType
-    {
-        Dictionary<BlockType, int> type;
-    }
-    struct NumberOfClearObstacleType
-    {
-        Dictionary<ObstacleType, int> type;
-    }
+    #region Stage 정보
+    int m_moveCount = 20;
+    Dictionary<BlockType, int> m_blockCounts = new Dictionary<BlockType, int>();
+    Dictionary<ObstacleType, int> m_obstacleCounts = new Dictionary<ObstacleType, int>();
     #endregion
 
     #region Hint 관련 변수
@@ -153,6 +176,14 @@ public class StageMgr : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        m_moveCount = m_maxMoveCount;
+
+        // 장애물 종류 등록
+        foreach (ObstacleType type in Enum.GetValues(typeof(ObstacleType)))
+        {
+            m_obstacleCounts.Add((ObstacleType)type, 0);
+        }
+
         // 시작 시 맵 체크(스테이지 블록 구성을 랜덤으로 했을 경우 대비)
         CheckPossibleMatch();
     }
@@ -284,8 +315,62 @@ public class StageMgr : MonoBehaviour
     }
 
     // 클리어 조건 확인
-    public void CheckStage()
+    public bool CheckStageClear()
     {
+        // 하나라도 false로 설정되면 클리어 못함
+        bool clear = true;
 
+        // 현재 스테이지 내부의 정보를 갱신
+        StageInfoUpdate();
+
+        if (m_stageClearConditions.blockTypes != null)
+        {
+            for (int i = 0; i < m_stageClearConditions.blockTypes.Count; i++)
+            {
+                BlockType blockType = m_stageClearConditions.blockTypes[i].type;
+                int blockCount = m_stageClearConditions.blockTypes[i].count;
+            }
+        }
+
+        if (m_stageClearConditions.ObstacleTypes != null)
+        {
+            for(int i = 0; i < m_stageClearConditions.ObstacleTypes.Count; i++)
+            {
+                ObstacleType obstacleType = m_stageClearConditions.ObstacleTypes[i].type;
+                int obstacleCount = m_stageClearConditions.ObstacleTypes[i].count;
+
+                if (m_obstacleCounts[obstacleType] != obstacleCount)
+                {
+                    clear = false;
+                }
+            }
+        }
+
+        return clear;
+    }
+
+    // 스테이지 정보 갱신
+    void StageInfoUpdate()
+    {
+        // 장애물 개수 초기화
+        foreach (ObstacleType type in Enum.GetValues(typeof(ObstacleType)))
+        {
+            m_obstacleCounts[type] = 0;
+        }
+
+        for (int i = 0; i <= m_maxMatrix.y; i++)
+        {
+            for (int j = 0; j <= m_maxMatrix.x; j++)
+            {
+                Vector2Int matrix = new Vector2Int(j, i);
+                GameObject tile = GetTile(matrix);
+
+                // 장애물 개수
+                ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
+                m_obstacleCounts[frontObstacleType]++;
+                ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
+                m_obstacleCounts[backObstacleType]++;
+            }
+        }
     }
 }

@@ -39,7 +39,7 @@ public class Prison : Obstacle
         OnLevelSyncExecuted?.Invoke(m_level);
     }
 
-    protected override void ChangeSprite()
+    void ChangeSprite()
     {
         if (m_level == 0)
         {

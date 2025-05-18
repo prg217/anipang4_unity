@@ -2,7 +2,8 @@ using System;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public abstract class Obstacle : MonoBehaviour
+
+public class Obstacle : MonoBehaviour
 {
     #region º¯¼ö
 
@@ -93,8 +94,6 @@ public abstract class Obstacle : MonoBehaviour
         m_level = _level;
     }
     #endregion
-
-    protected abstract void ChangeSprite();
 
     private void Awake()
     {

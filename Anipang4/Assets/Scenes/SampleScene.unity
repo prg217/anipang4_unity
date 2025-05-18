@@ -6629,7 +6629,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 2.815
+  orthographic size: 2.82
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -9399,9 +9399,13 @@ PrefabInstance:
       propertyPath: m_WasSpriteAssigned
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8495019305549643783, guid: 5cc9f60b52098a844892d9097db0982f, type: 3}
+      propertyPath: m_ObstacleType
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8977638511709911768, guid: 5cc9f60b52098a844892d9097db0982f, type: 3}
       propertyPath: m_blockType
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -25819,6 +25823,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_board: {fileID: 70911196}
   m_maxBlockType: 5
+  m_maxMove: 20
+  m_stageClearConditions:
+    blockTypes: []
+    ObstacleTypes:
+    - type: 1
+      count: 0
+    - type: 3
+      count: 61
 --- !u!224 &2125766134 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7215217717676188513, guid: 5cc9f60b52098a844892d9097db0982f, type: 3}

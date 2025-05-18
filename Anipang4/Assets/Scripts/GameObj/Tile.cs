@@ -57,6 +57,8 @@ public class Tile : MonoBehaviour
 
         return ObstacleType.NONE;
     }
+    public ObstacleType GetMyFrontObstacleType() { return m_myFrontObstacle.GetComponent<Obstacle>().GetObstacleType(); }
+    public ObstacleType GetMyBackObstacleType() { return m_myBackObstacle.GetComponent<Obstacle>().GetObstacleType(); }
     #endregion
 
     #region Set함수
@@ -208,7 +210,10 @@ public class Tile : MonoBehaviour
             // BackObstacle 인 경우
             if (_addObstacleType > ObstacleType.FRONT_END)
             {
-                m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_addObstacleType);
+                if (m_tileType == TileType.MOVABLE)
+                {
+                    m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_addObstacleType);
+                }
             }
         }
 
