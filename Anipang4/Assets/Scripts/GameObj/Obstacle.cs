@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -47,8 +48,14 @@ public class Obstacle : MonoBehaviour
     #region Set함수
     public void SetObstacle(ObstacleType _type)
     {
+        if (_type == m_ObstacleType)
+        {
+            return;
+        }
+
+        DestroyTypeScript();
         m_ObstacleType = _type;
-        SetTypeScript();
+        AddTypeScript();
     }
 
     // 장애물 단계 설정(가상함수)
@@ -62,7 +69,7 @@ public class Obstacle : MonoBehaviour
         if (m_level < 0)
         {
             m_level = 0;
-            SetTypeScript();
+            AddTypeScript();
         }
     }
     public virtual void AddLevel(int _addLevel)
@@ -75,21 +82,21 @@ public class Obstacle : MonoBehaviour
         if (m_level < 0)
         {
             m_level = 0;
-            SetTypeScript();
+            AddTypeScript();
         }
     }
     protected void SetTileType(TileType _type)
     {
-        OnTileTypeExecuted?.Invoke(_type);
+        OnTileType?.Invoke(_type);
     }
     #endregion
 
 
     #region 이벤트
-    public event Action<TileType> OnTileTypeExecuted;
+    public event Action<TileType> OnTileType;
 
     // 레벨 동기화
-    void HandleLevelSyncExecution(int _level)
+    void HandleLevelSync(int _level)
     {
         m_level = _level;
     }
@@ -98,7 +105,7 @@ public class Obstacle : MonoBehaviour
     private void Awake()
     {
         // 기존에 가진 장애물 타입에 따라 자식 클래스 스크립트 부여
-        SetTypeScript();
+        AddTypeScript();
         // 자식 클래스에 초기 세팅 레벨 정보 전달
         SetLevel(m_level);
     }
@@ -115,23 +122,39 @@ public class Obstacle : MonoBehaviour
 
     }
 
-    void SetTypeScript()
+    void AddTypeScript()
     {
-        if (m_ObstacleType == ObstacleType.NONE)
+        switch (m_ObstacleType)
         {
-            if (m_script != null)
-            {
-                Destroy(m_script);
-                m_script = null;
-            }
-            else
-            {
-                m_script = null;
-            }
-            return;
-        }
+            case ObstacleType.PRISON:
+                {
+                    Prison script = m_script as Prison;
+                    if (script == null)
+                    {
+                        m_script = transform.AddComponent<Prison>();
 
-        // 보유하지 않은 장애물 스크립트는 지워버림
+                        Prison prison = m_script as Prison;
+                        prison.OnLevelSync += HandleLevelSync;
+                        prison.OnDestroyObstacle += SetObstacle;
+                    }
+                }
+                break;
+            case ObstacleType.PAINT:
+                {
+                    Paint script = m_script as Paint;
+                    if (script == null)
+                    {
+                        m_script = transform.AddComponent<Paint>();
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    void DestroyTypeScript()
+    {
         switch (m_ObstacleType)
         {
             case ObstacleType.PRISON:
@@ -141,11 +164,9 @@ public class Obstacle : MonoBehaviour
                     {
                         Destroy(m_script);
 
-                        m_script = transform.AddComponent<Prison>();
-
                         Prison prison = m_script as Prison;
-                        prison.OnLevelSyncExecuted += HandleLevelSyncExecution;
-                        prison.OnDestroyObstacleExecuted += SetObstacle;
+                        prison.OnLevelSync -= HandleLevelSync;
+                        prison.OnDestroyObstacle -= SetObstacle;
                     }
                 }
                 break;
@@ -155,22 +176,15 @@ public class Obstacle : MonoBehaviour
                     if (script == null)
                     {
                         Destroy(m_script);
-
-                        m_script = transform.AddComponent<Paint>();
                     }
                 }
                 break;
             default:
-                {
-                    // 비었을 경우 제거
-                    if (m_script != null)
-                    {
-                        Destroy(m_script);
-                        m_script = null;
-                    }
-                }
                 break;
         }
+
+        Destroy(m_script);
+        m_script = null;
     }
 }
 

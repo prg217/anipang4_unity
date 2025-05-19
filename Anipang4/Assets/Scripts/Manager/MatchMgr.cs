@@ -37,6 +37,9 @@ public class MatchMgr : MonoBehaviour
 
     #region 변수
 
+    [SerializeField]
+    GameObject m_chasingMoon;
+
     Vector2Int m_targetMatrix;
     BlockType m_targetType;
     GameObject m_targetTile;
@@ -693,6 +696,12 @@ public class MatchMgr : MonoBehaviour
     {
         // 주변 8곳 터트림
         SurroundingsExplode(1, 1);
+
+        #region 클리어 조건 중 하나 랜덤으로 가서 파괴
+        // 달 추격 프리팹 소환
+        GameObject chasingMoon = Instantiate(m_chasingMoon, m_targetTile.transform.position, m_targetTile.transform.rotation);
+        chasingMoon.GetComponent<ChasingMoon>().SetBlockType(_specialType);
+        #endregion
     }
 
     void CrossExplode()
@@ -867,9 +876,9 @@ public class MatchMgr : MonoBehaviour
         #endregion
 
         #region 클리어 조건 중 하나 랜덤으로 가서 파괴
-
-        /* 추가 예정 */
-
+        // 달 추격 프리팹 소환
+        GameObject chasingMoon = Instantiate(m_chasingMoon, m_targetTile.transform.position, m_targetTile.transform.rotation);
+        chasingMoon.GetComponent<ChasingMoon>().SetBlockType(BlockType.NONE);
         #endregion
     }
 

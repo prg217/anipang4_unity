@@ -1,6 +1,11 @@
 using Unity.VisualScripting;
 using UnityEngine;
 using System.Collections;
+using static UnityEngine.Video.VideoPlayer;
+using System;
+
+using Random = UnityEngine.Random;
+using UnityEngine.Events;
 
 public class Tile : MonoBehaviour
 {
@@ -77,6 +82,8 @@ public class Tile : MonoBehaviour
     #endregion
 
     #region 이벤트
+    public event Action<BlockType> OnTileExplode;
+
     void HandleSetTileTypeExecution(TileType _type)
     {
         m_tileType = _type;
@@ -204,6 +211,9 @@ public class Tile : MonoBehaviour
 
     public void Explode(ObstacleType _addObstacleType, BlockType _newBlockType = BlockType.NONE)
     {
+        // StageMgr에 터트린 블록 타입 알려줌
+        OnTileExplode?.Invoke(GetMyBlockType());
+
         // 전달 받은 장애물이 있는 경우
         if (_addObstacleType != ObstacleType.NONE)
         {
@@ -222,7 +232,7 @@ public class Tile : MonoBehaviour
         {
             Obstacle fo = m_myFrontObstacle.GetComponent<Obstacle>();
             // Obstacle이 가지고 있는 자식 장애물 쪽으로 이벤트를 연결해줌
-            fo.GetChildObstacle().OnTileTypeExecuted += HandleSetTileTypeExecution;
+            fo.GetChildObstacle().OnTileType += HandleSetTileTypeExecution;
 
             fo.AddLevel(-1);
 

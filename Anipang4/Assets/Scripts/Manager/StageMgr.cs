@@ -173,10 +173,31 @@ public class StageMgr : MonoBehaviour
     }
     #endregion
 
+    #region 이벤트
+    // 타일의 Explode가 실행될 때마다 어떤 타일이 터졌는지 누적
+    void HandleTileExplode(BlockType _type)
+    {
+        m_blockCounts[_type]++;
+    }
+    #endregion
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         m_moveCount = m_maxMoveCount;
+
+        // 블록 종류 등록
+        foreach (BlockType type in Enum.GetValues(typeof(BlockType)))
+        {
+            m_blockCounts.Add((BlockType)type, 0);
+        }
+
+        // 모든 타일의 이벤트 구독
+        foreach (KeyValuePair<Vector2Int, GameObject> tile in m_tiles)
+        {
+            Tile tileScript = tile.Value.GetComponent<Tile>();
+            tileScript.OnTileExplode += HandleTileExplode;
+        }
 
         // 장애물 종류 등록
         foreach (ObstacleType type in Enum.GetValues(typeof(ObstacleType)))
@@ -371,6 +392,15 @@ public class StageMgr : MonoBehaviour
                 ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
                 m_obstacleCounts[backObstacleType]++;
             }
+        }
+    }
+
+    void OnDestroy()
+    {
+        foreach (KeyValuePair<Vector2Int, GameObject> tile in m_tiles)
+        {
+            Tile tileScript = tile.Value.GetComponent<Tile>();
+            tileScript.OnTileExplode -= HandleTileExplode;
         }
     }
 }
