@@ -701,6 +701,7 @@ public class MatchMgr : MonoBehaviour
         // 달 추격 프리팹 소환
         GameObject chasingMoon = Instantiate(m_chasingMoon, m_targetTile.transform.position, m_targetTile.transform.rotation);
         chasingMoon.GetComponent<ChasingMoon>().SetBlockType(_specialType);
+        chasingMoon.GetComponent<ChasingMoon>().SetAddObstacleType(m_addObstacle);
         #endregion
     }
 
@@ -879,6 +880,7 @@ public class MatchMgr : MonoBehaviour
         // 달 추격 프리팹 소환
         GameObject chasingMoon = Instantiate(m_chasingMoon, m_targetTile.transform.position, m_targetTile.transform.rotation);
         chasingMoon.GetComponent<ChasingMoon>().SetBlockType(BlockType.NONE);
+        chasingMoon.GetComponent<ChasingMoon>().SetAddObstacleType(m_addObstacle);
         #endregion
     }
 

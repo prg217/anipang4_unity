@@ -9262,7 +9262,7 @@ PrefabInstance:
     - target: {fileID: 4617679021697797741, guid: 5cc9f60b52098a844892d9097db0982f, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 4f9d9eea436a5a048a2eb80e8e68d5af, type: 2}
+      objectReference: {fileID: 9100000, guid: 2628f8c5ec91c6948888587c478d839c, type: 2}
     - target: {fileID: 5668005098577933526, guid: 5cc9f60b52098a844892d9097db0982f, type: 3}
       propertyPath: m_upTile
       value: 
@@ -9922,6 +9922,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e23ae596aea490f40bd7a97d7ccbee40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_chasingMoon: {fileID: 0}
 --- !u!1001 &740563461
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25826,11 +25827,7 @@ MonoBehaviour:
   m_maxMoveCount: 20
   m_stageClearConditions:
     blockTypes: []
-    ObstacleTypes:
-    - type: 1
-      count: 0
-    - type: 3
-      count: 61
+    obstacleTypes: []
 --- !u!224 &2125766134 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7215217717676188513, guid: 5cc9f60b52098a844892d9097db0982f, type: 3}

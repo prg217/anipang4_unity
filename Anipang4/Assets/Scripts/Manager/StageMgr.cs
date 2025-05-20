@@ -7,6 +7,8 @@ using Unity.Burst.CompilerServices;
 using System;
 
 using Random = UnityEngine.Random;
+using System.Runtime.ConstrainedExecution;
+using System.Reflection;
 
 // 스테이지 클리어 조건
 [Serializable]
@@ -16,8 +18,7 @@ struct StageClearConditions
     [SerializeField]
     public List<NumberOfClearBlockType> blockTypes;
     [SerializeField]
-    public List<NumberOfClearObstacleType> ObstacleTypes;
-
+    public List<NumberOfClearObstacleType> obstacleTypes;
 }
 // 클리어에 필요한 타일 타입과 개수
 [Serializable]
@@ -27,6 +28,7 @@ struct NumberOfClearBlockType
     public BlockType type;
     [SerializeField]
     public int count;
+    public bool clear;
 }
 [Serializable]
 struct NumberOfClearObstacleType
@@ -35,6 +37,7 @@ struct NumberOfClearObstacleType
     public ObstacleType type;
     [SerializeField]
     public int count;
+    public bool clear;
 }
 
 public class StageMgr : MonoBehaviour
@@ -51,52 +54,6 @@ public class StageMgr : MonoBehaviour
         }
     }
     #endregion
-
-
-    void Awake()
-    {
-        #region 싱글톤
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-        #endregion
-
-        #region 타일 정보 등록
-        // 보드의 자식인 라인들 불러오기
-        for (int i = 0; i < m_board.transform.childCount; i++)
-        {
-            Transform line = m_board.transform.GetChild(i);
-
-            // 라인의 자식인 타일들 등록
-            for (int j = 0; j < line.transform.childCount; j++)
-            {
-                Transform tile = line.transform.GetChild(j);
-
-                if (tile.CompareTag("Tile"))
-                {
-                    Vector2Int matrix = tile.GetComponent<Tile>().GetMatrix();
-                    m_tiles.Add(matrix, tile.gameObject);
-
-                    // 최대 행렬 세팅
-                    if (m_maxMatrix.x < matrix.x)
-                    {
-                        m_maxMatrix.x = matrix.x;
-                    }
-                    if (m_maxMatrix.y < matrix.y)
-                    {
-                        m_maxMatrix.y = matrix.y;
-                    }
-                }
-            }
-        }
-        #endregion
-    }
 
     #region 변수
 
@@ -145,6 +102,40 @@ public class StageMgr : MonoBehaviour
     }
     public int GetMaxBlockType() { return m_maxBlockType; }
     public Vector2Int GetMaxMatrix() { return m_maxMatrix; }
+    public Dictionary<ObstacleType, bool> GetClearObstacleTypes()
+    {
+        if (m_stageClearConditions.obstacleTypes != null)
+        {
+            Dictionary<ObstacleType, bool> types = new Dictionary<ObstacleType, bool>();
+
+            for (int i = 0; i < m_stageClearConditions.obstacleTypes.Count; i++)
+            {
+                ObstacleType obstacleType = m_stageClearConditions.obstacleTypes[i].type;
+                bool clear = m_stageClearConditions.obstacleTypes[i].clear;
+                types.Add(obstacleType, clear);
+            }
+
+            return types;
+        }
+        return null;
+    }
+    public Dictionary<BlockType, bool> GetClearBlockTypes()
+    {
+        if (m_stageClearConditions.blockTypes != null)
+        {
+            Dictionary<BlockType, bool> types = new Dictionary<BlockType, bool>();
+
+            for (int i = 0; i < m_stageClearConditions.blockTypes.Count; i++)
+            {
+                BlockType blockType = m_stageClearConditions.blockTypes[i].type;
+                bool clear = m_stageClearConditions.blockTypes[i].clear;
+                types.Add(blockType, clear);
+            }
+
+            return types;
+        }
+        return null;
+    }
     #endregion
 
     #region Set함수
@@ -180,6 +171,51 @@ public class StageMgr : MonoBehaviour
         m_blockCounts[_type]++;
     }
     #endregion
+
+    void Awake()
+    {
+        #region 싱글톤
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        #endregion
+
+        #region 타일 정보 등록
+        // 보드의 자식인 라인들 불러오기
+        for (int i = 0; i < m_board.transform.childCount; i++)
+        {
+            Transform line = m_board.transform.GetChild(i);
+
+            // 라인의 자식인 타일들 등록
+            for (int j = 0; j < line.transform.childCount; j++)
+            {
+                Transform tile = line.transform.GetChild(j);
+
+                if (tile.CompareTag("Tile"))
+                {
+                    Vector2Int matrix = tile.GetComponent<Tile>().GetMatrix();
+                    m_tiles.Add(matrix, tile.gameObject);
+
+                    // 최대 행렬 세팅
+                    if (m_maxMatrix.x < matrix.x)
+                    {
+                        m_maxMatrix.x = matrix.x;
+                    }
+                    if (m_maxMatrix.y < matrix.y)
+                    {
+                        m_maxMatrix.y = matrix.y;
+                    }
+                }
+            }
+        }
+        #endregion
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -350,22 +386,44 @@ public class StageMgr : MonoBehaviour
             {
                 BlockType blockType = m_stageClearConditions.blockTypes[i].type;
                 int blockCount = m_stageClearConditions.blockTypes[i].count;
+
+                if (m_blockCounts[blockType] < blockCount)
+                {
+                    clear = false;
+                }
+                else
+                {
+                    // 개별 클리어 조건 달성했는지 확인
+                    var temp = m_stageClearConditions.blockTypes[i];
+                    temp.clear = true;
+                    m_stageClearConditions.blockTypes[i] = temp;
+                }
             }
         }
 
-        if (m_stageClearConditions.ObstacleTypes != null)
+        if (m_stageClearConditions.obstacleTypes != null)
         {
-            for(int i = 0; i < m_stageClearConditions.ObstacleTypes.Count; i++)
+            for(int i = 0; i < m_stageClearConditions.obstacleTypes.Count; i++)
             {
-                ObstacleType obstacleType = m_stageClearConditions.ObstacleTypes[i].type;
-                int obstacleCount = m_stageClearConditions.ObstacleTypes[i].count;
+                ObstacleType obstacleType = m_stageClearConditions.obstacleTypes[i].type;
+                int obstacleCount = m_stageClearConditions.obstacleTypes[i].count;
 
                 if (m_obstacleCounts[obstacleType] != obstacleCount)
                 {
                     clear = false;
                 }
+                else
+                {
+                    // 개별 클리어 조건 달성했는지 확인
+                    var temp = m_stageClearConditions.obstacleTypes[i];
+                    temp.clear = true;
+                    m_stageClearConditions.obstacleTypes[i] = temp;
+                }
             }
         }
+
+        // 클리어 하면 어떻게 될지
+        /* 추가 예정 */
 
         return clear;
     }
