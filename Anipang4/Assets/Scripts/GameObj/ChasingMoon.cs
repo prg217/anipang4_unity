@@ -29,38 +29,7 @@ public class ChasingMoon : MonoBehaviour
     void Start()
     {
         // 목표하는 타겟 설정
-        // 스테이지매니저에서 클리어 조건 장애물->클리어 조건 블록 순으로 우선순위
-        Dictionary<ObstacleType, bool> obstacleTypes = new Dictionary<ObstacleType, bool>(StageMgr.Instance.GetClearObstacleTypes());
-        if (obstacleTypes != null)
-        {
-            for (int i = 0; i < (int)ObstacleType.BACK_END; i++)
-            {
-                // 유효한 키인지 확인
-                if (obstacleTypes.ContainsKey((ObstacleType)i))
-                {
-                    // 이미 클리어 조건을 달성했는지 확인
-                    if (obstacleTypes[(ObstacleType)i] == false)
-                    {
-                        // 함수 따로 만들까?
-                        // 만약 장애물이 전염되는거라면 패스
-
-                    }
-                }
-            }
-        }
-
-        // 만약 m_addObstacleType가 NONE이 아니라면 타겟은 똑같은 장애물 타입이 없는 곳으로
-        Dictionary<BlockType, bool> blockTypes = new Dictionary<BlockType, bool>(StageMgr.Instance.GetClearBlockTypes());
-        if (blockTypes != null)
-        {
-            // 클리어 조건 블록 타입 중 랜덤 하나
-            List<BlockType> keys = new List<BlockType>(blockTypes.Keys);
-            Random.Range(0, keys.Count);
-
-            
-        }
-
-        // 위에 다 없을 경우 랜덤으로 타겟 설정
+        TargetSetting();
     }
 
     // Update is called once per frame
@@ -93,5 +62,45 @@ public class ChasingMoon : MonoBehaviour
         {
             GetComponent<SpriteRenderer>().sprite = newSprite;
         }
+    }
+
+    void TargetSetting()
+    {
+        // 스테이지매니저에서 클리어 조건 장애물->클리어 조건 블록 순으로 우선순위
+        #region 장애물 타입
+        Dictionary<ObstacleType, bool> obstacleTypes = new Dictionary<ObstacleType, bool>(StageMgr.Instance.GetClearObstacleTypes());
+        if (obstacleTypes != null)
+        {
+            for (int i = 0; i < (int)ObstacleType.BACK_END; i++)
+            {
+                // 유효한 키인지 확인
+                if (obstacleTypes.ContainsKey((ObstacleType)i))
+                {
+                    // 이미 클리어 조건을 달성했는지 확인
+                    if (obstacleTypes[(ObstacleType)i] == false)
+                    {
+                        // 함수 따로 만들까?
+                        // 만약 장애물이 전염되는거라면 패스
+
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region 블록 타입
+        // 만약 m_addObstacleType가 NONE이 아니라면 타겟은 똑같은 장애물 타입이 없는 곳으로
+        Dictionary<BlockType, bool> blockTypes = new Dictionary<BlockType, bool>(StageMgr.Instance.GetClearBlockTypes());
+        if (blockTypes != null)
+        {
+            // 클리어 조건 블록 타입 중 랜덤 하나
+            List<BlockType> keys = new List<BlockType>(blockTypes.Keys);
+            Random.Range(0, keys.Count);
+
+
+        }
+        #endregion
+
+        // 위에 다 없을 경우 랜덤으로 타겟 설정
     }
 }

@@ -1,3 +1,7 @@
+using System;
+using System.Reflection;
+
+#region enum
 public enum BlockType
 {
     NONE = -1,
@@ -27,6 +31,7 @@ public enum TileType
     MOVABLE = 1, // 움직일 수 있는 상태
 }
 
+
 public enum ObstacleType
 {
     NONE,
@@ -37,7 +42,38 @@ public enum ObstacleType
     FRONT_END,
 
     // 뒤 장애물
+    [ObstacleInfo(true)]
     PAINT, // 페인트
 
     BACK_END,
 }
+#endregion
+
+#region 추가 정보 확장 함수
+// 장애물 타입 추가 정보를 위한 확장 메서드
+[AttributeUsage(AttributeTargets.Field)]
+public class ObstacleInfoAttribute : Attribute
+{
+    public bool contagious { get; private set; }
+
+    public ObstacleInfoAttribute(bool _contagious = false)
+    {
+        contagious = _contagious;
+    }
+}
+
+public static class EnumExtensions
+{
+    public static ObstacleInfoAttribute GetInfo(this Enum value)
+    {
+        var fieldInfo = value.GetType().GetField(value.ToString());
+        return fieldInfo.GetCustomAttribute<ObstacleInfoAttribute>();
+    }
+
+    public static bool GetContagious(this Enum value)
+    {
+        return value.GetInfo()?.contagious ?? false;
+    }
+
+}
+#endregion

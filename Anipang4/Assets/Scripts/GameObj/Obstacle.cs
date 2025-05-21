@@ -33,6 +33,8 @@ public class Obstacle : MonoBehaviour
     // 전파되는 장애물
     public bool IsPropagationObstacle()
     {
+
+
         switch (m_ObstacleType)
         {
             case ObstacleType.PAINT:
