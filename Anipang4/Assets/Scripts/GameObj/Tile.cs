@@ -18,6 +18,7 @@ public class Tile : MonoBehaviour
     GameObject m_upTile;
 
     #region 타일이 보유 한 자식 오브젝트
+    [Header("타일이 보유 한 자식 오브젝트")]
     [SerializeField]
     GameObject m_myBlock;
     GameObject m_myFrontObstacle;
@@ -25,13 +26,18 @@ public class Tile : MonoBehaviour
     #endregion
 
     #region 자신의 위치(행렬)
+    [Header("자신의 위치(행렬)")]
     [SerializeField]
     Vector2Int m_matrix;
     #endregion
 
     // 생성 타일 여부
+    [Header("생성 타일 여부")]
     [SerializeField]
     bool m_createTile = false;
+
+    // 타겟이 되었는지
+    bool m_isTargeted = false;
 
     #endregion 변수 끝
 
@@ -50,11 +56,11 @@ public class Tile : MonoBehaviour
     // 전파되는 장애물
     public ObstacleType GetPropagationObstacle()
     {
-        if (m_myFrontObstacle.GetComponent<Obstacle>().IsPropagationObstacle())
+        if (m_myFrontObstacle.GetComponent<Obstacle>().IsContagiousObstacle())
         {
             return m_myFrontObstacle.GetComponent<Obstacle>().GetObstacleType();
         }
-        if (m_myBackObstacle.GetComponent<Obstacle>().IsPropagationObstacle())
+        if (m_myBackObstacle.GetComponent<Obstacle>().IsContagiousObstacle())
         {
             return m_myBackObstacle.GetComponent<Obstacle>().GetObstacleType();
         }
@@ -63,6 +69,7 @@ public class Tile : MonoBehaviour
     }
     public ObstacleType GetMyFrontObstacleType() { return m_myFrontObstacle.GetComponent<Obstacle>().GetObstacleType(); }
     public ObstacleType GetMyBackObstacleType() { return m_myBackObstacle.GetComponent<Obstacle>().GetObstacleType(); }
+    public bool GetIsTargeted() { return m_isTargeted; }
     #endregion
 
     #region Set함수
@@ -77,6 +84,10 @@ public class Tile : MonoBehaviour
     public void SetMyBlockSetOutline(in bool _setting)
     {
         m_myBlock.GetComponent<Block>().SetOutline(_setting);
+    }
+    public void SetIsTargeted(in bool _setting)
+    {
+        m_isTargeted = _setting;
     }
     #endregion
 
@@ -208,20 +219,20 @@ public class Tile : MonoBehaviour
         }
     }
 
-    public void Explode(ObstacleType _addObstacleType, BlockType _newBlockType = BlockType.NONE)
+    public void Explode(ObstacleType _contagiousObstacleType, BlockType _newBlockType = BlockType.NONE)
     {
         // StageMgr에 터트린 블록 타입 알려줌
         OnTileExplode?.Invoke(GetMyBlockType());
 
         // 전달 받은 장애물이 있는 경우
-        if (_addObstacleType != ObstacleType.NONE)
+        if (_contagiousObstacleType != ObstacleType.NONE)
         {
             // BackObstacle 인 경우
-            if (_addObstacleType > ObstacleType.FRONT_END)
+            if (_contagiousObstacleType > ObstacleType.FRONT_END)
             {
                 if (m_tileType == TileType.MOVABLE)
                 {
-                    m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_addObstacleType);
+                    m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_contagiousObstacleType);
                 }
             }
         }

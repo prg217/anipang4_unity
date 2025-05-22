@@ -50,7 +50,7 @@ public class MatchMgr : MonoBehaviour
     List<GameObject> m_saveMatchTiles = new List<GameObject>();
 
     BlockType m_newBlock = BlockType.NONE; // 특수 블록의 조건에 맞을 경우 생성될 블럭
-    ObstacleType m_addObstacle = ObstacleType.NONE; // 타일에 추가 될 장애물
+    ObstacleType m_contagiousObstacle = ObstacleType.NONE; // 타일에 추가 될 장애물
 
     #endregion 변수 끝
 
@@ -115,7 +115,7 @@ public class MatchMgr : MonoBehaviour
             // 특수 블록 터트림
             if (_explode)
             {
-                m_targetTile.GetComponent<Tile>().Explode(m_addObstacle);
+                m_targetTile.GetComponent<Tile>().Explode(m_contagiousObstacle);
             }
 
             return true;
@@ -439,11 +439,11 @@ public class MatchMgr : MonoBehaviour
     void Explode()
     {
         // 매치되는 타일 중 전파되는 장애물이 있는지 확인
-        m_addObstacle = ObstacleType.NONE;
+        m_contagiousObstacle = ObstacleType.NONE;
         ObstacleType obstacleType = m_targetTile.GetComponent<Tile>().GetPropagationObstacle();
         if (obstacleType != ObstacleType.NONE)
         {
-            m_addObstacle = obstacleType;
+            m_contagiousObstacle = obstacleType;
         }
 
         foreach (GameObject tile in m_matchTiles)
@@ -452,25 +452,25 @@ public class MatchMgr : MonoBehaviour
             // 있다면 전파되는 장애물로 장애물을 추가하게 함
             if (obstacleType != ObstacleType.NONE)
             {
-                m_addObstacle = obstacleType;
+                m_contagiousObstacle = obstacleType;
             }
         }
 
         // 특수 블록 조건에 해당 될 경우
         if (m_newBlock >= BlockType.CROSS)
         {
-            m_targetTile.GetComponent<Tile>().Explode(m_addObstacle, m_newBlock);
+            m_targetTile.GetComponent<Tile>().Explode(m_contagiousObstacle, m_newBlock);
         }
         // 아닌 경우 터트림
         else
         {
-            m_targetTile.GetComponent<Tile>().Explode(m_addObstacle);
+            m_targetTile.GetComponent<Tile>().Explode(m_contagiousObstacle);
         }
 
         // m_matchTiles에 등록된 타일들을 터트림
         foreach (GameObject tile in m_matchTiles)
         {
-            tile.GetComponent<Tile>().Explode(m_addObstacle);
+            tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
         }
     }
 
@@ -557,11 +557,11 @@ public class MatchMgr : MonoBehaviour
     public void SpecialExplode()
     {
         // 매치되는 타일 중 전파되는 장애물이 있는지 확인
-        m_addObstacle = ObstacleType.NONE;
+        m_contagiousObstacle = ObstacleType.NONE;
         ObstacleType obstacleType = m_targetTile.GetComponent<Tile>().GetPropagationObstacle();
         if (obstacleType != ObstacleType.NONE)
         {
-            m_addObstacle = obstacleType;
+            m_contagiousObstacle = obstacleType;
         }
 
         switch (m_targetType)
@@ -586,9 +586,9 @@ public class MatchMgr : MonoBehaviour
         }
     }
 
-    public void SpecialCompositionExplode(in GameObject _tile1, in GameObject _tile2, in ObstacleType _addObstacle)
+    public void SpecialCompositionExplode(in GameObject _tile1, in GameObject _tile2, in ObstacleType _contagiousObstacle)
     {
-        m_addObstacle = _addObstacle;
+        m_contagiousObstacle = _contagiousObstacle;
 
         BlockType type1 = _tile1.GetComponent<Tile>().GetMyBlockType();
         BlockType type2 = _tile2.GetComponent<Tile>().GetMyBlockType();
@@ -596,8 +596,8 @@ public class MatchMgr : MonoBehaviour
         m_targetTile = _tile2;
         m_targetMatrix = _tile2.GetComponent<Tile>().GetMatrix();
 
-        _tile1.GetComponent<Tile>().Explode(_addObstacle);
-        _tile2.GetComponent<Tile>().Explode(_addObstacle);
+        _tile1.GetComponent<Tile>().Explode(_contagiousObstacle);
+        _tile2.GetComponent<Tile>().Explode(_contagiousObstacle);
 
         switch (type1)
         {
@@ -699,10 +699,25 @@ public class MatchMgr : MonoBehaviour
 
         #region 클리어 조건 중 하나 랜덤으로 가서 파괴
         // 달 추격 프리팹 소환
+        if (_specialType == BlockType.MOON)
+        {
+            SummonChasingMoon(_specialType);
+            SummonChasingMoon(_specialType);
+            SummonChasingMoon(_specialType);
+        }
+        else
+        {
+            SummonChasingMoon(_specialType);
+        }
+        #endregion
+    }
+
+    void SummonChasingMoon(in BlockType _specialType)
+    {
+        // 같이 소환 되었으면 타겟이 중복되지 않게 해야 함
         GameObject chasingMoon = Instantiate(m_chasingMoon, m_targetTile.transform.position, m_targetTile.transform.rotation);
         chasingMoon.GetComponent<ChasingMoon>().SetBlockType(_specialType);
-        chasingMoon.GetComponent<ChasingMoon>().SetAddObstacleType(m_addObstacle);
-        #endregion
+        chasingMoon.GetComponent<ChasingMoon>().SetContagiousObstacleType(m_contagiousObstacle);
     }
 
     void CrossExplode()
@@ -716,9 +731,9 @@ public class MatchMgr : MonoBehaviour
         SurroundingsExplode(2, 2);
     }
 
-    public void RandomExplode(in BlockType _type, in ObstacleType _addObstacle)
+    public void RandomExplode(in BlockType _type, in ObstacleType _contagiousObstacle)
     {
-        m_addObstacle = _addObstacle;
+        m_contagiousObstacle = _contagiousObstacle;
         // 교차 시킨 블록 타입 정보 알아야 함
         // 그 블록 타입들 서치해서 제거
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
@@ -734,7 +749,7 @@ public class MatchMgr : MonoBehaviour
                     BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
                     if (type == _type)
                     {
-                        tile.GetComponent<Tile>().Explode(m_addObstacle);
+                        tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                     }
                 }
             }
@@ -764,7 +779,7 @@ public class MatchMgr : MonoBehaviour
                         // 딜레이 후 터트리기
                         /* 추가 예정 */
                         
-                        tile.GetComponent<Tile>().Explode(m_addObstacle);
+                        tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                     }
                 }
             }
@@ -784,7 +799,7 @@ public class MatchMgr : MonoBehaviour
                 GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(i, j));
                 if (tile != null)
                 {
-                    tile.GetComponent<Tile>().Explode(m_addObstacle);
+                    tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                 }
             }
         }
@@ -795,7 +810,7 @@ public class MatchMgr : MonoBehaviour
         // 십자칸 파괴 후 클리어 조건 중 하나 랜덤으로 가서 파괴
         #region 십자칸 파괴
         // 본인 파괴
-        m_targetTile.GetComponent<Tile>().Explode(m_addObstacle);
+        m_targetTile.GetComponent<Tile>().Explode(m_contagiousObstacle);
 
         // 상하좌우 파괴
         GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x - 1, m_targetMatrix.y));
@@ -805,7 +820,7 @@ public class MatchMgr : MonoBehaviour
             // 일반 블록인 경우
             if (type < BlockType.CROSS)
             {
-                tile.GetComponent<Tile>().Explode(m_addObstacle);
+                tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
             }
             // 특수 블록인 경우
             else if (type != BlockType.NULL)
@@ -824,7 +839,7 @@ public class MatchMgr : MonoBehaviour
             // 일반 블록인 경우
             if (type < BlockType.CROSS)
             {
-                tile.GetComponent<Tile>().Explode(m_addObstacle);
+                tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
             }
             // 특수 블록인 경우
             else if (type != BlockType.NULL)
@@ -843,7 +858,7 @@ public class MatchMgr : MonoBehaviour
             // 일반 블록인 경우
             if (type < BlockType.CROSS)
             {
-                tile.GetComponent<Tile>().Explode(m_addObstacle);
+                tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
             }
             // 특수 블록인 경우
             else if (type != BlockType.NULL)
@@ -862,7 +877,7 @@ public class MatchMgr : MonoBehaviour
             // 일반 블록인 경우
             if (type < BlockType.CROSS)
             {
-                tile.GetComponent<Tile>().Explode(m_addObstacle);
+                tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
             }
             // 특수 블록인 경우
             else if (type != BlockType.NULL)
@@ -880,7 +895,7 @@ public class MatchMgr : MonoBehaviour
         // 달 추격 프리팹 소환
         GameObject chasingMoon = Instantiate(m_chasingMoon, m_targetTile.transform.position, m_targetTile.transform.rotation);
         chasingMoon.GetComponent<ChasingMoon>().SetBlockType(BlockType.NONE);
-        chasingMoon.GetComponent<ChasingMoon>().SetAddObstacleType(m_addObstacle);
+        chasingMoon.GetComponent<ChasingMoon>().SetContagiousObstacleType(m_contagiousObstacle);
         #endregion
     }
 
@@ -898,7 +913,7 @@ public class MatchMgr : MonoBehaviour
                     // 일반 블록인 경우
                     if (type < BlockType.CROSS)
                     {
-                        tile.GetComponent<Tile>().Explode(m_addObstacle);
+                        tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                     }
                     // 특수 블록인 경우
                     else if (type != BlockType.NULL)
@@ -906,7 +921,7 @@ public class MatchMgr : MonoBehaviour
                         // 특수 블록의 위치 기준으로 매치 실행
                         if (m_targetTile == tile)
                         {
-                            tile.GetComponent<Tile>().Explode(m_addObstacle);
+                            tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                         }
                         else
                         {
@@ -944,7 +959,7 @@ public class MatchMgr : MonoBehaviour
                     // 일반 블록인 경우
                     if (type < BlockType.CROSS)
                     {
-                        tile.GetComponent<Tile>().Explode(m_addObstacle);
+                        tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                     }
                     // 특수 블록인 경우
                     else if (type != BlockType.NULL)
@@ -952,7 +967,7 @@ public class MatchMgr : MonoBehaviour
                         // 특수 블록의 위치 기준으로 매치 실행
                         if (m_targetTile == tile)
                         {
-                            tile.GetComponent<Tile>().Explode(m_addObstacle);
+                            tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                         }
                         else
                         {
@@ -981,7 +996,7 @@ public class MatchMgr : MonoBehaviour
                     // 일반 블록인 경우
                     if (type < BlockType.CROSS)
                     {
-                        tile.GetComponent<Tile>().Explode(m_addObstacle);
+                        tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                     }
                     // 특수 블록인 경우
                     else if (type != BlockType.NULL)
@@ -989,7 +1004,7 @@ public class MatchMgr : MonoBehaviour
                         // 특수 블록의 위치 기준으로 매치 실행
                         if (m_targetTile == tile)
                         {
-                            tile.GetComponent<Tile>().Explode(m_addObstacle);
+                            tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                         }
                         else
                         {

@@ -136,6 +136,19 @@ public class StageMgr : MonoBehaviour
         }
         return null;
     }
+    public GameObject GetRandomTile()
+    {
+        while (true)
+        {
+            Vector2Int randomMatrix = new Vector2Int(Random.Range(0, m_maxMatrix.x), Random.Range(0, m_maxMatrix.y));
+            GameObject tile = GetTile(randomMatrix);
+            // 유효 타일일 경우
+            if (tile.GetComponent<Tile>().GetMyBlockType() != BlockType.NULL)
+            {
+                return tile;
+            }
+        }
+    }
     #endregion
 
     #region Set함수
@@ -451,6 +464,108 @@ public class StageMgr : MonoBehaviour
                 m_obstacleCounts[backObstacleType]++;
             }
         }
+    }
+
+    // 조건을 입력하고 해당하는 타일들을 반환
+    public List<GameObject> SearchTiles(BlockType _blockType = BlockType.NONE, ObstacleType _obstacleType = ObstacleType.NONE)
+    {
+        List<GameObject> tiles = new List<GameObject>();
+
+        for (int i = 0; i <= m_maxMatrix.y; i++)
+        {
+            for (int j = 0; j <= m_maxMatrix.x; j++)
+            {
+                Vector2Int matrix = new Vector2Int(j, i);
+                GameObject tile = GetTile(matrix);
+
+                // 블록 타입이 조건에 맞는지
+                if (_blockType != BlockType.NONE)
+                {
+                    BlockType blockType = tile.GetComponent<Tile>().GetMyBlockType();
+
+                    if (blockType != _blockType)
+                    {
+                        continue;
+                    }
+                }
+
+                // 장애물 타입이 조건에 맞는지
+                if (_obstacleType != ObstacleType.NONE)
+                {
+                    ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
+                    ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
+
+                    if (backObstacleType != _obstacleType && frontObstacleType != _obstacleType)
+                    {
+                        continue;
+                    }
+                }
+
+                // 다 조건에 맞는다면 저장
+                tiles.Add(tile);
+            }
+        }
+
+        return tiles;
+    }
+    public List<GameObject> SearchTiles(BlockType _blockType = BlockType.NONE)
+    {
+        List<GameObject> tiles = new List<GameObject>();
+
+        for (int i = 0; i <= m_maxMatrix.y; i++)
+        {
+            for (int j = 0; j <= m_maxMatrix.x; j++)
+            {
+                Vector2Int matrix = new Vector2Int(j, i);
+                GameObject tile = GetTile(matrix);
+
+                // 블록 타입이 조건에 맞는지
+                if (_blockType != BlockType.NONE)
+                {
+                    BlockType blockType = tile.GetComponent<Tile>().GetMyBlockType();
+
+                    if (blockType != _blockType)
+                    {
+                        continue;
+                    }
+                }
+
+                // 다 조건에 맞는다면 저장
+                tiles.Add(tile);
+            }
+        }
+
+        return tiles;
+    }
+    public List<GameObject> SearchTiles(ObstacleType _obstacleType)
+    {
+        List<GameObject> tiles = new List<GameObject>();
+
+        for (int i = 0; i <= m_maxMatrix.y; i++)
+        {
+            for (int j = 0; j <= m_maxMatrix.x; j++)
+            {
+                Vector2Int matrix = new Vector2Int(j, i);
+                GameObject tile = GetTile(matrix);
+
+                // 장애물 타입이 조건에 맞는지
+                if (_obstacleType != ObstacleType.NONE)
+                {
+                    ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
+                    ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
+
+                    if (backObstacleType != _obstacleType && frontObstacleType != _obstacleType)
+                    {
+                        continue;
+                    }
+                }
+
+                // 다 조건에 맞는다면 저장
+                tiles.Add(tile);
+            }
+        }
+
+        return tiles;
     }
 
     void OnDestroy()

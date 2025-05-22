@@ -31,18 +31,9 @@ public class Obstacle : MonoBehaviour
     public int GetLevel() { return m_level; }
     public Obstacle GetChildObstacle() { return m_script; }
     // 전파되는 장애물
-    public bool IsPropagationObstacle()
+    public bool IsContagiousObstacle()
     {
-
-
-        switch (m_ObstacleType)
-        {
-            case ObstacleType.PAINT:
-                return true;
-            default:
-                break;
-        }
-        return false;
+        return m_ObstacleType.GetContagious();
     }
     public ObstacleType GetObstacleType() { return m_ObstacleType; }
     #endregion
