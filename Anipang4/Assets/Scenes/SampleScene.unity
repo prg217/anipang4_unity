@@ -9405,7 +9405,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8977638511709911768, guid: 5cc9f60b52098a844892d9097db0982f, type: 3}
       propertyPath: m_blockType
-      value: 7
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9922,7 +9922,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e23ae596aea490f40bd7a97d7ccbee40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_chasingMoon: {fileID: 0}
+  m_chasingMoon: {fileID: 37516900394663481, guid: 23cbd8409c3531b40993d646ddb7a429, type: 3}
 --- !u!1001 &740563461
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25659,7 +25659,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8977638511709911768, guid: 5cc9f60b52098a844892d9097db0982f, type: 3}
       propertyPath: m_blockType
-      value: 6
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -25827,7 +25827,13 @@ MonoBehaviour:
   m_maxMoveCount: 20
   m_stageClearConditions:
     blockTypes: []
-    obstacleTypes: []
+    obstacleTypes:
+    - type: 1
+      count: 0
+      clear: 0
+    - type: 3
+      count: 61
+      clear: 0
 --- !u!224 &2125766134 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7215217717676188513, guid: 5cc9f60b52098a844892d9097db0982f, type: 3}

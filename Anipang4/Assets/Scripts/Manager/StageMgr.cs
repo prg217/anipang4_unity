@@ -572,8 +572,11 @@ public class StageMgr : MonoBehaviour
     {
         foreach (KeyValuePair<Vector2Int, GameObject> tile in m_tiles)
         {
-            Tile tileScript = tile.Value.GetComponent<Tile>();
-            tileScript.OnTileExplode -= HandleTileExplode;
+            if (tile.Value != null)
+            {
+                Tile tileScript = tile.Value.GetComponent<Tile>();
+                tileScript.OnTileExplode -= HandleTileExplode;
+            }
         }
     }
 }

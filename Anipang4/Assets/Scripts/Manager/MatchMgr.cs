@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.Image;
 
 public class MatchMgr : MonoBehaviour
@@ -714,8 +715,8 @@ public class MatchMgr : MonoBehaviour
 
     void SummonChasingMoon(in BlockType _specialType)
     {
-        // 같이 소환 되었으면 타겟이 중복되지 않게 해야 함
         GameObject chasingMoon = Instantiate(m_chasingMoon, m_targetTile.transform.position, m_targetTile.transform.rotation);
+        chasingMoon.GetComponent<ChasingMoon>().SetMyTile(m_targetTile);
         chasingMoon.GetComponent<ChasingMoon>().SetBlockType(_specialType);
         chasingMoon.GetComponent<ChasingMoon>().SetContagiousObstacleType(m_contagiousObstacle);
     }
@@ -893,9 +894,7 @@ public class MatchMgr : MonoBehaviour
 
         #region 클리어 조건 중 하나 랜덤으로 가서 파괴
         // 달 추격 프리팹 소환
-        GameObject chasingMoon = Instantiate(m_chasingMoon, m_targetTile.transform.position, m_targetTile.transform.rotation);
-        chasingMoon.GetComponent<ChasingMoon>().SetBlockType(BlockType.NONE);
-        chasingMoon.GetComponent<ChasingMoon>().SetContagiousObstacleType(m_contagiousObstacle);
+        SummonChasingMoon(BlockType.NONE);
         #endregion
     }
 
@@ -1014,5 +1013,12 @@ public class MatchMgr : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void SoloExplode(in GameObject _tile, in ObstacleType _contagiousObstacleType = ObstacleType.NONE)
+    {
+        _tile.GetComponent<Tile>().Explode(_contagiousObstacleType);
+        // 빈 공간 체크
+        StartCoroutine(MoveMgr.Instance.CheckEmpty());
     }
 }

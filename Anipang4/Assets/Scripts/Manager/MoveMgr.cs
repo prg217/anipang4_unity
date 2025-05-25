@@ -368,7 +368,6 @@ public class MoveMgr : MonoBehaviour
                         }
                         #endregion
 
-                        Debug.Log("빈 공간 다시");
                         // 빈 공간이 있을 때 다시 처음부터
                         StartCoroutine(CheckEmpty());
                         yield break;
@@ -379,6 +378,8 @@ public class MoveMgr : MonoBehaviour
 
         // 앞으로 매치가 가능한지 체크
         StageMgr.Instance.CheckPossibleMatch();
+        // 클리어 조건을 확인
+        StageMgr.Instance.CheckStageClear();
         // 다시 힌트를 줄 수 있게 설정
         StageMgr.Instance.SetHint(true);
         m_emptyMoving = false;
