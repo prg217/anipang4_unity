@@ -16,24 +16,24 @@ public class ChasingMoon : MonoBehaviour
     BlockType m_blockType;
     ObstacleType m_contagiousObstacleType;
 
-    [Header("부메랑 설정")]
-    [SerializeField] private float backwardDistance = 3f; // 뒤로 가는 거리
-    [SerializeField] private float arcHeight = 3f; // 포물선 높이
-    [SerializeField] private float duration = 0.3f; // 이동 시간
-    [SerializeField] private AnimationCurve boomerangCurve; // 부메랑 커브
+    #region 포물선 이동 변수
+    float m_backwardDistance = 0.5f; // 뒤로 가는 거리
+    float m_arcHeight = 2f; // 포물선 높이
+    float m_duration = 0.7f; // 이동 시간
+    AnimationCurve m_boomerangCurve; // 부메랑 커브
 
-    [Header("회전 설정")]
-    [SerializeField] private bool rotateTowardsDirection = true;
+    float m_currentTime = 0f;
 
-    [Header("이동 상태")]
-    [SerializeField] private float currentTime = 0f;
+    Vector2 m_startPosition;
+    Vector2 m_targetPosition;
+    Vector2 m_backwardPosition;
+    Vector2 m_lastPosition;
 
-    private Vector2 startPosition;
-    private Vector2 targetPosition;
-    private Vector2 backwardPosition;
-    private Vector2 lastPosition;
+    Vector2 m_backwardDir;
+    #endregion
 
-    Vector2 backwardDir;
+    // 회전 변수
+    float m_rotSpeed = 800f; // 초당 n도 회전
 
     #endregion
 
@@ -71,16 +71,19 @@ public class ChasingMoon : MonoBehaviour
             }
         }
 
-        targetPosition = m_target.transform.position;
-        startPosition = transform.position;
-        lastPosition = startPosition;
-        backwardPosition = CalculateBackwardPosition();
+        m_targetPosition = m_target.transform.position;
+        m_startPosition = transform.position;
+        m_lastPosition = m_startPosition;
+        m_backwardPosition = CalculateBackwardPosition();
         SetupBoomerangCurve();
     }
 
     void Update()
     {
+        // 타겟을 향해 포물선으로 이동
         Move();
+        // 회전
+        transform.Rotate(0, 0, m_rotSpeed * Time.deltaTime);
     }
 
     void ChangeSprite()
@@ -154,30 +157,20 @@ public class ChasingMoon : MonoBehaviour
 
     void Move()
     {
-        currentTime += Time.deltaTime;
-        float progress = currentTime / duration;
+        m_currentTime += Time.deltaTime;
+        float progress = m_currentTime / m_duration;
 
         if (progress >= 1f)
         {
             progress = 1f;
-            transform.position = targetPosition;
+            transform.position = m_targetPosition;
             MoveComplete();
             return;
         }
 
         Vector2 currentPosition = CalculateBoomerangPosition(progress);
 
-        if (rotateTowardsDirection)
-        {
-            Vector2 direction = (currentPosition - lastPosition).normalized;
-            if (direction != Vector2.zero)
-            {
-                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                transform.rotation = Quaternion.Euler(0, 0, angle);
-            }
-        }
-
-        lastPosition = transform.position;
+        m_lastPosition = transform.position;
         transform.position = currentPosition;
     }
 
@@ -190,45 +183,44 @@ public class ChasingMoon : MonoBehaviour
 
     void SetupBoomerangCurve()
     {
-        boomerangCurve = new AnimationCurve();
+        m_boomerangCurve = new AnimationCurve();
 
-        // 뒤로 가는 정도를 크게 줄임
-        boomerangCurve.AddKey(0f, 0f);       // 시작점
-        boomerangCurve.AddKey(0.1f, -0.1f);  // 뒤로
-        boomerangCurve.AddKey(0.4f, 0.1f);   // 중간 지점
-        boomerangCurve.AddKey(1f, 1f);       // 타겟 도착
+        m_boomerangCurve.AddKey(0f, 0f);       // 시작점
+        m_boomerangCurve.AddKey(0.1f, -0.1f);  // 뒤로
+        m_boomerangCurve.AddKey(0.4f, 0.1f);   // 중간 지점
+        m_boomerangCurve.AddKey(1f, 1f);       // 타겟 도착
 
-        for (int i = 0; i < boomerangCurve.keys.Length; i++)
+        for (int i = 0; i < m_boomerangCurve.keys.Length; i++)
         {
-            boomerangCurve.SmoothTangents(i, 0f);
+            m_boomerangCurve.SmoothTangents(i, 0f);
         }
     }
 
     Vector2 CalculateBoomerangPosition(float progress)
     {
-        float curveValue = boomerangCurve.Evaluate(progress);
+        float curveValue = m_boomerangCurve.Evaluate(progress);
 
         Vector2 horizontalPosition;
         if (curveValue < 0)
         {
-            horizontalPosition = Vector2.Lerp(startPosition, backwardPosition, -curveValue);
+            horizontalPosition = Vector2.Lerp(m_startPosition, m_backwardPosition, -curveValue);
         }
         else
         {
-            horizontalPosition = Vector2.Lerp(startPosition, targetPosition, curveValue);
+            horizontalPosition = Vector2.Lerp(m_startPosition, m_targetPosition, curveValue);
         }
 
         float heightMultiplier = Mathf.Sin(progress * Mathf.PI);
-        float verticalOffset = arcHeight * heightMultiplier;
+        float verticalOffset = m_arcHeight * heightMultiplier;
 
-        return horizontalPosition + (backwardDir + Vector2.right) * verticalOffset;
+        return horizontalPosition + (m_backwardDir + Vector2.right) * verticalOffset;
     }
 
     Vector2 CalculateBackwardPosition()
     {
-        Vector2 direction = (targetPosition - startPosition).normalized;
-        backwardDir = -direction;
+        Vector2 direction = (m_targetPosition - m_startPosition).normalized;
+        m_backwardDir = -direction;
 
-        return startPosition + (backwardDir * backwardDistance);
+        return m_startPosition + (m_backwardDir * m_backwardDistance);
     }
 }
