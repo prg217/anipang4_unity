@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7794510135714156433}
   - component: {fileID: 3532409541250496769}
   - component: {fileID: 974488294109236660}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Block
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -140,7 +140,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7006117884037781645}
   - component: {fileID: 5937635101029234479}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Outline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -209,7 +209,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 4
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

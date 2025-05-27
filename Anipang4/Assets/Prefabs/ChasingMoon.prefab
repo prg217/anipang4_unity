@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4390443284763386997}
   - component: {fileID: 9027418582679263509}
   - component: {fileID: -4923158409659149659}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: ChasingMoon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,18 +46,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b963c98571add2498882d923ebb51da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backwardDistance: 3
-  arcHeight: 5
-  duration: 2
-  boomerangCurve:
-    serializedVersion: 2
-    m_Curve: []
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  rotateTowardsDirection: 1
-  isMoving: 0
-  currentTime: 0
 --- !u!212 &9027418582679263509
 SpriteRenderer:
   m_ObjectHideFlags: 0
