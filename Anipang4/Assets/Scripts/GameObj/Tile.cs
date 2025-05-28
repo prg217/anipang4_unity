@@ -14,7 +14,7 @@ public class Tile : MonoBehaviour
     TileType m_tileType = TileType.MOVABLE;
 
     [SerializeField]
-    // 블록이 비었을 때 어떤 타일에서 받아올지?
+    // 블록이 비었을 때 어떤 타일에서 받아올지
     GameObject m_upTile;
 
     #region 타일이 보유 한 자식 오브젝트

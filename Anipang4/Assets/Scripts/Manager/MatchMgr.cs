@@ -38,8 +38,9 @@ public class MatchMgr : MonoBehaviour
 
     #region 변수
 
+    [Header("프리팹 등록")]
     [SerializeField]
-    GameObject m_chasingMoon;
+    GameObject m_chasingMoonPrefab; // 추격하는 달 프리팹 등록
 
     Vector2Int m_targetMatrix;
     BlockType m_targetType;
@@ -715,7 +716,7 @@ public class MatchMgr : MonoBehaviour
 
     void SummonChasingMoon(in BlockType _specialType)
     {
-        GameObject chasingMoon = Instantiate(m_chasingMoon, m_targetTile.transform.position, m_targetTile.transform.rotation);
+        GameObject chasingMoon = Instantiate(m_chasingMoonPrefab, m_targetTile.transform.position, m_targetTile.transform.rotation);
         chasingMoon.GetComponent<ChasingMoon>().SetMyTile(m_targetTile);
         chasingMoon.GetComponent<ChasingMoon>().SetBlockType(_specialType);
         chasingMoon.GetComponent<ChasingMoon>().SetContagiousObstacleType(m_contagiousObstacle);

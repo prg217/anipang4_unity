@@ -10,36 +10,6 @@ using Random = UnityEngine.Random;
 using System.Runtime.ConstrainedExecution;
 using System.Reflection;
 
-// 스테이지 클리어 조건
-[Serializable]
-struct StageClearConditions
-{
-    // 타입과 개수 설정, List로 여러 개 설정 가능
-    [SerializeField]
-    public List<NumberOfClearBlockType> blockTypes;
-    [SerializeField]
-    public List<NumberOfClearObstacleType> obstacleTypes;
-}
-// 클리어에 필요한 타일 타입과 개수
-[Serializable]
-struct NumberOfClearBlockType
-{
-    [SerializeField]
-    public BlockType type;
-    [SerializeField]
-    public int count;
-    public bool clear;
-}
-[Serializable]
-struct NumberOfClearObstacleType
-{
-    [SerializeField]
-    public ObstacleType type;
-    [SerializeField]
-    public int count;
-    public bool clear;
-}
-
 public class StageMgr : MonoBehaviour
 {
     #region 싱글톤
@@ -57,6 +27,7 @@ public class StageMgr : MonoBehaviour
 
     #region 변수
 
+    [Header("보드 등록")]
     [SerializeField]
     GameObject m_board;
     // 타일 최대 행렬
@@ -65,6 +36,7 @@ public class StageMgr : MonoBehaviour
     Dictionary<Vector2Int, GameObject> m_tiles = new Dictionary<Vector2Int, GameObject>();
 
     #region Stage 설정 변수
+    [Header("Stage 설정 변수")]
     [SerializeField]
     int m_maxBlockType = 5;
     [SerializeField]
@@ -75,9 +47,10 @@ public class StageMgr : MonoBehaviour
     #endregion
 
     #region Stage 정보
-    int m_moveCount = 20;
-    Dictionary<BlockType, int> m_blockCounts = new Dictionary<BlockType, int>();
-    Dictionary<ObstacleType, int> m_obstacleCounts = new Dictionary<ObstacleType, int>();
+    //int m_moveCount = 20;
+    //Dictionary<BlockType, int> m_blockCounts = new Dictionary<BlockType, int>();
+    //Dictionary<ObstacleType, int> m_obstacleCounts = new Dictionary<ObstacleType, int>();
+    StageInfo m_stageInfo;
     #endregion
 
     #region Hint 관련 변수
@@ -181,7 +154,7 @@ public class StageMgr : MonoBehaviour
     // 타일의 Explode가 실행될 때마다 어떤 타일이 터졌는지 누적
     void HandleTileExplode(BlockType _type)
     {
-        m_blockCounts[_type]++;
+        m_stageInfo.blockCounts[_type]++;
     }
     #endregion
 
@@ -228,17 +201,21 @@ public class StageMgr : MonoBehaviour
             }
         }
         #endregion
+
+        // m_stageInfo 변수 초기화
+        m_stageInfo.blockCounts = new Dictionary<BlockType, int>();
+        m_stageInfo.obstacleCounts = new Dictionary<ObstacleType, int>();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        m_moveCount = m_maxMoveCount;
+        m_stageInfo.moveCount = m_maxMoveCount;
 
         // 블록 종류 등록
         foreach (BlockType type in Enum.GetValues(typeof(BlockType)))
         {
-            m_blockCounts.Add((BlockType)type, 0);
+            m_stageInfo.blockCounts.Add((BlockType)type, 0);
         }
 
         // 모든 타일의 이벤트 구독
@@ -251,11 +228,16 @@ public class StageMgr : MonoBehaviour
         // 장애물 종류 등록
         foreach (ObstacleType type in Enum.GetValues(typeof(ObstacleType)))
         {
-            m_obstacleCounts.Add((ObstacleType)type, 0);
+            m_stageInfo.obstacleCounts.Add((ObstacleType)type, 0);
         }
 
         // 시작 시 맵 체크(스테이지 블록 구성을 랜덤으로 했을 경우 대비)
         CheckPossibleMatch();
+
+        // UI에 클리어 조건 넘겨줌
+        UIMgr.Instance.UpdateStageClearConditions(m_stageClearConditions);
+        // 맵 정보 갱신
+        CheckStageClear();
     }
 
     // Update is called once per frame
@@ -400,7 +382,7 @@ public class StageMgr : MonoBehaviour
                 BlockType blockType = m_stageClearConditions.blockTypes[i].type;
                 int blockCount = m_stageClearConditions.blockTypes[i].count;
 
-                if (m_blockCounts[blockType] < blockCount)
+                if (m_stageInfo.blockCounts[blockType] < blockCount)
                 {
                     clear = false;
                 }
@@ -421,7 +403,7 @@ public class StageMgr : MonoBehaviour
                 ObstacleType obstacleType = m_stageClearConditions.obstacleTypes[i].type;
                 int obstacleCount = m_stageClearConditions.obstacleTypes[i].count;
 
-                if (m_obstacleCounts[obstacleType] != obstacleCount)
+                if (m_stageInfo.obstacleCounts[obstacleType] != obstacleCount)
                 {
                     clear = false;
                 }
@@ -435,6 +417,9 @@ public class StageMgr : MonoBehaviour
             }
         }
 
+        // UI정보 갱신
+        UIMgr.Instance.UpdateStageUI(m_stageInfo);
+
         // 클리어 하면 어떻게 될지
         /* 추가 예정 */
 
@@ -447,7 +432,7 @@ public class StageMgr : MonoBehaviour
         // 장애물 개수 초기화
         foreach (ObstacleType type in Enum.GetValues(typeof(ObstacleType)))
         {
-            m_obstacleCounts[type] = 0;
+            m_stageInfo.obstacleCounts[type] = 0;
         }
 
         for (int i = 0; i <= m_maxMatrix.y; i++)
@@ -459,9 +444,9 @@ public class StageMgr : MonoBehaviour
 
                 // 장애물 개수
                 ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
-                m_obstacleCounts[frontObstacleType]++;
+                m_stageInfo.obstacleCounts[frontObstacleType]++;
                 ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
-                m_obstacleCounts[backObstacleType]++;
+                m_stageInfo.obstacleCounts[backObstacleType]++;
             }
         }
     }
