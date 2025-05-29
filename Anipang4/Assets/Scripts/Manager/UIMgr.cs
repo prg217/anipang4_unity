@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class UIMgr : MonoBehaviour
@@ -26,6 +27,8 @@ public class UIMgr : MonoBehaviour
 
     [SerializeField]
     GameObject m_ConditionPrefab;
+
+    List<GameObject> m_ConditionList = new List<GameObject>();
 
     #endregion
 
@@ -96,21 +99,106 @@ public class UIMgr : MonoBehaviour
         m_UIInfo.tensPlace.text = tensPlace.ToString();
     }
 
-    void UpdateClearBlockTypeConditions(BlockType _type, bool _clear)
+    void UpdateClearBlockTypeConditions(in BlockType _type, in bool _clear)
     {
-        // 클리어 상태라면 기존에 등록된게 있는지 없는지 살펴봄
-        if (_clear)
+        // 클리어를 위해 필요한 개수, 현재 개수
+        int clearCount = m_stageClearConditions.GetTypeCount(_type);
+        int count = m_stageInfo.blockCounts[_type];
+
+        foreach (GameObject condition in m_ConditionList)
         {
-            // 기존에 등록된 것이 있다면 삭제
+            MissionType missionType = condition.GetComponent<Condition>().GetMissionType();
+
+            if (missionType.TryGetBlockType(out BlockType blockType))
+            {
+                // 같은 타입이라면
+                if (blockType == _type)
+                {
+                    // 클리어 상태 : 기존에 등록된 것이 있다면 삭제
+                    if (_clear)
+                    {
+                        Destroy(condition);
+
+                        return;
+                    }
+
+                    // 기존에 있었으면 상태 갱신
+                    condition.GetComponent<Condition>().UpdateCondition(_type, count, clearCount);
+                    return;
+                }
+            }
         }
 
         // 기존에 없었으면 추가
+        GameObject conditionObj = Instantiate(m_ConditionPrefab);
+        RectTransform rectTransform = conditionObj.GetComponent<RectTransform>();
+        // 자식으로 넣어줌
+        rectTransform.SetParent(m_UIInfo.clearConditions.transform, false);
+        rectTransform.anchoredPosition = Vector2.zero;
 
-        // 기존에 있었으면 
+        // 상태 갱신
+        conditionObj.GetComponent<Condition>().UpdateCondition(_type, count, clearCount);
+
+        m_ConditionList.Add(conditionObj);
     }
 
-    void UpdateClearObstacleTypeConditions(ObstacleType _type, bool _clear)
+    void UpdateClearObstacleTypeConditions(in ObstacleType _type, in bool _clear)
     {
+        // 클리어를 위해 필요한 개수, 현재 개수
+        int clearCount = m_stageClearConditions.GetTypeCount(_type);
+        int count = m_stageInfo.obstacleCounts[_type];
 
+        foreach (GameObject condition in m_ConditionList)
+        {
+            MissionType missionType = condition.GetComponent<Condition>().GetMissionType();
+
+            if (missionType.TryGetObstacleType(out ObstacleType obstacleType))
+            {
+                // 같은 타입이라면
+                if (obstacleType == _type)
+                {
+                    // 클리어 상태 : 기존에 등록된 것이 있다면 삭제
+                    if (_clear)
+                    {
+                        Debug.Log(_type + "파괴");
+                        Destroy(condition);
+
+                        return;
+                    }
+
+                    // 기존에 있었으면 상태 갱신
+                    condition.GetComponent<Condition>().UpdateCondition(_type, count, clearCount);
+                    Debug.Log(_type + "갱신");
+                    return;
+                }
+            }
+        }
+
+        // 기존에 없었으면 추가
+        GameObject conditionObj = Instantiate(m_ConditionPrefab);
+        RectTransform rectTransform = conditionObj.GetComponent<RectTransform>();
+        // 자식으로 넣어줌
+        rectTransform.SetParent(m_UIInfo.clearConditions.transform, false);
+        rectTransform.anchoredPosition = Vector2.zero;
+
+        // 상태 갱신
+        conditionObj.GetComponent<Condition>().UpdateCondition(_type, count, clearCount);
+        Debug.Log(_type + "추가");
+
+        m_ConditionList.Add(conditionObj);
+    }
+
+    void ScanConditions()
+    {
+        m_ConditionList.Clear();
+
+        foreach (Transform child in m_UIInfo.clearConditions.transform)
+        {
+            // 현재 자식의 이름 확인
+            if (child.name == "Condition")
+            {
+                m_ConditionList.Add(child.gameObject);
+            }
+        }
     }
 }

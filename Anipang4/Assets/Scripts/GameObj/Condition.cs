@@ -1,6 +1,61 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System;
+
+// 두 enum을 하나로 묶는 Union 구조체
+[Serializable]
+public struct MissionType
+{
+    public enum Category
+    {
+        BLOCK,
+        OBSTACLE,
+    }
+
+    Category category;
+    BlockType blockType;
+    ObstacleType obstacleType;
+
+    // 생성자들
+    public MissionType(BlockType type)
+    {
+        category = Category.BLOCK;
+        blockType = type;
+        obstacleType = default;
+    }
+
+    public MissionType(ObstacleType type)
+    {
+        category = Category.OBSTACLE;
+        obstacleType = type;
+        blockType = default;
+    }
+
+    // 타입 체크 메서드들
+    public bool IsBlock() => category == Category.BLOCK;
+    public bool IsObstacle() => category == Category.OBSTACLE;
+
+    // 안전한 값 가져오기
+    public bool TryGetBlockType(out BlockType type)
+    {
+        type = blockType;
+        return category == Category.BLOCK;
+    }
+
+    public bool TryGetObstacleType(out ObstacleType type)
+    {
+        type = obstacleType;
+        return category == Category.OBSTACLE;
+    }
+
+    // 현재 타입 반환
+    public object GetCurrentType()
+    {
+        return category == Category.BLOCK ? (object)blockType : obstacleType;
+    }
+}
+
 
 public class Condition : MonoBehaviour
 {
@@ -11,10 +66,17 @@ public class Condition : MonoBehaviour
     [SerializeField]
     Image m_image;
 
+    [SerializeField]
+    MissionType m_type;
+
     #endregion
+
+    public MissionType GetMissionType() { return m_type; }
 
     public void UpdateCondition(in BlockType _type, in int _count, in int _clearCount)
     {
+        m_type = new MissionType(_type);
+
         // 타입에 따라 이미지 변경
         string spritePath = "Block/block_0";
         spritePath += (int)_type;
@@ -30,6 +92,8 @@ public class Condition : MonoBehaviour
 
     public void UpdateCondition(in ObstacleType _type, in int _count, in int _clearCount)
     {
+        m_type = new MissionType(_type);
+
         // 타입에 따라 이미지 변경
         string spritePath = "UI/";
         switch (_type)
