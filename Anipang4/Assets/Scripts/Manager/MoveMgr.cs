@@ -249,6 +249,12 @@ public class MoveMgr : MonoBehaviour
                 StartCoroutine(CheckEmpty());
             }
 
+            // 직접 움직였을 때만 moveCount차감
+            if (m_isClickMoving)
+            {
+                StageMgr.Instance.MoveComplete();
+            }
+
             m_moving = false;
             m_pClickedTile1 = null;
             m_pClickedTile2 = null;

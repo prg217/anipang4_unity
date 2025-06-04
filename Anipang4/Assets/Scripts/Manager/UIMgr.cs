@@ -23,7 +23,6 @@ public class UIMgr : MonoBehaviour
     UIInfo m_UIInfo;
 
     StageClearConditions m_stageClearConditions;
-    StageInfo m_stageInfo;
 
     [SerializeField]
     GameObject m_ConditionPrefab;
@@ -64,11 +63,8 @@ public class UIMgr : MonoBehaviour
         m_stageClearConditions = _stageClearConditions;
     }
 
-    public void UpdateStageUI(in StageInfo _stageInfo)
+    public void UpdateStageUI()
     {
-        // StageMgr의 데이터를 가져와서 UI 업데이트
-        m_stageInfo = _stageInfo;
-
         // 남은 카운트 수 업데이트
         UpdateMoveCount();
 
@@ -92,8 +88,9 @@ public class UIMgr : MonoBehaviour
 
     void UpdateMoveCount()
     {
-        int onesPlace = m_stageInfo.moveCount % 10;
-        int tensPlace = m_stageInfo.moveCount / 10;
+        int moveCount = StageInfo.MoveCount;
+        int onesPlace = moveCount % 10;
+        int tensPlace = moveCount / 10;
 
         m_UIInfo.onesPlace.text = onesPlace.ToString();
         m_UIInfo.tensPlace.text = tensPlace.ToString();
@@ -103,7 +100,7 @@ public class UIMgr : MonoBehaviour
     {
         // 클리어를 위해 필요한 개수, 현재 개수
         int clearCount = m_stageClearConditions.GetTypeCount(_type);
-        int count = m_stageInfo.blockCounts[_type];
+        int count = StageInfo.GetBlockCount(_type);
 
         foreach (GameObject condition in m_ConditionList)
         {
@@ -146,7 +143,7 @@ public class UIMgr : MonoBehaviour
     {
         // 클리어를 위해 필요한 개수, 현재 개수
         int clearCount = m_stageClearConditions.GetTypeCount(_type);
-        int count = m_stageInfo.obstacleCounts[_type];
+        int count = StageInfo.GetObstacleCount(_type);
 
         foreach (GameObject condition in m_ConditionList)
         {

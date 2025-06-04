@@ -46,13 +46,6 @@ public class StageMgr : MonoBehaviour
     StageClearConditions m_stageClearConditions;
     #endregion
 
-    #region Stage 정보
-    //int m_moveCount = 20;
-    //Dictionary<BlockType, int> m_blockCounts = new Dictionary<BlockType, int>();
-    //Dictionary<ObstacleType, int> m_obstacleCounts = new Dictionary<ObstacleType, int>();
-    StageInfo m_stageInfo;
-    #endregion
-
     #region Hint 관련 변수
     // 매치가 가능한 블록들 저장
     List<GameObject> m_matchOK = new List<GameObject>();
@@ -154,7 +147,7 @@ public class StageMgr : MonoBehaviour
     // 타일의 Explode가 실행될 때마다 어떤 타일이 터졌는지 누적
     void HandleTileExplode(BlockType _type)
     {
-        m_stageInfo.blockCounts[_type]++;
+        StageInfo.AddBlock(_type, 1);
     }
     #endregion
 
@@ -203,19 +196,16 @@ public class StageMgr : MonoBehaviour
         #endregion
 
         // m_stageInfo 변수 초기화
-        m_stageInfo.blockCounts = new Dictionary<BlockType, int>();
-        m_stageInfo.obstacleCounts = new Dictionary<ObstacleType, int>();
+        StageInfo.Initialize(m_maxMoveCount);
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        m_stageInfo.moveCount = m_maxMoveCount;
-
         // 블록 종류 등록
         foreach (BlockType type in Enum.GetValues(typeof(BlockType)))
         {
-            m_stageInfo.blockCounts.Add((BlockType)type, 0);
+            //m_stageInfo.blockCounts.Add((BlockType)type, 0);
         }
 
         // 모든 타일의 이벤트 구독
@@ -228,7 +218,7 @@ public class StageMgr : MonoBehaviour
         // 장애물 종류 등록
         foreach (ObstacleType type in Enum.GetValues(typeof(ObstacleType)))
         {
-            m_stageInfo.obstacleCounts.Add((ObstacleType)type, 0);
+            //m_stageInfo.obstacleCounts.Add((ObstacleType)type, 0);
         }
 
         // 시작 시 맵 체크(스테이지 블록 구성을 랜덤으로 했을 경우 대비)
@@ -382,7 +372,7 @@ public class StageMgr : MonoBehaviour
                 BlockType blockType = m_stageClearConditions.blockTypes[i].type;
                 int blockCount = m_stageClearConditions.blockTypes[i].count;
 
-                if (m_stageInfo.blockCounts[blockType] < blockCount)
+                if (StageInfo.GetBlockCount(blockType) < blockCount)
                 {
                     clear = false;
                 }
@@ -403,7 +393,7 @@ public class StageMgr : MonoBehaviour
                 ObstacleType obstacleType = m_stageClearConditions.obstacleTypes[i].type;
                 int obstacleCount = m_stageClearConditions.obstacleTypes[i].count;
 
-                if (m_stageInfo.obstacleCounts[obstacleType] != obstacleCount)
+                if (StageInfo.GetObstacleCount(obstacleType) != obstacleCount)
                 {
                     clear = false;
                 }
@@ -418,7 +408,7 @@ public class StageMgr : MonoBehaviour
         }
 
         // UI정보 갱신
-        UIMgr.Instance.UpdateStageUI(m_stageInfo);
+        UIMgr.Instance.UpdateStageUI();
 
         // 클리어 하면 어떻게 될지
         /* 추가 예정 */
@@ -432,7 +422,7 @@ public class StageMgr : MonoBehaviour
         // 장애물 개수 초기화
         foreach (ObstacleType type in Enum.GetValues(typeof(ObstacleType)))
         {
-            m_stageInfo.obstacleCounts[type] = 0;
+            StageInfo.ResetObstacle();
         }
 
         for (int i = 0; i <= m_maxMatrix.y; i++)
@@ -444,9 +434,9 @@ public class StageMgr : MonoBehaviour
 
                 // 장애물 개수
                 ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
-                m_stageInfo.obstacleCounts[frontObstacleType]++;
+                StageInfo.AddObstacle(frontObstacleType, 1);
                 ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
-                m_stageInfo.obstacleCounts[backObstacleType]++;
+                StageInfo.AddObstacle(backObstacleType, 1);
             }
         }
     }
@@ -551,6 +541,17 @@ public class StageMgr : MonoBehaviour
         }
 
         return tiles;
+    }
+
+    public void MoveComplete()
+    {
+        StageInfo.MoveCount--;
+
+        // 만약 moveCount가 0이 되었는데, 클리어 조건을 만족하지 못하면 게임 오버
+        if (StageInfo.MoveCount <= 0)
+        { 
+            /* 추가 예정 */
+        }
     }
 
     void OnDestroy()

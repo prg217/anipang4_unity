@@ -4,13 +4,6 @@ using UnityEngine;
 using TMPro;
 
 #region 스테이지 클리어 조건
-public struct StageInfo
-{
-    public int moveCount;
-    public Dictionary<BlockType, int> blockCounts;
-    public Dictionary<ObstacleType, int> obstacleCounts;
-}
-
 [Serializable]
 public struct StageClearConditions
 {
