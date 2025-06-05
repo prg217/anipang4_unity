@@ -5,37 +5,8 @@ using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.Image;
 
-public class MatchMgr : MonoBehaviour
+public class MatchMgr : BaseMgr<MatchMgr>
 {
-    #region ½Ì±ÛÅæ
-    static MatchMgr instance;
-
-    public static MatchMgr Instance
-    {
-        get
-        {
-            if (instance == null) instance = new MatchMgr();
-            return instance;
-        }
-    }
-    #endregion
-
-
-    void Awake()
-    {
-        #region ½Ì±ÛÅæ
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-        #endregion
-    }
-
     #region º¯¼ö
 
     [Header("ÇÁ¸®ÆÕ µî·Ï")]

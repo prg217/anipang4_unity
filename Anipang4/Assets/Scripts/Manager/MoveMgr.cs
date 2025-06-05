@@ -2,37 +2,8 @@ using UnityEngine;
 using System.Collections;
 using Unity.VisualScripting;
 
-public class MoveMgr : MonoBehaviour
+public class MoveMgr : BaseMgr<MoveMgr>
 {
-    #region 싱글톤
-    static MoveMgr instance;
-
-    public static MoveMgr Instance
-    {
-        get
-        {
-            if (instance == null) instance = new MoveMgr();
-            return instance;
-        }
-    }
-    #endregion
-
-
-    void Awake()
-    {
-        #region 싱글톤
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-        #endregion
-    }
-
     #region 변수
 
     // ====== 드래그 클릭 된 타일 1, 2 ======
@@ -123,6 +94,9 @@ public class MoveMgr : MonoBehaviour
                 // 특수 블록을 한 번 클릭했을 경우
                 if (m_specialClicked)
                 {
+                    // 직접 움직였을 때만 moveCount차감
+                    ConsumeMove();
+
                     m_specialClicked = false;
                     m_isClickMoving = true;
 
@@ -162,6 +136,29 @@ public class MoveMgr : MonoBehaviour
         }
         #endregion
 
+        #region 미리 매치 시도 후 매치가 안 되면 원상복구
+        if (!m_reMoving)
+        {
+            BlockType blockType1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlockType();
+            BlockType blockType2 = m_pClickedTile2.GetComponent<Tile>().GetMyBlockType();
+            m_pClickedTile1.GetComponent<Tile>().SetMyBlockType(blockType2);
+            m_pClickedTile2.GetComponent<Tile>().SetMyBlockType(blockType1);
+
+            bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1, false);
+            bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2, false);
+            Debug.Log("match1" + match1);
+            Debug.Log("match2" + match2);
+            if (match1 == false && match2 == false)
+            {
+                // 원상복구
+                m_reMoving = true;
+            }
+
+            m_pClickedTile1.GetComponent<Tile>().SetMyBlockType(blockType1);
+            m_pClickedTile2.GetComponent<Tile>().SetMyBlockType(blockType2);
+        }
+        #endregion
+
         #region 블록 움직이기
         // 타일이 가지고 있는 블록에게 상대 타일쪽으로 움직이라고 함
         GameObject block1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlock();
@@ -174,6 +171,9 @@ public class MoveMgr : MonoBehaviour
         // 타일들 정보 새로고침
         m_pClickedTile1.GetComponent<Tile>().Refresh();
         m_pClickedTile2.GetComponent<Tile>().Refresh();
+
+        // 직접 움직였을 때만 moveCount차감
+        ConsumeMove();
     }
 
     public void MoveComplete()
@@ -198,7 +198,7 @@ public class MoveMgr : MonoBehaviour
                     obType = obType1;
                 }
                 else if (obType2 != ObstacleType.NONE)
-                { 
+                {
                     obType = obType2;
                 }
                 #endregion
@@ -228,31 +228,19 @@ public class MoveMgr : MonoBehaviour
                     // 매치 시도 후 매치가 안 되면 원상복구
                     bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1);
                     bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2);
-
-                    // 둘 다 매치가 되지 않았다면
-                    if (match1 == false && match2 == false)
-                    {
-                        // 원상복구
-                        m_reMoving = true;
-                        GameObject tempTile = m_pClickedTile1;
-                        m_pClickedTile1 = m_pClickedTile2;
-                        m_pClickedTile2 = tempTile;
-                        Moving();
-
-                        m_moving = false;
-                        m_completeCount = 0;
-                        return;
-                    }
                 }
 
                 // 매치 후 빈 공간 채우기 실행
                 StartCoroutine(CheckEmpty());
             }
-
-            // 직접 움직였을 때만 moveCount차감
-            if (m_isClickMoving)
+            else if (m_reMoving)
             {
-                StageMgr.Instance.MoveComplete();
+                // 둘 다 매치가 되지 않았다면
+                // 원상복구
+                GameObject tempTile = m_pClickedTile1;
+                m_pClickedTile1 = m_pClickedTile2;
+                m_pClickedTile2 = tempTile;
+                Moving();
             }
 
             m_moving = false;
@@ -262,6 +250,15 @@ public class MoveMgr : MonoBehaviour
             m_isClickMoving = false;
 
             m_completeCount = 0;
+        }
+    }
+
+    private void ConsumeMove()
+    {
+        if (m_isClickMoving && !m_reMoving)
+        {
+            StageInfo.MoveCount--;
+            StageMgr.Instance.CheckGameOver();
         }
     }
 

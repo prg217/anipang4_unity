@@ -2,21 +2,8 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class UIMgr : MonoBehaviour
+public class UIMgr : BaseMgr<UIMgr>
 {
-    #region ½Ì±ÛÅæ
-    static UIMgr instance;
-
-    public static UIMgr Instance
-    {
-        get
-        {
-            if (instance == null) instance = new UIMgr();
-            return instance;
-        }
-    }
-    #endregion
-
     #region º¯¼ö
 
     [SerializeField]
@@ -30,21 +17,6 @@ public class UIMgr : MonoBehaviour
     List<GameObject> m_ConditionList = new List<GameObject>();
 
     #endregion
-
-    void Awake()
-    {
-        #region ½Ì±ÛÅæ
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-        #endregion
-    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

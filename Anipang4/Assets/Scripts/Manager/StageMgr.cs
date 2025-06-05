@@ -10,21 +10,8 @@ using Random = UnityEngine.Random;
 using System.Runtime.ConstrainedExecution;
 using System.Reflection;
 
-public class StageMgr : MonoBehaviour
+public class StageMgr : BaseMgr<StageMgr>
 {
-    #region 싱글톤
-    static StageMgr instance;
-
-    public static StageMgr Instance
-    {
-        get
-        {
-            if (instance == null) instance = new StageMgr();
-            return instance;
-        }
-    }
-    #endregion
-
     #region 변수
 
     [Header("보드 등록")]
@@ -151,20 +138,8 @@ public class StageMgr : MonoBehaviour
     }
     #endregion
 
-    void Awake()
+    protected override void OnAwake()
     {
-        #region 싱글톤
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-        #endregion
-
         #region 타일 정보 등록
         // 보드의 자식인 라인들 불러오기
         for (int i = 0; i < m_board.transform.childCount; i++)
@@ -543,10 +518,8 @@ public class StageMgr : MonoBehaviour
         return tiles;
     }
 
-    public void MoveComplete()
+    public void CheckGameOver()
     {
-        StageInfo.MoveCount--;
-
         // 만약 moveCount가 0이 되었는데, 클리어 조건을 만족하지 못하면 게임 오버
         if (StageInfo.MoveCount <= 0)
         { 
@@ -554,7 +527,7 @@ public class StageMgr : MonoBehaviour
         }
     }
 
-    void OnDestroy()
+    protected override void OnDestroyed()
     {
         foreach (KeyValuePair<Vector2Int, GameObject> tile in m_tiles)
         {
