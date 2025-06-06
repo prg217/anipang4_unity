@@ -447,7 +447,27 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
     }
 
-    public bool SimulationMatch(in GameObject _tile)
+    public bool SimulationMatch(in GameObject _originalTile, in GameObject _changeTile)
+    {
+        // 테스트할 타입으로 매치 실행
+        m_targetType = _originalTile.GetComponent<Tile>().GetMyBlockType();
+
+        BlockType saveType = _changeTile.GetComponent<Tile>().GetMyBlockType();
+        _originalTile.GetComponent<Tile>().SetMyBlockType(saveType);
+
+        m_targetTile = _changeTile;
+        m_targetMatrix = _changeTile.GetComponent<Tile>().GetMatrix();
+
+        if (CheckMatch(_changeTile, false))
+        {
+            _originalTile.GetComponent<Tile>().SetMyBlockType(m_targetType);
+            return true;
+        }
+        _originalTile.GetComponent<Tile>().SetMyBlockType(m_targetType);
+        return false;
+    }
+
+    public bool SimulateBlockMove(in GameObject _tile)
     {
         // 상하좌우로 이동시켜서 매치가 되는지 테스트
         if (_tile == null)
@@ -509,21 +529,10 @@ public class MatchMgr : BaseMgr<MatchMgr>
         {
             if (changeTile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
             {
-                BlockType saveType = changeTile.GetComponent<Tile>().GetMyBlockType();
-                originalTile.GetComponent<Tile>().SetMyBlockType(saveType);
-
-                m_targetTile = changeTile;
-                m_targetMatrix = _changeMatrix;
-
-                if (CheckMatch(changeTile, false))
-                {
-                    originalTile.GetComponent<Tile>().SetMyBlockType(m_targetType);
-                    return true;
-                }
+                return SimulationMatch(originalTile, changeTile);
             }
         }
 
-        originalTile.GetComponent<Tile>().SetMyBlockType(m_targetType);
         return false;
     }
 

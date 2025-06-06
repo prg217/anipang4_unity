@@ -39,6 +39,8 @@ public class StageMgr : BaseMgr<StageMgr>
     List<List<GameObject>> m_matchOKs = new List<List<GameObject>>();
     bool m_hint = false;
     bool m_hintStart = false;
+
+    private Coroutine m_hintCoroutine; // 힌트 코루틴
     #endregion
 
     #endregion 변수 끝
@@ -210,7 +212,14 @@ public class StageMgr : BaseMgr<StageMgr>
     {
         if (m_hint && !m_hintStart)
         {
-            StartCoroutine(Hint());
+            m_hintCoroutine = StartCoroutine(Hint());
+        }
+        else if (!m_hint && m_hintCoroutine != null)
+        {
+            // 힌트가 꺼지면 코루틴 중단
+            StopCoroutine(m_hintCoroutine);
+            m_hintCoroutine = null;
+            m_hintStart = false;
         }
     }
 
@@ -251,7 +260,7 @@ public class StageMgr : BaseMgr<StageMgr>
                 Vector2Int matrix = new Vector2Int(j, i);
                 GameObject tile = GetTile(matrix);
 
-                if (MatchMgr.Instance.SimulationMatch(tile))
+                if (MatchMgr.Instance.SimulateBlockMove(tile))
                 {
                     m_matchOK.Add(tile);
                     m_hint = true;

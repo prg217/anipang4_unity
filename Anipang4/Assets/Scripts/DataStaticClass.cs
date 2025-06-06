@@ -12,7 +12,11 @@ public static class StageInfo
     public static int MoveCount
     {
         get => m_moveCount;
-        set => m_moveCount = value;
+        set
+        {
+            m_moveCount = value;
+            UIMgr.Instance.UpdateStageUI();
+        }
     }
 
     public static void Initialize(in int _maxMoveCount)

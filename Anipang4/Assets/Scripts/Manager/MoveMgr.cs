@@ -136,28 +136,22 @@ public class MoveMgr : BaseMgr<MoveMgr>
         }
         #endregion
 
-        #region 미리 매치 시도 후 매치가 안 되면 원상복구
-        if (!m_reMoving)
+        #region 미리 매치 시도 후 reMoving 대상인지 판단
+        if (!m_reMoving && m_isClickMoving)
         {
-            BlockType blockType1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlockType();
-            BlockType blockType2 = m_pClickedTile2.GetComponent<Tile>().GetMyBlockType();
-            m_pClickedTile1.GetComponent<Tile>().SetMyBlockType(blockType2);
-            m_pClickedTile2.GetComponent<Tile>().SetMyBlockType(blockType1);
+            bool match1 = MatchMgr.Instance.SimulationMatch(m_pClickedTile1, m_pClickedTile2);
+            bool match2 = MatchMgr.Instance.SimulationMatch(m_pClickedTile2, m_pClickedTile1);
 
-            bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1, false);
-            bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2, false);
-            Debug.Log("match1" + match1);
-            Debug.Log("match2" + match2);
             if (match1 == false && match2 == false)
             {
                 // 원상복구
                 m_reMoving = true;
             }
-
-            m_pClickedTile1.GetComponent<Tile>().SetMyBlockType(blockType1);
-            m_pClickedTile2.GetComponent<Tile>().SetMyBlockType(blockType2);
         }
         #endregion
+
+        // 직접 움직였을 때만 moveCount차감
+        ConsumeMove();
 
         #region 블록 움직이기
         // 타일이 가지고 있는 블록에게 상대 타일쪽으로 움직이라고 함
@@ -171,9 +165,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
         // 타일들 정보 새로고침
         m_pClickedTile1.GetComponent<Tile>().Refresh();
         m_pClickedTile2.GetComponent<Tile>().Refresh();
-
-        // 직접 움직였을 때만 moveCount차감
-        ConsumeMove();
     }
 
     public void MoveComplete()
