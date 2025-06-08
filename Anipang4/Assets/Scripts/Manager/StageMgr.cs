@@ -14,6 +14,8 @@ public class StageMgr : BaseMgr<StageMgr>
 {
     #region 변수
 
+    bool m_gameEnd =false;
+
     [Header("보드 등록")]
     [SerializeField]
     GameObject m_board;
@@ -40,7 +42,9 @@ public class StageMgr : BaseMgr<StageMgr>
     bool m_hint = false;
     bool m_hintStart = false;
 
-    private Coroutine m_hintCoroutine; // 힌트 코루틴
+    Coroutine m_hintCoroutine; // 힌트 코루틴
+
+    bool m_waitingMoveComplete = false; // 스테이지 클리어, 게임 오버 시 움직임 완료
     #endregion
 
     #endregion 변수 끝
@@ -203,13 +207,21 @@ public class StageMgr : BaseMgr<StageMgr>
 
         // UI에 클리어 조건 넘겨줌
         UIMgr.Instance.UpdateStageClearConditions(m_stageClearConditions);
-        // 맵 정보 갱신
+
+        // 스테이지 클리어 체크
         CheckStageClear();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (m_gameEnd && m_hintCoroutine != null)
+        {
+            StopCoroutine(m_hintCoroutine);
+            m_hintCoroutine = null;
+            m_hintStart = false;
+        }
+
         if (m_hint && !m_hintStart)
         {
             m_hintCoroutine = StartCoroutine(Hint());
@@ -394,10 +406,73 @@ public class StageMgr : BaseMgr<StageMgr>
         // UI정보 갱신
         UIMgr.Instance.UpdateStageUI();
 
-        // 클리어 하면 어떻게 될지
-        /* 추가 예정 */
+        // 클리어하면
+        if (clear)
+        {
+            StartCoroutine(StageClear());
+        }
 
         return clear;
+    }
+
+    IEnumerator StageClear()
+    {
+        if (m_gameEnd)
+        { yield break; }
+
+        m_gameEnd = true;
+
+        // MoveMgr에서 클릭 판정 중단 요청
+        MoveMgr.Instance.StopClickMoving();
+
+        // 움직임이 있다면 움직임이 다 할 때까지 기다림
+        m_waitingMoveComplete = true;
+        // 이벤트 구독
+        MoveMgr.Instance.OnMoveCompleteFunction += OnMoveCompleted;
+
+        // MoveMgr에서 빈 공간 채우기 함수 완료까지 대기
+        yield return new WaitUntil(() => !m_waitingMoveComplete);
+
+        // 움직임이 있다면 움직임이 다 할 때까지 기다림
+
+        // UI쪽에 클리어 UI 띄움
+
+        // 다시 화면으로 돌아오고
+
+        // 남은 moveCount 횟수에 따라 랜덤한 블록(특수 블록 제외)을 특수블록으로 만든 다음
+
+        // 특수블록들을 터트림
+        Debug.Log("스테이지 클리어");
+    }
+
+    IEnumerator GameOver()
+    {
+        if (m_gameEnd)
+        { yield break; }
+
+        m_gameEnd = true;
+
+        // MoveMgr에서 클릭 판정 중단 요청
+        MoveMgr.Instance.StopClickMoving();
+
+        // 움직임이 있다면 움직임이 다 할 때까지 기다림
+        m_waitingMoveComplete = true;
+        // 이벤트 구독
+        MoveMgr.Instance.OnMoveCompleteFunction += OnMoveCompleted;
+
+        // MoveMgr에서 빈 공간 채우기 함수 완료까지 대기
+        yield return new WaitUntil(() => !m_waitingMoveComplete);
+
+        // UI쪽에 게임오버 UI 띄움
+        Debug.Log("게임오버");
+    }
+
+    // MoveMgr에서 빈 공간 채우기 함수 완료
+    void OnMoveCompleted()
+    {
+        m_waitingMoveComplete = false;
+        // 구독 해제
+        MoveMgr.Instance.OnMoveCompleteFunction -= OnMoveCompleted;
     }
 
     // 스테이지 정보 갱신
@@ -531,8 +606,14 @@ public class StageMgr : BaseMgr<StageMgr>
     {
         // 만약 moveCount가 0이 되었는데, 클리어 조건을 만족하지 못하면 게임 오버
         if (StageInfo.MoveCount <= 0)
-        { 
-            /* 추가 예정 */
+        {
+            StageInfo.MoveCount = 0;
+
+            // 클리어 체크
+            if (CheckStageClear() == false)
+            {
+                StartCoroutine(GameOver());
+            }
         }
     }
 

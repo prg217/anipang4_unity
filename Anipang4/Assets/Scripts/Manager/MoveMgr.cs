@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using Unity.VisualScripting;
+using System;
 
 public class MoveMgr : BaseMgr<MoveMgr>
 {
@@ -21,6 +22,8 @@ public class MoveMgr : BaseMgr<MoveMgr>
     // 빈 블럭 채우기 중
     bool m_emptyMoving = false;
 
+    bool m_clickOK = true;
+
     #endregion 변수 끝
 
     #region Set함수
@@ -31,7 +34,9 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
         Moving();
     }
-    #endregion 
+    #endregion
+
+    public event System.Action OnMoveCompleteFunction;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -42,11 +47,16 @@ public class MoveMgr : BaseMgr<MoveMgr>
     // Update is called once per frame
     void Update()
     {
-        CheckClick();
+        if (m_clickOK)
+        {
+            CheckClick();
+        }
     }
 
     void CheckClick()
     {
+        // 빈자리 채우기 움직이던거 잠깐 멈추고 이쪽 먼저 처리하게 할 것
+
         // 마우스 왼쪽 클릭
         if (Input.GetMouseButton(0) && !m_moving)
         {
@@ -121,20 +131,17 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
         m_moving = true;
 
-        #region 둘 중 하나라도 움직일 수 없는 상태인지 확인
-        TileType tileType1 = m_pClickedTile1.GetComponent<Tile>().GetTileType();
-        TileType tileType2 = m_pClickedTile2.GetComponent<Tile>().GetTileType();
-
-        // 둘 중 하나라도 움직일 수 없는 상태라면 움직이지 않음
-        if (tileType1 == TileType.IMMOVABLE || tileType2 == TileType.IMMOVABLE)
+        // 둘 중 하나라도 움직일 수 없는 상태인지 확인
+        if (IsMovementImpossible())
         {
-            m_moving = false;
-            m_pClickedTile1 = null;
-            m_pClickedTile2 = null;
-
             return;
         }
-        #endregion
+
+        // 상하좌우에 있는 타일인지 확인
+        if (!CheckAdjacentTile())
+        {
+            return; 
+        }
 
         #region 미리 매치 시도 후 reMoving 대상인지 판단
         if (!m_reMoving && m_isClickMoving)
@@ -165,6 +172,41 @@ public class MoveMgr : BaseMgr<MoveMgr>
         // 타일들 정보 새로고침
         m_pClickedTile1.GetComponent<Tile>().Refresh();
         m_pClickedTile2.GetComponent<Tile>().Refresh();
+    }
+
+    bool CheckAdjacentTile()
+    {
+        // 상하좌우 체크
+        Vector2Int matrix1 = m_pClickedTile1.GetComponent<Tile>().GetMatrix();
+        Vector2Int matrix2 = m_pClickedTile2.GetComponent<Tile>().GetMatrix();
+
+        // 맨해튼 거리(거리 최소 값)
+        int distance = Mathf.Abs(matrix1.x - matrix2.x) + Mathf.Abs(matrix1.y - matrix2.y);
+
+        if (distance == 1)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    bool IsMovementImpossible()
+    {
+        TileType tileType1 = m_pClickedTile1.GetComponent<Tile>().GetTileType();
+        TileType tileType2 = m_pClickedTile2.GetComponent<Tile>().GetTileType();
+
+        // 둘 중 하나라도 움직일 수 없는 상태라면 움직이지 않음
+        if (tileType1 == TileType.IMMOVABLE || tileType2 == TileType.IMMOVABLE)
+        {
+            m_moving = false;
+            m_pClickedTile1 = null;
+            m_pClickedTile2 = null;
+
+            return true;
+        }
+
+        return false;
     }
 
     public void MoveComplete()
@@ -244,7 +286,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
         }
     }
 
-    private void ConsumeMove()
+    void ConsumeMove()
     {
         if (m_isClickMoving && !m_reMoving)
         {
@@ -370,10 +412,11 @@ public class MoveMgr : BaseMgr<MoveMgr>
             }
         }
 
+        // 스테이지 클리어, 게임 오버 시 완료 신호 보냄
+        OnMoveCompleteFunction?.Invoke();
+
         // 앞으로 매치가 가능한지 체크
         StageMgr.Instance.CheckPossibleMatch();
-        // 클리어 조건을 확인
-        StageMgr.Instance.CheckStageClear();
         // 다시 힌트를 줄 수 있게 설정
         StageMgr.Instance.SetHint(true);
         m_emptyMoving = false;
@@ -426,5 +469,11 @@ public class MoveMgr : BaseMgr<MoveMgr>
         }
 
         return true;
+    }
+
+    public void StopClickMoving()
+    {
+        // 클릭해서 움직이는 행동을 못하게 함
+        m_clickOK = false;
     }
 }
