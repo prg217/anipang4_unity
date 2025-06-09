@@ -43,7 +43,7 @@ public class Block : MonoBehaviour
     #endregion
 
     #region Set함수
-    public void SetMove(in GameObject _goalTile)
+    public void SetMove(in GameObject _goalTile, in bool _emptyMoving)
     {
         // 타일 오브젝트가 맞는지 확인
         if (_goalTile.GetComponent<Tile>() == null)
@@ -55,6 +55,16 @@ public class Block : MonoBehaviour
         m_start = transform.position;
         m_goal = _goalTile.transform.position;
         m_goalTile = _goalTile;
+
+        // 빈자리 채우기 일 경우 빠르게
+        if (_emptyMoving)
+        {
+            m_moveDurationTime = 0.3f;
+        }
+        else
+        {
+            m_moveDurationTime = 0.5f;
+        }
 
         transform.SetParent(m_goalTile.transform);
     }

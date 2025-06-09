@@ -28455,7 +28455,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_board: {fileID: 70911196}
   m_maxBlockType: 5
-  m_maxMoveCount: 20
+  m_maxMoveCount: 2
   m_stageClearConditions:
     blockTypes: []
     obstacleTypes:

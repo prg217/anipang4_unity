@@ -16,6 +16,8 @@ public class MoveMgr : BaseMgr<MoveMgr>
     bool m_moving = false;
     int m_completeCount = 0;
     bool m_isClickMoving = false;
+    // 움직임 완료
+    bool m_moveComplete = false;
 
     // 되돌리기
     bool m_reMoving = false;
@@ -36,7 +38,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
     }
     #endregion
 
-    public event System.Action OnMoveCompleteFunction;
+    public event System.Action OnEmptyMoveCompleteFunction;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -55,8 +57,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
     void CheckClick()
     {
-        // 빈자리 채우기 움직이던거 잠깐 멈추고 이쪽 먼저 처리하게 할 것
-
         // 마우스 왼쪽 클릭
         if (Input.GetMouseButton(0) && !m_moving)
         {
@@ -84,6 +84,14 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     if (m_pClickedTile1 == clickedTransform.gameObject || m_pClickedTile2 == clickedTransform.gameObject)
                     {
                         return;
+                    }
+
+                    // 만약 빈자리 채우기 중이라면 빈자리 채우기 움직이던거 멈추고 이쪽 먼저 처리
+                    if (m_emptyMoving)
+                    {
+                        Debug.Log("멈춰!");
+                        StopCoroutine(CheckEmpty());
+                        m_emptyMoving = false;
                     }
 
                     m_pClickedTile2 = clickedTransform.gameObject;
@@ -136,11 +144,15 @@ public class MoveMgr : BaseMgr<MoveMgr>
         {
             return;
         }
-
-        // 상하좌우에 있는 타일인지 확인
-        if (!CheckAdjacentTile())
+        
+        // 빈자리 채우기가 아닐 때에만 적용
+        if (!m_emptyMoving)
         {
-            return; 
+            // 상하좌우에 있는 타일인지 확인
+            if (!CheckAdjacentTile())
+            {
+                return;
+            }
         }
 
         #region 미리 매치 시도 후 reMoving 대상인지 판단
@@ -165,9 +177,10 @@ public class MoveMgr : BaseMgr<MoveMgr>
         GameObject block1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlock();
         GameObject block2 = m_pClickedTile2.GetComponent<Tile>().GetMyBlock();
 
-        block1.GetComponent<Block>().SetMove(m_pClickedTile2);
-        block2.GetComponent<Block>().SetMove(m_pClickedTile1);
+        block1.GetComponent<Block>().SetMove(m_pClickedTile2, m_emptyMoving);
+        block2.GetComponent<Block>().SetMove(m_pClickedTile1, m_emptyMoving);
         #endregion
+        m_moveComplete = false;
 
         // 타일들 정보 새로고침
         m_pClickedTile1.GetComponent<Tile>().Refresh();
@@ -216,6 +229,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
         // 블록 교환이 둘 다 완료가 되었다면
         if (m_completeCount >= 2)
         {
+            m_moveComplete = true;
             if (!m_reMoving && m_isClickMoving && !m_emptyMoving)
             {
                 BlockType type1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlockType();
@@ -354,10 +368,10 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     }
                 }
             }
-            // 코루틴으로 시간 지난 뒤 진행되게 함
+            // 움직인 다음에 진행되게 함
             if (isEmpty)
             {
-                yield return new WaitForSeconds(0.25f);
+                yield return new WaitUntil(() => m_moveComplete);
             }
         }
 
@@ -413,7 +427,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
         }
 
         // 스테이지 클리어, 게임 오버 시 완료 신호 보냄
-        OnMoveCompleteFunction?.Invoke();
+        OnEmptyMoveCompleteFunction?.Invoke();
 
         // 앞으로 매치가 가능한지 체크
         StageMgr.Instance.CheckPossibleMatch();
