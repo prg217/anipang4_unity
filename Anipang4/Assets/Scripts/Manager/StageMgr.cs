@@ -433,9 +433,10 @@ public class StageMgr : BaseMgr<StageMgr>
         // MoveMgr에서 빈 공간 채우기 함수 완료까지 대기
         yield return new WaitUntil(() => !m_waitingMoveComplete);
 
-        // 움직임이 있다면 움직임이 다 할 때까지 기다림
-
         // UI쪽에 클리어 UI 띄움
+        UIMgr.Instance.StageClear(true);
+        yield return new WaitForSeconds(1f);
+        UIMgr.Instance.StageClear(false);
 
         // 다시 화면으로 돌아오고
 
@@ -464,7 +465,7 @@ public class StageMgr : BaseMgr<StageMgr>
         yield return new WaitUntil(() => !m_waitingMoveComplete);
 
         // UI쪽에 게임오버 UI 띄움
-        Debug.Log("게임오버");
+        UIMgr.Instance.GameOver();
     }
 
     // MoveMgr에서 빈 공간 채우기 함수 완료

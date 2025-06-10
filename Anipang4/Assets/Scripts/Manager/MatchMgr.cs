@@ -1,9 +1,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEngine.GraphicsBuffer;
-using static UnityEngine.UI.Image;
 
 public class MatchMgr : BaseMgr<MatchMgr>
 {
@@ -554,9 +551,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
             case BlockType.SUN:
                 SunExplode();
                 break;
-            //case BlockType.RANDOM:
-            //    RandomExplode();
-            //    break;
+            case BlockType.RANDOM:
+                RandomExplode(BlockType.NONE, m_contagiousObstacle);
+                break;
             case BlockType.COSMIC:
                 CosmicExplode();
                 break;
@@ -713,12 +710,21 @@ public class MatchMgr : BaseMgr<MatchMgr>
         SurroundingsExplode(2, 2);
     }
 
-    public void RandomExplode(in BlockType _type, in ObstacleType _contagiousObstacle)
+    public void RandomExplode(BlockType _type, in ObstacleType _contagiousObstacle)
     {
         m_contagiousObstacle = _contagiousObstacle;
         // 교차 시킨 블록 타입 정보 알아야 함
         // 그 블록 타입들 서치해서 제거
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
+
+        #region 단독으로 실행 됐을 경우
+        if (_type == BlockType.NONE)
+        {
+            // 일반 블록 중 하나 랜덤으로 지정해주기
+            int randomType = Random.Range(0, StageMgr.Instance.GetMaxBlockType());
+            _type = (BlockType)randomType;
+        }
+        #endregion
 
         #region 일반 블록일 경우
         if (_type < BlockType.CROSS)

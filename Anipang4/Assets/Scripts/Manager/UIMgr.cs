@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIMgr : BaseMgr<UIMgr>
 {
@@ -15,6 +16,16 @@ public class UIMgr : BaseMgr<UIMgr>
     GameObject m_ConditionPrefab;
 
     List<GameObject> m_ConditionList = new List<GameObject>();
+
+    [Header("스테이지 종료 관련 UI")]
+    [SerializeField]
+    Image m_blackScreen;
+    [SerializeField]
+    GameObject m_stageClear;
+    [SerializeField]
+    GameObject m_clearResult;
+    [SerializeField]
+    GameObject m_gameOver;
 
     #endregion
 
@@ -169,5 +180,23 @@ public class UIMgr : BaseMgr<UIMgr>
                 m_ConditionList.Add(child.gameObject);
             }
         }
+    }
+
+    public void StageClear(bool _active)
+    {
+        m_blackScreen.gameObject.SetActive(_active);
+        m_stageClear.gameObject.SetActive(_active);
+    }
+
+    public void ClearResult()
+    {
+        m_blackScreen.gameObject.SetActive(true);
+        m_clearResult.gameObject.SetActive(true);
+    }
+
+    public void GameOver()
+    {
+        m_blackScreen.gameObject.SetActive(true);
+        m_gameOver.gameObject.SetActive(true);
     }
 }
