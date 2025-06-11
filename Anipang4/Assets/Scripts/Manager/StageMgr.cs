@@ -9,6 +9,7 @@ using System;
 using Random = UnityEngine.Random;
 using System.Runtime.ConstrainedExecution;
 using System.Reflection;
+using static UnityEditor.PlayerSettings;
 
 public class StageMgr : BaseMgr<StageMgr>
 {
@@ -99,7 +100,7 @@ public class StageMgr : BaseMgr<StageMgr>
     {
         while (true)
         {
-            Vector2Int randomMatrix = new Vector2Int(Random.Range(0, m_maxMatrix.x), Random.Range(0, m_maxMatrix.y));
+            Vector2Int randomMatrix = new Vector2Int(Random.Range(0, m_maxMatrix.x + 1), Random.Range(0, m_maxMatrix.y + 1));
             GameObject tile = GetTile(randomMatrix);
             // 유효 타일일 경우
             if (tile.GetComponent<Tile>().GetMyBlockType() != BlockType.NULL)
@@ -183,23 +184,11 @@ public class StageMgr : BaseMgr<StageMgr>
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        // 블록 종류 등록
-        foreach (BlockType type in Enum.GetValues(typeof(BlockType)))
-        {
-            //m_stageInfo.blockCounts.Add((BlockType)type, 0);
-        }
-
         // 모든 타일의 이벤트 구독
         foreach (KeyValuePair<Vector2Int, GameObject> tile in m_tiles)
         {
             Tile tileScript = tile.Value.GetComponent<Tile>();
             tileScript.OnTileExplode += HandleTileExplode;
-        }
-
-        // 장애물 종류 등록
-        foreach (ObstacleType type in Enum.GetValues(typeof(ObstacleType)))
-        {
-            //m_stageInfo.obstacleCounts.Add((ObstacleType)type, 0);
         }
 
         // 시작 시 맵 체크(스테이지 블록 구성을 랜덤으로 했을 경우 대비)
@@ -436,13 +425,70 @@ public class StageMgr : BaseMgr<StageMgr>
         // UI쪽에 클리어 UI 띄움
         UIMgr.Instance.StageClear(true);
         yield return new WaitForSeconds(1f);
+        // 다시 화면으로 돌아오고
         UIMgr.Instance.StageClear(false);
 
-        // 다시 화면으로 돌아오고
-
         // 남은 moveCount 횟수에 따라 랜덤한 블록(특수 블록 제외)을 특수블록으로 만든 다음
+        // 랜덤, 코즈믹 제외 특수 블록
+        BlockType[] selectableBlockTypes = { BlockType.CROSS, BlockType.SUN, BlockType.MOON };
+        // 중복 방지
+        HashSet<Vector2Int> usedPositions = new HashSet<Vector2Int>();
+        while (StageInfo.MoveCount > 0)
+        {
+            StageInfo.MoveCount--;
+
+            while (true)
+            {
+                // 만약 모든 타일이 특수 블록or바꿀 수 없는 블록일 경우
+                if (usedPositions.Count >= (m_maxMatrix.x * m_maxMatrix.y))
+                {
+                    // 바로 MoveCount 0으로 만들고 빠져나감
+                    StageInfo.MoveCount = 0;
+                    break;
+                }
+
+                // 랜덤한 타일 하나를 뽑음
+                int x = Random.Range(0, m_maxMatrix.x + 1);
+                int y = Random.Range(0, m_maxMatrix.y + 1);
+                Vector2Int randomPos = new Vector2Int(x, y);
+
+                // 이전과 중복되면 패스
+                if (usedPositions.Contains(randomPos))
+                {
+                    continue;
+                }
+                usedPositions.Add(randomPos);
+
+                GameObject tile = m_tiles[randomPos];
+                BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+
+                // 타일이 일반 블록인지 확인
+                if (type > BlockType.NONE && type < BlockType.CROSS)
+                {
+                    // 랜덤한 특수 블록으로 변환(랜덤, 코즈믹 제외)
+                    BlockType randomBlockType = selectableBlockTypes[Random.Range(0, selectableBlockTypes.Length)];
+                    tile.GetComponent<Tile>().SetMyBlockType(randomBlockType);
+                    break;
+                }
+            }
+
+            yield return new WaitForSeconds(0.15f);
+        }
 
         // 특수블록들을 터트림
+        foreach (KeyValuePair<Vector2Int, GameObject> tile in m_tiles)
+        {
+            BlockType type = tile.Value.GetComponent<Tile>().GetMyBlockType();
+
+            if (type != BlockType.NULL && type >= BlockType.CROSS)
+            {
+                tile.Value.GetComponent<Tile>().Explode(ObstacleType.NONE);
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+
+        // 다 터트리고 스테이지 결과
+        UIMgr.Instance.ClearResult();
         Debug.Log("스테이지 클리어");
     }
 

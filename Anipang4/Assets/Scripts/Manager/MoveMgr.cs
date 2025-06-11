@@ -66,7 +66,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
             if (hit.collider != null)
             {
                 Transform clickedTransform = hit.collider.transform;
-
+                Debug.Log("여기까지는 오는데");
                 if (m_pClickedTile1 == null)
                 {
                     m_pClickedTile1 = clickedTransform.gameObject;
@@ -80,6 +80,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 }
                 else
                 {
+                    Debug.Log("여기 안오네");
                     // 이미 저장된 타일을 누르고 있다면 return
                     if (m_pClickedTile1 == clickedTransform.gameObject || m_pClickedTile2 == clickedTransform.gameObject)
                     {
@@ -426,11 +427,15 @@ public class MoveMgr : BaseMgr<MoveMgr>
             }
         }
 
+        // 클리어 확인
+        StageMgr.Instance.CheckStageClear();
+
         // 스테이지 클리어, 게임 오버 시 완료 신호 보냄
         OnEmptyMoveCompleteFunction?.Invoke();
 
         // 앞으로 매치가 가능한지 체크
         StageMgr.Instance.CheckPossibleMatch();
+
         // 다시 힌트를 줄 수 있게 설정
         StageMgr.Instance.SetHint(true);
         m_emptyMoving = false;
