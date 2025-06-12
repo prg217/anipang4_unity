@@ -21,10 +21,13 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
     // 되돌리기
     bool m_reMoving = false;
-    // 빈 블럭 채우기 중
+    // 빈공간 채우기 중
     bool m_emptyMoving = false;
 
+    // 클릭 가능한 상태
     bool m_clickOK = true;
+    // 빈공간 채우기 중에 클릭
+    bool m_clickDuringEmptyMoving = false;
 
     #endregion 변수 끝
 
@@ -66,7 +69,19 @@ public class MoveMgr : BaseMgr<MoveMgr>
             if (hit.collider != null)
             {
                 Transform clickedTransform = hit.collider.transform;
-                Debug.Log("여기까지는 오는데");
+
+                // 만약 빈자리 채우기 중이라면 빈자리 채우기 움직이던거 멈추고 이쪽 먼저 처리
+                if (m_emptyMoving)
+                {
+                    Debug.Log("멈춰");
+                    StopAllCoroutines();
+                    m_emptyMoving = false;
+                    m_pClickedTile1 = null;
+                    m_pClickedTile2 = null;
+
+                    m_clickDuringEmptyMoving = true;
+                }
+
                 if (m_pClickedTile1 == null)
                 {
                     m_pClickedTile1 = clickedTransform.gameObject;
@@ -80,19 +95,10 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 }
                 else
                 {
-                    Debug.Log("여기 안오네");
                     // 이미 저장된 타일을 누르고 있다면 return
                     if (m_pClickedTile1 == clickedTransform.gameObject || m_pClickedTile2 == clickedTransform.gameObject)
                     {
                         return;
-                    }
-
-                    // 만약 빈자리 채우기 중이라면 빈자리 채우기 움직이던거 멈추고 이쪽 먼저 처리
-                    if (m_emptyMoving)
-                    {
-                        Debug.Log("멈춰!");
-                        StopCoroutine(CheckEmpty());
-                        m_emptyMoving = false;
                     }
 
                     m_pClickedTile2 = clickedTransform.gameObject;
@@ -122,7 +128,10 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     ObstacleType obType = m_pClickedTile1.GetComponent<Tile>().GetPropagationObstacle();
                     MatchMgr.Instance.CheckMatch(m_pClickedTile1);
                     // 매치 후 빈 공간 채우기 실행
-                    StartCoroutine(CheckEmpty());
+                    if (!m_emptyMoving)
+                    {
+                        StartCoroutine(CheckEmpty());
+                    }
                 }
 
                 m_pClickedTile1 = null;
@@ -138,7 +147,11 @@ public class MoveMgr : BaseMgr<MoveMgr>
             return;
         }
 
-        m_moving = true;
+        // 직접 클릭해서 할 때만 체크
+        if (!m_emptyMoving)
+        {
+            m_moving = true;
+        }
 
         // 둘 중 하나라도 움직일 수 없는 상태인지 확인
         if (IsMovementImpossible())
@@ -152,6 +165,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
             // 상하좌우에 있는 타일인지 확인
             if (!CheckAdjacentTile())
             {
+                Debug.Log("CheckAdjacentTile");
                 return;
             }
         }
@@ -277,9 +291,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1);
                     bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2);
                 }
-
-                // 매치 후 빈 공간 채우기 실행
-                StartCoroutine(CheckEmpty());
             }
             else if (m_reMoving)
             {
@@ -298,6 +309,17 @@ public class MoveMgr : BaseMgr<MoveMgr>
             m_isClickMoving = false;
 
             m_completeCount = 0;
+
+            // 빈공간 채우기 실행
+            if (!m_emptyMoving)
+            {
+                StartCoroutine(CheckEmpty());
+            }
+
+            if (m_clickDuringEmptyMoving)
+            {
+                m_emptyMoving = true;
+            }
         }
     }
 
@@ -420,7 +442,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
                         #endregion
 
                         // 빈 공간이 있을 때 다시 처음부터
-                        StartCoroutine(CheckEmpty());
+                        yield return StartCoroutine(CheckEmpty());
                         yield break;
                     }
                 }
