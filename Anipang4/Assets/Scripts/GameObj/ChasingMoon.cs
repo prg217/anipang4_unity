@@ -113,25 +113,51 @@ public class ChasingMoon : MonoBehaviour
     void TargetSetting()
     {
         #region 장애물 타입
+        // 클리어 조건 장애물을 가져와서 해당하는 장애물만 검사
         Dictionary<ObstacleType, bool> obstacleTypes = new Dictionary<ObstacleType, bool>(StageMgr.Instance.GetClearObstacleTypes());
         if (obstacleTypes != null)
         {
             for (int i = 0; i < (int)ObstacleType.BACK_END; i++)
             {
                 ObstacleType type = (ObstacleType)Enum.ToObject(typeof(ObstacleType), i);
+                // 클리어 조건에 있는 장애물인가?
                 if (obstacleTypes.ContainsKey(type))
                 {
+                    // 전염되는 장애물이면 일단 패스
                     if (type.GetContagious())
                     {
                         continue;
                     }
 
+                    // 아직 장애물 조건을 만족하기 전이라면
                     if (obstacleTypes[type] == false)
                     {
                         List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTiles(type));
                         int randomIndex = Random.Range(0, tiles.Count);
                         m_target = tiles[randomIndex];
                         return;
+                    }
+                }
+            }
+
+            // 만약 위 조건을 만족하지 못했다면 전염되는 장애물을 검사
+            for (int i = 0; i < (int)ObstacleType.BACK_END; i++)
+            {
+                ObstacleType type = (ObstacleType)Enum.ToObject(typeof(ObstacleType), i);
+                // 클리어 조건에 있는 장애물인가?
+                if (obstacleTypes.ContainsKey(type))
+                {
+                    // 전염되는 장애물이면
+                    if (type.GetContagious())
+                    {
+                        // 아직 장애물 조건을 만족하기 전이라면
+                        if (obstacleTypes[type] == false)
+                        {
+                            List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTiles(type));
+                            int randomIndex = Random.Range(0, tiles.Count);
+                            m_target = tiles[randomIndex];
+                            return;
+                        }
                     }
                 }
             }

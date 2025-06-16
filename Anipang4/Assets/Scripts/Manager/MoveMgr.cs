@@ -2,32 +2,45 @@ using UnityEngine;
 using System.Collections;
 using Unity.VisualScripting;
 using System;
+using System.Collections.Generic;
 
 public class MoveMgr : BaseMgr<MoveMgr>
 {
     #region 변수
 
+    [SerializeField]
+    GameObject m_moveEffect;
+
     // ====== 드래그 클릭 된 타일 1, 2 ======
     GameObject m_pClickedTile1;
     GameObject m_pClickedTile2;
     // ======================================
-    bool m_specialClicked = false;
-    // 움직이는 중
-    bool m_moving = false;
+
+
     int m_completeCount = 0;
+
+
+    // ====== 상태 ======
     bool m_isClickMoving = false;
     // 움직임 완료
     bool m_moveComplete = false;
-
+    // 움직이는 중
+    bool m_moving = false;
+    bool m_specialClicked = false;
     // 되돌리기
     bool m_reMoving = false;
-    // 빈공간 채우기 중
-    bool m_emptyMoving = false;
-
     // 클릭 가능한 상태
     bool m_clickOK = true;
+    // ==================
+
+    // ====== 빈공간 채우기 ======
+    // 빈공간 채우기 중
+    bool m_emptyMoving = false;
     // 빈공간 채우기 중에 클릭
     bool m_clickDuringEmptyMoving = false;
+
+    List<Coroutine> checkEmptyCoroutines = new List<Coroutine>();
+    // ==========================
 
     #endregion 변수 끝
 
@@ -73,8 +86,16 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 // 만약 빈자리 채우기 중이라면 빈자리 채우기 움직이던거 멈추고 이쪽 먼저 처리
                 if (m_emptyMoving)
                 {
-                    Debug.Log("멈춰");
-                    StopAllCoroutines();
+                    // 코루틴 중지
+                    foreach (Coroutine coroutine in checkEmptyCoroutines)
+                    {
+                        if (coroutine != null)
+                        {
+                            StopCoroutine(coroutine);
+                        }
+                    }
+                    checkEmptyCoroutines.Clear();
+
                     m_emptyMoving = false;
                     m_pClickedTile1 = null;
                     m_pClickedTile2 = null;
@@ -130,7 +151,8 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     // 매치 후 빈 공간 채우기 실행
                     if (!m_emptyMoving)
                     {
-                        StartCoroutine(CheckEmpty());
+                        Coroutine coroutine = StartCoroutine(CheckEmpty());
+                        checkEmptyCoroutines.Add(coroutine);
                     }
                 }
 
@@ -189,17 +211,48 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
         #region 블록 움직이기
         // 타일이 가지고 있는 블록에게 상대 타일쪽으로 움직이라고 함
-        GameObject block1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlock();
-        GameObject block2 = m_pClickedTile2.GetComponent<Tile>().GetMyBlock();
+        m_pClickedTile1.GetComponent<Tile>().SetBlockMove(m_pClickedTile2, m_emptyMoving);
+        m_pClickedTile2.GetComponent<Tile>().SetBlockMove(m_pClickedTile1, m_emptyMoving);
 
-        block1.GetComponent<Block>().SetMove(m_pClickedTile2, m_emptyMoving);
-        block2.GetComponent<Block>().SetMove(m_pClickedTile1, m_emptyMoving);
+        // 블록 움직이는 이펙트
+        // 직접 움직일 때만 적용
+        if (!m_emptyMoving)
+        {
+            StartCoroutine(ActiveMoveEffect());
+        }
         #endregion
         m_moveComplete = false;
 
         // 타일들 정보 새로고침
         m_pClickedTile1.GetComponent<Tile>().Refresh();
         m_pClickedTile2.GetComponent<Tile>().Refresh();
+    }
+
+    IEnumerator ActiveMoveEffect()
+    {
+        Vector3 midPos = (m_pClickedTile1.transform.position + m_pClickedTile2.transform.position) / 2f;
+        m_moveEffect.transform.position = midPos;
+
+        // 상하좌우에 따라 각도 돌리기
+        Vector2Int matrix1 = m_pClickedTile1.GetComponent<Tile>().GetMatrix();
+        Vector2Int matrix2 = m_pClickedTile2.GetComponent<Tile>().GetMatrix();
+        // 가로
+        if (matrix1.x - matrix2.x != 0)
+        {
+            m_moveEffect.transform.rotation = Quaternion.Euler(0, 0, 0);
+        }
+        // 세로
+        else
+        {
+            m_moveEffect.transform.rotation = Quaternion.Euler(0, 0, 90f);
+        }
+
+        m_moveEffect.SetActive(true);
+
+        // 움직이는 시간이 0.5초
+        yield return new WaitForSeconds(0.5f);
+
+        m_moveEffect.SetActive(false);
     }
 
     bool CheckAdjacentTile()
@@ -313,7 +366,8 @@ public class MoveMgr : BaseMgr<MoveMgr>
             // 빈공간 채우기 실행
             if (!m_emptyMoving)
             {
-                StartCoroutine(CheckEmpty());
+                Coroutine coroutine = StartCoroutine(CheckEmpty());
+                checkEmptyCoroutines.Add(coroutine);
             }
 
             if (m_clickDuringEmptyMoving)
@@ -442,7 +496,9 @@ public class MoveMgr : BaseMgr<MoveMgr>
                         #endregion
 
                         // 빈 공간이 있을 때 다시 처음부터
-                        yield return StartCoroutine(CheckEmpty());
+                        Coroutine coroutine = StartCoroutine(CheckEmpty());
+                        checkEmptyCoroutines.Add(coroutine);
+                        yield return coroutine;
                         yield break;
                     }
                 }

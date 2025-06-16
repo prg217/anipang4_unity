@@ -42,7 +42,7 @@ public class Tile : MonoBehaviour
     #endregion 변수 끝
 
     #region Get함수
-    public GameObject GetMyBlock() {  return m_myBlock; }
+    //public GameObject GetMyBlock() {  return m_myBlock; }
     // -1 : 블록 없음, 0 : 움직일 수 없음, 1 : 움직일 수 있음
     public TileType GetTileType() { return m_tileType; }
     public Vector2Int GetMatrix() { return m_matrix; }
@@ -76,6 +76,10 @@ public class Tile : MonoBehaviour
     public void SetMyBlockType(in BlockType _BlockType)
     {
         m_myBlock.GetComponent<Block>().SetBlockType(_BlockType);
+    }
+    public void SetBlockMove(in GameObject _goalTile, in bool _emptyMoving)
+    {
+        m_myBlock.GetComponent<Block>().SetMove(_goalTile, _emptyMoving);
     }
     public void SetMyBlockActiveOutline()
     {
