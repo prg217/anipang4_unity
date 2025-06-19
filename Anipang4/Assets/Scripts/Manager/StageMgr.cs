@@ -109,6 +109,24 @@ public class StageMgr : BaseMgr<StageMgr>
             }
         }
     }
+
+    public BlockType GetMostNormalBlockType()
+    {
+        BlockType mostType = BlockType.NULL;
+        int mostCount = 0;
+        // 일반 블록 타입 별로 카운트
+        for (int i = 0; i < (int)BlockType.CROSS; i++)
+        {
+            int count = SearchTiles((BlockType)i).Count;
+            if (mostCount < count)
+            {
+                mostCount = count;
+                mostType = (BlockType)i;
+            }
+        }
+        
+        return mostType;
+    }
     #endregion
 
     #region Set함수
@@ -250,14 +268,13 @@ public class StageMgr : BaseMgr<StageMgr>
         m_matchOKs.Clear();
 
         // 움직일 수 있는 타일의 블록을 상하좌우로 움직인(임시로) 다음 매치가 되는지 체크
-        // 매치가 하나라도 된다면 바로 return
         // 모두 매치가 안 된다면 움직일 수 없는 타일을 제외하고 블록 타입 개수를 수집한 뒤, 랜덤으로 배분하고 블록을 바꿈
         for (int i = 0; i <= m_maxMatrix.y; i++)
         {
-            m_matchOK.Clear();
-
             for (int j = 0; j <= m_maxMatrix.x; j++)
             {
+                m_matchOK.Clear();
+
                 Vector2Int matrix = new Vector2Int(j, i);
                 GameObject tile = GetTile(matrix);
 
@@ -265,12 +282,18 @@ public class StageMgr : BaseMgr<StageMgr>
                 {
                     m_matchOK.Add(tile);
                     m_hint = true;
-                }
-            }
 
-            if (m_matchOK.Count >= 3/* 또는 특수 블록 */)
-            {
-                m_matchOKs.Add(new List<GameObject>(m_matchOK));
+                    // 힌트를 위해 매치 되는 블록의 정보를 저장함
+                    if (m_matchOK.Count >= 3)
+                    {
+                        m_matchOKs.Add(new List<GameObject>(m_matchOK));
+                    }
+                    // 특수 블록 일 경우
+                    //else if (m_matchOK.Count == 1)
+                    //{
+                    //    m_matchOKs.Add(new List<GameObject>(m_matchOK));
+                    //}
+                }
             }
         }
 

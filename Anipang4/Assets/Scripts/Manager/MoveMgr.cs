@@ -386,6 +386,12 @@ public class MoveMgr : BaseMgr<MoveMgr>
         }
     }
 
+    // 외부에서 움직임 잠깐 멈춰달라고 요청
+    public void WaitMove()
+    { 
+        // 빈공간 채우기 코루틴 멈추기
+    }
+
     public IEnumerator CheckEmpty()
     {
         // 빈 공간 체크하는 중에는 스테이지 매니저에 힌트를 못 하게 전달

@@ -484,6 +484,12 @@ public class MatchMgr : BaseMgr<MatchMgr>
             return false;
         }
 
+        // 특수 블록일 경우 매치 가능
+        if (_tile.GetComponent<Tile>().GetMyBlockType() >= BlockType.CROSS)
+        {
+            return true;
+        }
+
         Vector2Int matrix = _tile.GetComponent<Tile>().GetMatrix();
         // 블록 타입을 고정
         m_targetType = _tile.GetComponent<Tile>().GetMyBlockType();
@@ -567,6 +573,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     public void SpecialCompositionExplode(in GameObject _tile1, in GameObject _tile2, in ObstacleType _contagiousObstacle)
     {
+        // 블록 타입을 더블 어쩌구...어쨋든 이렇게 바꾸고 잠깐 멈춘 다음에 터트리기
+
         m_contagiousObstacle = _contagiousObstacle;
 
         BlockType type1 = _tile1.GetComponent<Tile>().GetMyBlockType();
@@ -575,8 +583,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
         m_targetTile = _tile2;
         m_targetMatrix = _tile2.GetComponent<Tile>().GetMatrix();
 
-        _tile1.GetComponent<Tile>().Explode(_contagiousObstacle);
-        _tile2.GetComponent<Tile>().Explode(_contagiousObstacle);
+        //_tile1.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        //_tile1.GetComponent<Tile>().Explode(_contagiousObstacle);
+        //_tile2.GetComponent<Tile>().Explode(_contagiousObstacle);
 
         switch (type1)
         {
@@ -585,15 +594,22 @@ public class MatchMgr : BaseMgr<MatchMgr>
                     switch (type2)
                     {
                         case BlockType.CROSS:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.DOUBLE_CROSS);
                             DoubleCrossExplode();
                             break;
                         case BlockType.SUN:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_SUN);
                             CrossSunExplode();
+                            break;
+                        case BlockType.RANDOM:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.ACTIVE_RANDOM);
+                            RandomExplode(type1, m_contagiousObstacle);
                             break;
                         case BlockType.COSMIC:
                             CosmicExplode();
                             break;
                         case BlockType.MOON:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_MOON);
                             SpecialMoonExplode(BlockType.CROSS);
                             break;
                         default:
@@ -606,18 +622,42 @@ public class MatchMgr : BaseMgr<MatchMgr>
                     switch (type2)
                     {
                         case BlockType.CROSS:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_SUN);
                             CrossSunExplode();
                             break;
                         case BlockType.SUN:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.DOUBLE_SUN);
                             DoubleSunExplode();
+                            break;
+                        case BlockType.RANDOM:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.ACTIVE_RANDOM);
+                            RandomExplode(type1, m_contagiousObstacle);
                             break;
                         case BlockType.COSMIC:
                             CosmicExplode();
                             break;
                         case BlockType.MOON:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.SUN_MOON);
                             SpecialMoonExplode(BlockType.SUN);
                             break;
                         default:
+                            break;
+                    }
+                }
+                break;
+            case BlockType.RANDOM:
+                {
+                    switch (type2)
+                    {
+                        case BlockType.RANDOM:
+                            CosmicExplode();
+                            break;
+                        case BlockType.COSMIC:
+                            CosmicExplode();
+                            break;
+                        default:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.ACTIVE_RANDOM);
+                            RandomExplode(type2, m_contagiousObstacle);
                             break;
                     }
                 }
@@ -632,15 +672,22 @@ public class MatchMgr : BaseMgr<MatchMgr>
                     switch (type2)
                     {
                         case BlockType.CROSS:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_MOON);
                             SpecialMoonExplode(BlockType.CROSS);
                             break;
                         case BlockType.SUN:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.SUN_MOON);
                             SpecialMoonExplode(BlockType.SUN);
+                            break;
+                        case BlockType.RANDOM:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.ACTIVE_RANDOM);
+                            RandomExplode(type1, m_contagiousObstacle);
                             break;
                         case BlockType.COSMIC:
                             CosmicExplode();
                             break;
                         case BlockType.MOON:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.DOUBLE_MOON);
                             SpecialMoonExplode(BlockType.MOON);
                             break;
                         default:
@@ -752,7 +799,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 CosmicExplode();
             }
 
-            int randomType = Random.Range(0, StageMgr.Instance.GetMaxBlockType());
+            // 제일 많은 블록을 해당하는 특수 블록으로 변경 후 터트림
+            BlockType mostType = StageMgr.Instance.GetMostNormalBlockType();
 
             for (int x = 0; x < maxMatrix.x; x++)
             {
@@ -760,12 +808,10 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 {
                     GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(x, y));
                     BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-                    if ((int)type == randomType)
+                    if (type == mostType)
                     {
                         // 해당하는 특수 블록으로 전환
                         tile.GetComponent<Tile>().SetMyBlockType(_type);
-                        // 딜레이 후 터트리기
-                        /* 추가 예정 */
                         
                         tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                     }

@@ -21,6 +21,15 @@ public enum BlockType
     COSMIC, // 모두 다 제거
     MOON, // 클리어 조건 블록을 추적해서 제거
 
+    // 특수 블록 합성
+    DOUBLE_CROSS,
+    CROSS_SUN,
+    CROSS_MOON,
+    DOUBLE_SUN,
+    SUN_MOON,
+    DOUBLE_MOON,
+    ACTIVE_RANDOM,
+
     NULL,
 }
 

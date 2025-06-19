@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: f2cdcc4230e1b914ab25466dfd676f0b
+guid: 5f36affcd31e1034ba66193f6c65a22a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1918913177848569769
-    second: FX2_cross_All_Combine2_fx_03_0
+      213: 4372873429849665991
+    second: FX2_cross_effect_02_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: FX2_cross_All_Combine2_fx_03_0
+      name: FX2_cross_effect_02_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 120
-        height: 120
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9afda705e5951aa10800000000000000
-      internalID: 1918913177848569769
+      spriteID: 7c1fee947319fac30800000000000000
+      internalID: 4372873429849665991
       vertices: []
       indices: 
       edges: []
@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FX2_cross_effect_02_0: 4372873429849665991
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

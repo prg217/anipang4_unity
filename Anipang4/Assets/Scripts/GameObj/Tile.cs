@@ -261,6 +261,9 @@ public class Tile : MonoBehaviour
         // 특수 블록인 경우
         if (type >= BlockType.CROSS && type != BlockType.NULL)
         {
+            // 딜레이 후 터트림
+            StartCoroutine(EffectWithDelay());
+
             // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
             SetMyBlockType(BlockType.NONE);
             MatchMgr.Instance.SpecialExplode();
@@ -271,5 +274,12 @@ public class Tile : MonoBehaviour
         SetMyBlockType(_newBlockType);
     }
 
+    IEnumerator EffectWithDelay()
+    {
+        float delay = 0.1f;
+        // 블록 타입에 따라 이펙트 실행
+        m_myBlock.GetComponent<Block>().Effect(delay);
 
+        yield return new WaitForSeconds(delay);
+    }
 }

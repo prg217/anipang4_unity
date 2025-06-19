@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using System.Collections;
 using static UnityEngine.GraphicsBuffer;
+using System;
 
 public class Block : MonoBehaviour
 {
@@ -72,10 +73,16 @@ public class Block : MonoBehaviour
     public void SetBlockType(in BlockType _Type)
     {
         GetComponent<Renderer>().enabled = true;
+        GetComponent<Animator>().enabled = true;
         m_blockType = _Type;
 
         // 특수 블록 여부
-        if ((int)m_blockType >= (int)BlockType.CROSS)
+        if ((int)m_blockType >= (int)BlockType.DOUBLE_CROSS)
+        {
+            //SpecialComposition(_Type);
+            //return;
+        }
+        else if ((int)m_blockType >= (int)BlockType.CROSS)
         {
             m_isSpecial = true;
         }
@@ -143,6 +150,49 @@ public class Block : MonoBehaviour
         sr.sprite = outlineSprite; // 스프라이트 지정
         #endregion
     }
+
+    private void SpecialComposition(in BlockType _Type)
+    {
+        // 합성일 경우->이펙트+잠깐 멈추기
+        // 아닐 경우->터질 때 이펙트+잠깐 멈추기
+
+        // 애니메이션 잠깐 끄기
+        GetComponent<Animator>().enabled = false;
+
+        // 타입에 따라 스프라이트 설정
+        string spritePath = "";
+
+        switch (m_blockType)
+        {
+            case BlockType.DOUBLE_CROSS:
+                spritePath = "Block/FX2_cross_All_Combine1";
+                break;
+            case BlockType.CROSS_SUN:
+                spritePath = "Block/FX2_cross_All_Combine2";
+                break;
+            case BlockType.CROSS_MOON:
+                spritePath = "Moon/moonCross_01";
+                break;
+            case BlockType.DOUBLE_SUN:
+                spritePath = "Block/sun_01";
+                break;
+            case BlockType.SUN_MOON:
+                spritePath = "Moon/moonSun_01";
+                break;
+            case BlockType.DOUBLE_MOON:
+                spritePath = "Moon/FX2_moon_body_double";
+                break;
+            default:
+                break;
+        }
+
+        Sprite newSprite = Resources.Load<Sprite>(spritePath);
+        if (newSprite != null)
+        {
+            GetComponent<SpriteRenderer>().sprite = newSprite;
+        }
+    }
+
     public void SetOutline(in bool _setting)
     {
         m_outline.SetActive(_setting);
@@ -200,6 +250,11 @@ public class Block : MonoBehaviour
             // 매니저에 이동 완료 신호 보냄
             MoveMgr.Instance.MoveComplete();
         }
+    }
+
+    public void Effect(in float _activeTime)
+    {
+        // 자신의 타입에 따라 이펙트(외곽선 처럼)
     }
 
 }
