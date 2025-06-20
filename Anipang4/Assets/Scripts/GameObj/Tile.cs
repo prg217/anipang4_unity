@@ -223,7 +223,59 @@ public class Tile : MonoBehaviour
         }
     }
 
-    public void Explode(ObstacleType _contagiousObstacleType, BlockType _newBlockType = BlockType.NONE)
+    public void ChasingMoonExplode(in ObstacleType _contagiousObstacleType, in BlockType _explodeType = BlockType.NONE)
+    {
+        // StageMgr에 터트린 블록 타입 알려줌
+        OnTileExplode?.Invoke(GetMyBlockType());
+
+        // 전달 받은 장애물이 있는 경우
+        if (_contagiousObstacleType != ObstacleType.NONE)
+        {
+            // BackObstacle 인 경우
+            if (_contagiousObstacleType > ObstacleType.FRONT_END)
+            {
+                if (m_tileType == TileType.MOVABLE)
+                {
+                    m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_contagiousObstacleType);
+                }
+            }
+        }
+
+        // 장애물이 있는 경우
+        if (!m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty())
+        {
+            Obstacle fo = m_myFrontObstacle.GetComponent<Obstacle>();
+            // Obstacle이 가지고 있는 자식 장애물 쪽으로 이벤트를 연결해줌
+            fo.GetChildObstacle().OnTileType += HandleSetTileTypeExecution;
+
+            fo.AddLevel(-1);
+
+            if (fo.GetLevel() >= 0)
+            {
+                // 특수 블록일 경우 바로 터트림
+                if (_explodeType < BlockType.CROSS)
+                {
+                    return;
+                }
+            }
+        }
+
+        BlockType type = _explodeType;
+
+        // 특수 블록인 경우
+        if (type >= BlockType.CROSS && type != BlockType.NULL)
+        {
+            // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
+            SetMyBlockType(BlockType.NONE);
+            MatchMgr.Instance.SpecialExplode();
+
+            return;
+        }
+
+        SetMyBlockType(_explodeType);
+    }
+
+    public void Explode(in ObstacleType _contagiousObstacleType, in BlockType _newBlockType = BlockType.NONE)
     {
         // StageMgr에 터트린 블록 타입 알려줌
         OnTileExplode?.Invoke(GetMyBlockType());
@@ -276,10 +328,9 @@ public class Tile : MonoBehaviour
 
     IEnumerator EffectWithDelay()
     {
-        float delay = 0.1f;
         // 블록 타입에 따라 이펙트 실행
-        m_myBlock.GetComponent<Block>().Effect(delay);
-
-        yield return new WaitForSeconds(delay);
+        m_myBlock.GetComponent<Block>().SetEffect(true);
+        yield return new WaitForSeconds(0.3f);
+        m_myBlock.GetComponent<Block>().SetEffect(false);
     }
 }

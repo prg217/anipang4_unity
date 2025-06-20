@@ -93,13 +93,13 @@ public class ChasingMoon : MonoBehaviour
         switch (m_blockType)
         {
             case BlockType.CROSS:
-                spritePath += "moonCross1";
+                spritePath += "moonCross_01";
                 break;
             case BlockType.SUN:
-                spritePath += "moonSun1";
+                spritePath += "moonSun_01";
                 break;
             default:
-                spritePath += "moon1";
+                spritePath += "moon_01";
                 break;
         }
 
@@ -204,7 +204,7 @@ public class ChasingMoon : MonoBehaviour
     {
         Destroy(transform.gameObject);
         m_target.GetComponent<Tile>().SetIsTargeted(false);
-        MatchMgr.Instance.SoloExplode(m_target, m_contagiousObstacleType);
+        MatchMgr.Instance.ChasingMoonExplode(m_target, m_contagiousObstacleType, m_blockType);
     }
 
     void SetupBoomerangCurve()

@@ -573,8 +573,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     public void SpecialCompositionExplode(in GameObject _tile1, in GameObject _tile2, in ObstacleType _contagiousObstacle)
     {
-        // 블록 타입을 더블 어쩌구...어쨋든 이렇게 바꾸고 잠깐 멈춘 다음에 터트리기
-
         m_contagiousObstacle = _contagiousObstacle;
 
         BlockType type1 = _tile1.GetComponent<Tile>().GetMyBlockType();
@@ -583,9 +581,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         m_targetTile = _tile2;
         m_targetMatrix = _tile2.GetComponent<Tile>().GetMatrix();
 
-        //_tile1.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
-        //_tile1.GetComponent<Tile>().Explode(_contagiousObstacle);
-        //_tile2.GetComponent<Tile>().Explode(_contagiousObstacle);
+        _tile1.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
 
         switch (type1)
         {
@@ -742,6 +738,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
     {
         GameObject chasingMoon = Instantiate(m_chasingMoonPrefab, m_targetTile.transform.position, m_targetTile.transform.rotation);
         chasingMoon.GetComponent<ChasingMoon>().SetMyTile(m_targetTile);
+        Debug.Log(_specialType);
         chasingMoon.GetComponent<ChasingMoon>().SetBlockType(_specialType);
         chasingMoon.GetComponent<ChasingMoon>().SetContagiousObstacleType(m_contagiousObstacle);
     }
@@ -934,6 +931,10 @@ public class MatchMgr : BaseMgr<MatchMgr>
     // 주변 터트림 : Sun 관련 함수에서 사용, 특수 블록 합성 Moon에서도 사용
     void SurroundingsExplode(in int _x, in int _y) 
     {
+        // 중복 터짐 방지
+        GameObject originalTile = StageMgr.Instance.GetTile(new Vector2Int(_x, _y));
+        originalTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+
         for (int x = -_x; x <= _x; x++)
         {
             for (int y = -_y; y <= _y; y++)
@@ -1048,9 +1049,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
     }
 
-    public void SoloExplode(in GameObject _tile, in ObstacleType _contagiousObstacleType = ObstacleType.NONE)
+    public void ChasingMoonExplode(in GameObject _tile, in ObstacleType _contagiousObstacleType = ObstacleType.NONE, in BlockType _explodeType = BlockType.NONE)
     {
-        _tile.GetComponent<Tile>().Explode(_contagiousObstacleType);
+        _tile.GetComponent<Tile>().ChasingMoonExplode(_contagiousObstacleType, _explodeType);
         // 빈 공간 체크
         StartCoroutine(MoveMgr.Instance.CheckEmpty());
     }

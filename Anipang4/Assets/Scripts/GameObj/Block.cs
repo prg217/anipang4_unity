@@ -16,6 +16,7 @@ public class Block : MonoBehaviour
     bool m_isSpecial = false;
 
     GameObject m_outline;
+    GameObject m_effect;
 
     #region 움직이기 위한 변수
     bool m_moving = false;
@@ -79,8 +80,8 @@ public class Block : MonoBehaviour
         // 특수 블록 여부
         if ((int)m_blockType >= (int)BlockType.DOUBLE_CROSS)
         {
-            //SpecialComposition(_Type);
-            //return;
+            StartCoroutine(SpecialComposition(_Type));
+            return;
         }
         else if ((int)m_blockType >= (int)BlockType.CROSS)
         {
@@ -151,7 +152,97 @@ public class Block : MonoBehaviour
         #endregion
     }
 
-    private void SpecialComposition(in BlockType _Type)
+    public void SetOutline(in bool _setting)
+    {
+        m_outline.SetActive(_setting);
+    }
+    public void SetEffect(in bool _active)
+    {
+        m_effect.SetActive(_active);
+
+        if (_active)
+        {
+            string spritePath = "Effect/";
+
+            switch (m_blockType)
+            {
+                case BlockType.CROSS:
+                    // 회전
+                    spritePath += "FX2_cross_body_effect_0";
+                    break;
+                case BlockType.SUN:
+                    // 원형 파앗...기운...이펙트
+                    spritePath += "FX2_cross_All_Combine2_fx_01";
+                    break;
+                case BlockType.RANDOM:
+                    // 겉에 링 생기고 회전(해당하는 블록들 반짝반짝)
+                    spritePath += "FX2_cosmic_glow";
+                    break;
+                case BlockType.COSMIC:
+                    spritePath += "FX2_cosmic_glow";
+                    break;
+                case BlockType.MOON:
+                    spritePath += "FX2_moon_effect";
+                    break;
+                case BlockType.DOUBLE_CROSS:
+                    spritePath = "FX2_cross_body_effect_0";
+                    break;
+                case BlockType.CROSS_SUN:
+                    spritePath = "FX2_cross_All_Combine2_fx_01";
+                    break;
+                case BlockType.CROSS_MOON:
+                    spritePath = "FX2_moon_effect";
+                    break;
+                case BlockType.DOUBLE_SUN:
+                    spritePath = "FX2_cross_All_Combine2_fx_01";
+                    break;
+                case BlockType.SUN_MOON:
+                    spritePath = "FX2_moon_effect";
+                    break;
+                case BlockType.DOUBLE_MOON:
+                    spritePath = "FX2_moon_double_effect";
+                    break;
+                case BlockType.ACTIVE_RANDOM:
+                    spritePath = "FX2_cosmic_glow";
+                    break;
+                default:
+                    break;
+            }
+
+            Sprite newSprite = Resources.Load<Sprite>(spritePath);
+            if (newSprite != null)
+            {
+                m_effect.GetComponent<SpriteRenderer>().sprite = newSprite;
+            }
+
+            
+        }
+    }
+    #endregion
+
+    private void Awake()
+    {
+        m_outline = transform.Find("Outline").GameObject();
+        m_outline.SetActive(false);
+        m_effect = transform.Find("Effect").GameObject();
+        m_effect.SetActive(false);
+        // 내 블록 타입으로 한 번 세팅
+        SetBlockType(m_blockType);
+    }
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        // 교환을 위한 이동
+        ChangeMoving();
+    }
+    IEnumerator SpecialComposition(BlockType _Type)
     {
         // 합성일 경우->이펙트+잠깐 멈추기
         // 아닐 경우->터질 때 이펙트+잠깐 멈추기
@@ -191,33 +282,10 @@ public class Block : MonoBehaviour
         {
             GetComponent<SpriteRenderer>().sprite = newSprite;
         }
-    }
 
-    public void SetOutline(in bool _setting)
-    {
-        m_outline.SetActive(_setting);
-    }
-    #endregion
-
-    private void Awake()
-    {
-        m_outline = transform.Find("Outline").GameObject();
-        m_outline.SetActive(false);
-        // 내 블록 타입으로 한 번 세팅
-        SetBlockType(m_blockType);
-    }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        // 교환을 위한 이동
-        ChangeMoving();
+        SetEffect(true);
+        yield return new WaitForSeconds(0.3f);
+        SetEffect(false);
     }
 
     public IEnumerator ActiveOutline()
@@ -250,11 +318,6 @@ public class Block : MonoBehaviour
             // 매니저에 이동 완료 신호 보냄
             MoveMgr.Instance.MoveComplete();
         }
-    }
-
-    public void Effect(in float _activeTime)
-    {
-        // 자신의 타입에 따라 이펙트(외곽선 처럼)
     }
 
 }
