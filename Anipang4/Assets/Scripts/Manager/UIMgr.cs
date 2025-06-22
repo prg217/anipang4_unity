@@ -148,7 +148,6 @@ public class UIMgr : BaseMgr<UIMgr>
 
                     // 기존에 있었으면 상태 갱신
                     condition.GetComponent<Condition>().UpdateCondition(_type, count, clearCount);
-                    Debug.Log(_type + "갱신");
                     return;
                 }
             }
@@ -163,7 +162,6 @@ public class UIMgr : BaseMgr<UIMgr>
 
         // 상태 갱신
         conditionObj.GetComponent<Condition>().UpdateCondition(_type, count, clearCount);
-        Debug.Log(_type + "추가");
 
         m_ConditionList.Add(conditionObj);
     }

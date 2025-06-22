@@ -932,7 +932,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
     void SurroundingsExplode(in int _x, in int _y) 
     {
         // 중복 터짐 방지
-        GameObject originalTile = StageMgr.Instance.GetTile(new Vector2Int(_x, _y));
+        GameObject originalTile = StageMgr.Instance.GetTile(m_targetMatrix);
         originalTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
 
         for (int x = -_x; x <= _x; x++)
@@ -1051,7 +1051,20 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     public void ChasingMoonExplode(in GameObject _tile, in ObstacleType _contagiousObstacleType = ObstacleType.NONE, in BlockType _explodeType = BlockType.NONE)
     {
-        _tile.GetComponent<Tile>().ChasingMoonExplode(_contagiousObstacleType, _explodeType);
+        // 여기에 특수블록이면 바로 특수 블록... 아니면 그냥 Explode
+        if (_explodeType >= BlockType.CROSS)
+        {
+            m_targetTile = _tile;
+            m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
+            m_contagiousObstacle = _contagiousObstacleType;
+            m_targetType = _explodeType;
+            SpecialExplode();
+        }
+        else
+        {
+            _tile.GetComponent<Tile>().Explode(_contagiousObstacleType);
+        }
+
         // 빈 공간 체크
         StartCoroutine(MoveMgr.Instance.CheckEmpty());
     }
