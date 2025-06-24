@@ -228,19 +228,6 @@ public class Tile : MonoBehaviour
         // StageMgr에 터트린 블록 타입 알려줌
         OnTileExplode?.Invoke(GetMyBlockType());
 
-        // 전달 받은 장애물이 있는 경우
-        if (_contagiousObstacleType != ObstacleType.NONE)
-        {
-            // BackObstacle 인 경우
-            if (_contagiousObstacleType > ObstacleType.FRONT_END)
-            {
-                if (m_tileType == TileType.MOVABLE)
-                {
-                    m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_contagiousObstacleType);
-                }
-            }
-        }
-
         // 장애물이 있는 경우
         if (!m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty())
         {
@@ -256,6 +243,19 @@ public class Tile : MonoBehaviour
             }
         }
 
+        // 전달 받은 장애물이 있는 경우
+        if (_contagiousObstacleType != ObstacleType.NONE)
+        {
+            // BackObstacle 인 경우
+            if (_contagiousObstacleType > ObstacleType.FRONT_END)
+            {
+                if (m_tileType == TileType.MOVABLE)
+                {
+                    m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_contagiousObstacleType);
+                }
+            }
+        }
+
         BlockType type = GetMyBlockType();
 
         // 특수 블록인 경우
@@ -263,9 +263,10 @@ public class Tile : MonoBehaviour
         {
             // 딜레이 후 터트림
             StartCoroutine(EffectWithDelay());
-
+            Debug.Log(_newBlockType);
             // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
             SetMyBlockType(BlockType.NONE);
+
             MatchMgr.Instance.SpecialExplode();
 
             return;
@@ -274,7 +275,50 @@ public class Tile : MonoBehaviour
         SetMyBlockType(_newBlockType);
     }
 
-    IEnumerator EffectWithDelay()
+    public void ChasingMoonExplode(in ObstacleType _contagiousObstacleType, in BlockType _explodeType = BlockType.NONE)
+    {
+        // StageMgr에 터트린 블록 타입 알려줌
+        OnTileExplode?.Invoke(GetMyBlockType());
+
+        // 장애물이 있는 경우
+        if (!m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty())
+        {
+            Obstacle fo = m_myFrontObstacle.GetComponent<Obstacle>();
+            // Obstacle이 가지고 있는 자식 장애물 쪽으로 이벤트를 연결해줌
+            fo.GetChildObstacle().OnTileType += HandleSetTileTypeExecution;
+
+            fo.AddLevel(-1);
+        }
+        else
+        {
+            // 전달 받은 장애물이 있는 경우
+            if (_contagiousObstacleType != ObstacleType.NONE)
+            {
+                // BackObstacle 인 경우
+                if (_contagiousObstacleType > ObstacleType.FRONT_END)
+                {
+                    if (m_tileType == TileType.MOVABLE)
+                    {
+                        m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_contagiousObstacleType);
+                    }
+                }
+            }
+
+            SetMyBlockType(BlockType.NONE);
+        }
+
+        BlockType type = _explodeType;
+
+        // 특수 블록인 경우
+        if (type >= BlockType.CROSS && type != BlockType.NULL)
+        {
+            MatchMgr.Instance.SpecialExplode();
+
+            return;
+        }
+    }
+
+    public IEnumerator EffectWithDelay()
     {
         // 블록 타입에 따라 이펙트 실행
         m_myBlock.GetComponent<Block>().SetEffect(true);

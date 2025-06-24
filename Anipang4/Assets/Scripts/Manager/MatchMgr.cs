@@ -543,10 +543,15 @@ public class MatchMgr : BaseMgr<MatchMgr>
     {
         // 매치되는 타일 중 전파되는 장애물이 있는지 확인
         m_contagiousObstacle = ObstacleType.NONE;
-        ObstacleType obstacleType = m_targetTile.GetComponent<Tile>().GetPropagationObstacle();
-        if (obstacleType != ObstacleType.NONE)
+
+        // 앞 장애물이 없을 경우
+        if (m_targetTile.GetComponent<Tile>().GetMyFrontObstacleType() == ObstacleType.NONE)
         {
-            m_contagiousObstacle = obstacleType;
+            ObstacleType obstacleType = m_targetTile.GetComponent<Tile>().GetPropagationObstacle();
+            if (obstacleType != ObstacleType.NONE)
+            {
+                m_contagiousObstacle = obstacleType;
+            }
         }
 
         switch (m_targetType)
@@ -565,6 +570,36 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 break;
             case BlockType.MOON:
                 MoonExplode();
+                break;
+            case BlockType.DOUBLE_CROSS:
+                DoubleCrossExplode();
+                break;
+            case BlockType.CROSS_SUN:
+                CrossSunExplode();
+                break;
+            case BlockType.CROSS_MOON:
+                SpecialMoonExplode(BlockType.CROSS);
+                break;
+            case BlockType.DOUBLE_SUN:
+                DoubleSunExplode();
+                break;
+            case BlockType.SUN_MOON:
+                SpecialMoonExplode(BlockType.SUN);
+                break;
+            case BlockType.DOUBLE_MOON:
+                SpecialMoonExplode(BlockType.MOON);
+                break;
+            case BlockType.DOUBLE_RANDOM:
+                CosmicExplode();
+                break;
+            case BlockType.RANDOM_CROSS:
+                RandomExplode(BlockType.CROSS, m_contagiousObstacle);
+                break;
+            case BlockType.RANDOM_SUN:
+                RandomExplode(BlockType.SUN, m_contagiousObstacle);
+                break;
+            case BlockType.RANDOM_MOON:
+                RandomExplode(BlockType.MOON, m_contagiousObstacle);
                 break;
             default:
                 break;
@@ -591,22 +626,18 @@ public class MatchMgr : BaseMgr<MatchMgr>
                     {
                         case BlockType.CROSS:
                             _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.DOUBLE_CROSS);
-                            DoubleCrossExplode();
                             break;
                         case BlockType.SUN:
                             _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_SUN);
-                            CrossSunExplode();
                             break;
                         case BlockType.RANDOM:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.ACTIVE_RANDOM);
-                            RandomExplode(type1, m_contagiousObstacle);
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_CROSS);
                             break;
                         case BlockType.COSMIC:
-                            CosmicExplode();
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
                             break;
                         case BlockType.MOON:
                             _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_MOON);
-                            SpecialMoonExplode(BlockType.CROSS);
                             break;
                         default:
                             break;
@@ -619,22 +650,18 @@ public class MatchMgr : BaseMgr<MatchMgr>
                     {
                         case BlockType.CROSS:
                             _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_SUN);
-                            CrossSunExplode();
                             break;
                         case BlockType.SUN:
                             _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.DOUBLE_SUN);
-                            DoubleSunExplode();
                             break;
                         case BlockType.RANDOM:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.ACTIVE_RANDOM);
-                            RandomExplode(type1, m_contagiousObstacle);
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_SUN);
                             break;
                         case BlockType.COSMIC:
-                            CosmicExplode();
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
                             break;
                         case BlockType.MOON:
                             _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.SUN_MOON);
-                            SpecialMoonExplode(BlockType.SUN);
                             break;
                         default:
                             break;
@@ -645,22 +672,29 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 {
                     switch (type2)
                     {
+                        case BlockType.CROSS:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_CROSS);
+                            break;
+                        case BlockType.SUN:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_SUN);
+                            break;
+                        case BlockType.MOON:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_MOON);
+                            break;
                         case BlockType.RANDOM:
-                            CosmicExplode();
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
                             break;
                         case BlockType.COSMIC:
-                            CosmicExplode();
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
                             break;
                         default:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.ACTIVE_RANDOM);
-                            RandomExplode(type2, m_contagiousObstacle);
                             break;
                     }
                 }
                 break;
             case BlockType.COSMIC:
                 {
-                    CosmicExplode();
+                    _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
                 }
                 break;
             case BlockType.MOON:
@@ -669,22 +703,18 @@ public class MatchMgr : BaseMgr<MatchMgr>
                     {
                         case BlockType.CROSS:
                             _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_MOON);
-                            SpecialMoonExplode(BlockType.CROSS);
                             break;
                         case BlockType.SUN:
                             _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.SUN_MOON);
-                            SpecialMoonExplode(BlockType.SUN);
                             break;
                         case BlockType.RANDOM:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.ACTIVE_RANDOM);
-                            RandomExplode(type1, m_contagiousObstacle);
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_MOON);
                             break;
                         case BlockType.COSMIC:
-                            CosmicExplode();
+                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
                             break;
                         case BlockType.MOON:
                             _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.DOUBLE_MOON);
-                            SpecialMoonExplode(BlockType.MOON);
                             break;
                         default:
                             break;
@@ -694,6 +724,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
             default:
                 break;
         }
+
+        m_targetType = _tile2.GetComponent<Tile>().GetMyBlockType();
+        _tile2.GetComponent<Tile>().Explode(_contagiousObstacle);
     }
 
     void DoubleCrossExplode()
@@ -738,7 +771,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
     {
         GameObject chasingMoon = Instantiate(m_chasingMoonPrefab, m_targetTile.transform.position, m_targetTile.transform.rotation);
         chasingMoon.GetComponent<ChasingMoon>().SetMyTile(m_targetTile);
-        Debug.Log(_specialType);
+
         chasingMoon.GetComponent<ChasingMoon>().SetBlockType(_specialType);
         chasingMoon.GetComponent<ChasingMoon>().SetContagiousObstacleType(m_contagiousObstacle);
     }
@@ -1051,21 +1084,22 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     public void ChasingMoonExplode(in GameObject _tile, in ObstacleType _contagiousObstacleType = ObstacleType.NONE, in BlockType _explodeType = BlockType.NONE)
     {
-        // 여기에 특수블록이면 바로 특수 블록... 아니면 그냥 Explode
+        // 여기에 특수블록이면 바로 특수 블록을 터트림(장애물 위여도) 아니면 그냥 Explode
         if (_explodeType >= BlockType.CROSS)
         {
             m_targetTile = _tile;
             m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
             m_contagiousObstacle = _contagiousObstacleType;
             m_targetType = _explodeType;
-            SpecialExplode();
+            Debug.Log("1");
+            _tile.GetComponent<Tile>().ChasingMoonExplode(_contagiousObstacleType, _explodeType);
         }
         else
         {
+            Debug.Log("2");
             _tile.GetComponent<Tile>().Explode(_contagiousObstacleType);
         }
 
-        // 빈 공간 체크
-        StartCoroutine(MoveMgr.Instance.CheckEmpty());
+        MoveMgr.Instance.StartCheckEmpty();
     }
 }

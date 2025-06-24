@@ -151,8 +151,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     // 매치 후 빈 공간 채우기 실행
                     if (!m_emptyMoving)
                     {
-                        Coroutine coroutine = StartCoroutine(CheckEmpty());
-                        checkEmptyCoroutines.Add(coroutine);
+                        StartCheckEmpty();
                     }
                 }
 
@@ -366,8 +365,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
             // 빈공간 채우기 실행
             if (!m_emptyMoving)
             {
-                Coroutine coroutine = StartCoroutine(CheckEmpty());
-                checkEmptyCoroutines.Add(coroutine);
+                StartCheckEmpty();
             }
 
             if (m_clickDuringEmptyMoving)
@@ -375,6 +373,12 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 m_emptyMoving = true;
             }
         }
+    }
+
+    public void StartCheckEmpty()
+    {
+        Coroutine coroutine = StartCoroutine(CheckEmpty());
+        checkEmptyCoroutines.Add(coroutine);
     }
 
     void ConsumeMove()

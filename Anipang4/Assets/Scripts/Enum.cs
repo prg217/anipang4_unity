@@ -25,10 +25,16 @@ public enum BlockType
     DOUBLE_CROSS,
     CROSS_SUN,
     CROSS_MOON,
+
     DOUBLE_SUN,
     SUN_MOON,
+
     DOUBLE_MOON,
-    ACTIVE_RANDOM,
+
+    DOUBLE_RANDOM,
+    RANDOM_CROSS,
+    RANDOM_SUN,
+    RANDOM_MOON,
 
     NULL,
 }

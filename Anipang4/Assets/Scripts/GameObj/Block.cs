@@ -202,7 +202,10 @@ public class Block : MonoBehaviour
                 case BlockType.DOUBLE_MOON:
                     spritePath = "FX2_moon_double_effect";
                     break;
-                case BlockType.ACTIVE_RANDOM:
+                case BlockType.DOUBLE_RANDOM:
+                case BlockType.RANDOM_CROSS:
+                case BlockType.RANDOM_SUN:
+                case BlockType.RANDOM_MOON:
                     spritePath = "FX2_cosmic_glow";
                     break;
                 default:
