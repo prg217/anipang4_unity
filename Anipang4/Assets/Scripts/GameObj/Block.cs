@@ -80,7 +80,7 @@ public class Block : MonoBehaviour
         // 특수 블록 여부
         if ((int)m_blockType >= (int)BlockType.DOUBLE_CROSS)
         {
-            StartCoroutine(SpecialComposition(_Type));
+            SpecialComposition(_Type);
             return;
         }
         else if ((int)m_blockType >= (int)BlockType.CROSS)
@@ -185,28 +185,28 @@ public class Block : MonoBehaviour
                     spritePath += "FX2_moon_effect";
                     break;
                 case BlockType.DOUBLE_CROSS:
-                    spritePath = "FX2_cross_body_effect_0";
+                    spritePath += "FX2_cross_body_effect_0";
                     break;
                 case BlockType.CROSS_SUN:
-                    spritePath = "FX2_cross_All_Combine2_fx_01";
+                    spritePath += "FX2_cross_All_Combine2_fx_01";
                     break;
                 case BlockType.CROSS_MOON:
-                    spritePath = "FX2_moon_effect";
+                    spritePath += "FX2_moon_effect";
                     break;
                 case BlockType.DOUBLE_SUN:
-                    spritePath = "FX2_cross_All_Combine2_fx_01";
+                    spritePath += "FX2_cross_All_Combine2_fx_01";
                     break;
                 case BlockType.SUN_MOON:
-                    spritePath = "FX2_moon_effect";
+                    spritePath += "FX2_moon_effect";
                     break;
                 case BlockType.DOUBLE_MOON:
-                    spritePath = "FX2_moon_double_effect";
+                    spritePath += "FX2_moon_double_effect";
                     break;
                 case BlockType.DOUBLE_RANDOM:
                 case BlockType.RANDOM_CROSS:
                 case BlockType.RANDOM_SUN:
                 case BlockType.RANDOM_MOON:
-                    spritePath = "FX2_cosmic_glow";
+                    spritePath += "FX2_cosmic_glow";
                     break;
                 default:
                     break;
@@ -245,7 +245,7 @@ public class Block : MonoBehaviour
         // 교환을 위한 이동
         ChangeMoving();
     }
-    IEnumerator SpecialComposition(BlockType _Type)
+    void SpecialComposition(BlockType _Type)
     {
         // 합성일 경우->이펙트+잠깐 멈추기
         // 아닐 경우->터질 때 이펙트+잠깐 멈추기
@@ -285,10 +285,6 @@ public class Block : MonoBehaviour
         {
             GetComponent<SpriteRenderer>().sprite = newSprite;
         }
-
-        SetEffect(true);
-        yield return new WaitForSeconds(0.3f);
-        SetEffect(false);
     }
 
     public IEnumerator ActiveOutline()
@@ -323,4 +319,9 @@ public class Block : MonoBehaviour
         }
     }
 
+    public void RandomEffect(in bool _active)
+    {
+        // 흔들리고 터트림(매치 매니저에서 0.1초마다 하나씩 흔들리고, 거기서 완료 사인이 도착하기 까지 흔들림
+        
+    }
 }

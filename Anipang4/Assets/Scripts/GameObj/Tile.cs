@@ -262,12 +262,7 @@ public class Tile : MonoBehaviour
         if (type >= BlockType.CROSS && type != BlockType.NULL)
         {
             // 딜레이 후 터트림
-            StartCoroutine(EffectWithDelay());
-            Debug.Log(_newBlockType);
-            // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
-            SetMyBlockType(BlockType.NONE);
-
-            MatchMgr.Instance.SpecialExplode();
+            StartCoroutine(SpecialExplode());
 
             return;
         }
@@ -318,11 +313,31 @@ public class Tile : MonoBehaviour
         }
     }
 
-    public IEnumerator EffectWithDelay()
+    public void RandomEffect(in bool _active)
+    {
+        m_myBlock.GetComponent<Block>().RandomEffect(_active);
+        if (_active)
+        {
+
+        }
+        else
+        {
+            // 블록 원상 복귀 시키기
+            m_myBlock.transform.position = Vector3.zero;
+            //StopCoroutine(m_myBlock.GetComponent<Block>().RandomEffect());
+        }
+    }
+
+    public IEnumerator SpecialExplode()
     {
         // 블록 타입에 따라 이펙트 실행
         m_myBlock.GetComponent<Block>().SetEffect(true);
         yield return new WaitForSeconds(0.3f);
         m_myBlock.GetComponent<Block>().SetEffect(false);
+
+        // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
+        SetMyBlockType(BlockType.NONE);
+
+        MatchMgr.Instance.SpecialExplode();
     }
 }

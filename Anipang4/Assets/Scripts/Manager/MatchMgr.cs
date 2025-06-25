@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -787,12 +788,14 @@ public class MatchMgr : BaseMgr<MatchMgr>
         SurroundingsExplode(2, 2);
     }
 
-    public void RandomExplode(BlockType _type, in ObstacleType _contagiousObstacle)
+    public IEnumerator RandomExplode(BlockType _type, ObstacleType _contagiousObstacle)
     {
         m_contagiousObstacle = _contagiousObstacle;
         // 교차 시킨 블록 타입 정보 알아야 함
         // 그 블록 타입들 서치해서 제거
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
+        
+        List<GameObject> explodeTiles = new List<GameObject>();
 
         #region 단독으로 실행 됐을 경우
         if (_type == BlockType.NONE)
@@ -814,7 +817,11 @@ public class MatchMgr : BaseMgr<MatchMgr>
                     BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
                     if (type == _type)
                     {
-                        tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
+                        // 해당되는 블록 흔들리는 효과
+                        explodeTiles.Add(tile);
+                        tile.GetComponent<Tile>().RandomEffect(true);
+
+                        yield return new WaitForSeconds(0.1f);
                     }
                 }
             }
@@ -842,13 +849,22 @@ public class MatchMgr : BaseMgr<MatchMgr>
                     {
                         // 해당하는 특수 블록으로 전환
                         tile.GetComponent<Tile>().SetMyBlockType(_type);
-                        
-                        tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
+
+                        // 해당되는 블록 흔들리는 효과
+                        explodeTiles.Add(tile);
+                        tile.GetComponent<Tile>().RandomEffect(true);
                     }
                 }
             }
         }
         #endregion
+
+        // 다 끝나면 끝났다는 사인 보냄 해당되는 블록들에게 동시에 보냄
+        foreach (GameObject tile in explodeTiles)
+        {
+            tile.GetComponent<Tile>().RandomEffect(false);
+            tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
+        }
     }
 
     void CosmicExplode()
@@ -1091,12 +1107,11 @@ public class MatchMgr : BaseMgr<MatchMgr>
             m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
             m_contagiousObstacle = _contagiousObstacleType;
             m_targetType = _explodeType;
-            Debug.Log("1");
+
             _tile.GetComponent<Tile>().ChasingMoonExplode(_contagiousObstacleType, _explodeType);
         }
         else
         {
-            Debug.Log("2");
             _tile.GetComponent<Tile>().Explode(_contagiousObstacleType);
         }
 
