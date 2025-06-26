@@ -30,6 +30,11 @@ public class Block : MonoBehaviour
     float m_time = 0f;
     #endregion
 
+    [Header("흔들림 설정")]
+    float m_shakeIntensity = 0.02f;  // 흔들림 강도
+    float m_shakeSpeed = 10f;       // 흔들림 속도
+    bool m_shaking = false;
+
     #endregion 변수 끝
 
     #region Get함수
@@ -202,12 +207,6 @@ public class Block : MonoBehaviour
                 case BlockType.DOUBLE_MOON:
                     spritePath += "FX2_moon_double_effect";
                     break;
-                case BlockType.DOUBLE_RANDOM:
-                case BlockType.RANDOM_CROSS:
-                case BlockType.RANDOM_SUN:
-                case BlockType.RANDOM_MOON:
-                    spritePath += "FX2_cosmic_glow";
-                    break;
                 default:
                     break;
             }
@@ -244,6 +243,12 @@ public class Block : MonoBehaviour
     {
         // 교환을 위한 이동
         ChangeMoving();
+
+        if (m_shaking)
+        {
+            Shake();
+        }
+
     }
     void SpecialComposition(BlockType _Type)
     {
@@ -275,6 +280,12 @@ public class Block : MonoBehaviour
                 break;
             case BlockType.DOUBLE_MOON:
                 spritePath = "Moon/FX2_moon_body_double";
+                break;
+            case BlockType.DOUBLE_RANDOM:
+            case BlockType.RANDOM_CROSS:
+            case BlockType.RANDOM_SUN:
+            case BlockType.RANDOM_MOON:
+                spritePath += "FX2_cosmic_glow";
                 break;
             default:
                 break;
@@ -322,6 +333,23 @@ public class Block : MonoBehaviour
     public void RandomEffect(in bool _active)
     {
         // 흔들리고 터트림(매치 매니저에서 0.1초마다 하나씩 흔들리고, 거기서 완료 사인이 도착하기 까지 흔들림
-        
+        m_shaking = _active;
+        if (!_active)
+        {
+            transform.localPosition = new Vector3(0f, 0f, 0f);
+        }
+    }
+
+    void Shake()
+    {
+        // 랜덤한 방향으로 흔들림
+        Vector3 shakeOffset =
+        new Vector3(
+            UnityEngine.Random.Range(-m_shakeIntensity, m_shakeIntensity),
+            UnityEngine.Random.Range(-m_shakeIntensity, m_shakeIntensity),
+            0f
+        );
+
+        transform.localPosition = shakeOffset;
     }
 }

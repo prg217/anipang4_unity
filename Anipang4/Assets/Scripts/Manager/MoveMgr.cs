@@ -186,7 +186,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
             // 상하좌우에 있는 타일인지 확인
             if (!CheckAdjacentTile())
             {
-                Debug.Log("CheckAdjacentTile");
                 return;
             }
         }
@@ -330,11 +329,11 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     // 랜덤과 일반 블록인 경우->랜덤 Explode 실행
                     if (type1 == BlockType.RANDOM)
                     {
-                        MatchMgr.Instance.RandomExplode(type2, obType);
+                        MatchMgr.Instance.RandomMatch(type2, obType);
                     }
                     else if (type2 == BlockType.RANDOM)
                     {
-                        MatchMgr.Instance.RandomExplode(type1, obType);
+                        MatchMgr.Instance.RandomMatch(type1, obType);
                     }
 
                     #endregion

@@ -39,6 +39,9 @@ public class Tile : MonoBehaviour
     // 타겟이 되었는지
     bool m_isTargeted = false;
 
+    // 랜덤이 끝날 때까지 대기하기 위한 용도
+    bool m_randomComplete = false;
+
     #endregion 변수 끝
 
     #region Get함수
@@ -67,6 +70,7 @@ public class Tile : MonoBehaviour
 
         return ObstacleType.NONE;
     }
+    public bool GetFrontObstacleEmpty() { return m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty(); }
     public ObstacleType GetMyFrontObstacleType() { return m_myFrontObstacle.GetComponent<Obstacle>().GetObstacleType(); }
     public ObstacleType GetMyBackObstacleType() { return m_myBackObstacle.GetComponent<Obstacle>().GetObstacleType(); }
     public bool GetIsTargeted() { return m_isTargeted; }
@@ -92,6 +96,10 @@ public class Tile : MonoBehaviour
     public void SetIsTargeted(in bool _setting)
     {
         m_isTargeted = _setting;
+    }
+    public void SetRandomComplete(in bool _setting)
+    {
+        m_randomComplete = _setting;
     }
     #endregion
 
@@ -276,7 +284,7 @@ public class Tile : MonoBehaviour
         OnTileExplode?.Invoke(GetMyBlockType());
 
         // 장애물이 있는 경우
-        if (!m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty())
+        if (!GetFrontObstacleEmpty())
         {
             Obstacle fo = m_myFrontObstacle.GetComponent<Obstacle>();
             // Obstacle이 가지고 있는 자식 장애물 쪽으로 이벤트를 연결해줌
@@ -316,28 +324,41 @@ public class Tile : MonoBehaviour
     public void RandomEffect(in bool _active)
     {
         m_myBlock.GetComponent<Block>().RandomEffect(_active);
-        if (_active)
-        {
-
-        }
-        else
-        {
-            // 블록 원상 복귀 시키기
-            m_myBlock.transform.position = Vector3.zero;
-            //StopCoroutine(m_myBlock.GetComponent<Block>().RandomEffect());
-        }
     }
 
     public IEnumerator SpecialExplode()
     {
         // 블록 타입에 따라 이펙트 실행
         m_myBlock.GetComponent<Block>().SetEffect(true);
-        yield return new WaitForSeconds(0.3f);
-        m_myBlock.GetComponent<Block>().SetEffect(false);
+        switch (GetMyBlockType())
+        {
+            case BlockType.RANDOM:
+            case BlockType.DOUBLE_RANDOM:
+            case BlockType.RANDOM_CROSS:
+            case BlockType.RANDOM_SUN:
+            case BlockType.RANDOM_MOON:
+                Debug.Log("?");
+                SetRandomComplete(false);
+                yield return new WaitUntil(() => m_randomComplete);
+                Debug.Log("오잉");
 
-        // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
-        SetMyBlockType(BlockType.NONE);
+                m_myBlock.GetComponent<Block>().SetEffect(false);
 
-        MatchMgr.Instance.SpecialExplode();
+                // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
+                SetMyBlockType(BlockType.NONE);
+
+
+                break;
+            default:
+                yield return new WaitForSeconds(0.3f);
+                m_myBlock.GetComponent<Block>().SetEffect(false);
+
+                // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
+                SetMyBlockType(BlockType.NONE);
+
+                MatchMgr.Instance.SpecialExplode();
+                break;
+        }
+
     }
 }

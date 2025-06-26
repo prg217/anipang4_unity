@@ -564,7 +564,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 SunExplode();
                 break;
             case BlockType.RANDOM:
-                RandomExplode(BlockType.NONE, m_contagiousObstacle);
+                StartCoroutine(RandomExplode(BlockType.NONE, m_contagiousObstacle));
                 break;
             case BlockType.COSMIC:
                 CosmicExplode();
@@ -594,13 +594,13 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 CosmicExplode();
                 break;
             case BlockType.RANDOM_CROSS:
-                RandomExplode(BlockType.CROSS, m_contagiousObstacle);
+                StartCoroutine(RandomExplode(BlockType.CROSS, m_contagiousObstacle));
                 break;
             case BlockType.RANDOM_SUN:
-                RandomExplode(BlockType.SUN, m_contagiousObstacle);
+                StartCoroutine(RandomExplode(BlockType.SUN, m_contagiousObstacle));
                 break;
             case BlockType.RANDOM_MOON:
-                RandomExplode(BlockType.MOON, m_contagiousObstacle);
+                StartCoroutine(RandomExplode(BlockType.MOON, m_contagiousObstacle));
                 break;
             default:
                 break;
@@ -788,7 +788,12 @@ public class MatchMgr : BaseMgr<MatchMgr>
         SurroundingsExplode(2, 2);
     }
 
-    public IEnumerator RandomExplode(BlockType _type, ObstacleType _contagiousObstacle)
+    public void RandomMatch(BlockType _type, ObstacleType _contagiousObstacle)
+    {
+        StartCoroutine(RandomExplode(_type, _contagiousObstacle));
+    }
+
+    IEnumerator RandomExplode(BlockType _type, ObstacleType _contagiousObstacle)
     {
         m_contagiousObstacle = _contagiousObstacle;
         // 교차 시킨 블록 타입 정보 알아야 함
@@ -848,11 +853,17 @@ public class MatchMgr : BaseMgr<MatchMgr>
                     if (type == mostType)
                     {
                         // 해당하는 특수 블록으로 전환
-                        tile.GetComponent<Tile>().SetMyBlockType(_type);
+                        // Front장애물 안에 있는 경우 일반 블록 처럼 처리
+                        if (tile.GetComponent<Tile>().GetFrontObstacleEmpty())
+                        {
+                            tile.GetComponent<Tile>().SetMyBlockType(_type);
+                        }
 
                         // 해당되는 블록 흔들리는 효과
                         explodeTiles.Add(tile);
                         tile.GetComponent<Tile>().RandomEffect(true);
+
+                        yield return new WaitForSeconds(0.1f);
                     }
                 }
             }
@@ -865,6 +876,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
             tile.GetComponent<Tile>().RandomEffect(false);
             tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
         }
+
+        m_targetTile.GetComponent<Tile>().SetRandomComplete(true);
+        MoveMgr.Instance.StartCheckEmpty();
     }
 
     void CosmicExplode()
