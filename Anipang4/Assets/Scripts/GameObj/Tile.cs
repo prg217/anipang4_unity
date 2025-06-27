@@ -99,6 +99,7 @@ public class Tile : MonoBehaviour
     }
     public void SetRandomComplete(in bool _setting)
     {
+        Debug.Log(transform.name + _setting);
         m_randomComplete = _setting;
     }
     #endregion
@@ -330,15 +331,22 @@ public class Tile : MonoBehaviour
     {
         // 블록 타입에 따라 이펙트 실행
         m_myBlock.GetComponent<Block>().SetEffect(true);
+        SetRandomComplete(false);
+
         switch (GetMyBlockType())
         {
             case BlockType.RANDOM:
+                yield return new WaitUntil(() => m_randomComplete);
+                m_myBlock.GetComponent<Block>().SetEffect(false);
+                // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
+                SetMyBlockType(BlockType.NONE);
+                break;
             case BlockType.DOUBLE_RANDOM:
             case BlockType.RANDOM_CROSS:
             case BlockType.RANDOM_SUN:
             case BlockType.RANDOM_MOON:
-                Debug.Log("?");
-                SetRandomComplete(false);
+                Debug.Log("대기");
+                MatchMgr.Instance.SpecialExplode();
                 yield return new WaitUntil(() => m_randomComplete);
                 Debug.Log("오잉");
 
@@ -346,8 +354,6 @@ public class Tile : MonoBehaviour
 
                 // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
                 SetMyBlockType(BlockType.NONE);
-
-
                 break;
             default:
                 yield return new WaitForSeconds(0.3f);

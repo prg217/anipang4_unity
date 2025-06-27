@@ -320,6 +320,11 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 if (type1 >= BlockType.CROSS && type2 >= BlockType.CROSS)
                 {
                     MatchMgr.Instance.SpecialCompositionExplode(m_pClickedTile1, m_pClickedTile2, obType);
+
+                    if (type1 == BlockType.RANDOM || type2 == BlockType.RANDOM)
+                    {
+                        return;
+                    }
                 }
                 // 아닌경우
                 else
@@ -329,11 +334,11 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     // 랜덤과 일반 블록인 경우->랜덤 Explode 실행
                     if (type1 == BlockType.RANDOM)
                     {
-                        MatchMgr.Instance.RandomMatch(type2, obType);
+                        MatchMgr.Instance.RandomMatch(m_pClickedTile1, type2, obType);
                     }
                     else if (type2 == BlockType.RANDOM)
                     {
-                        MatchMgr.Instance.RandomMatch(type1, obType);
+                        MatchMgr.Instance.RandomMatch(m_pClickedTile2, type1, obType);
                     }
 
                     #endregion
@@ -341,6 +346,11 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     // 매치 시도 후 매치가 안 되면 원상복구
                     bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1);
                     bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2);
+
+                    if (type1 == BlockType.RANDOM || type2 == BlockType.RANDOM)
+                    {
+                        return;
+                    }
                 }
             }
             else if (m_reMoving)

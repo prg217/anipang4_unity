@@ -25,6 +25,11 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     #endregion 변수 끝
 
+    void SetTargetTile(in GameObject _targetTile)
+    {
+        m_targetTile = _targetTile;
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -68,7 +73,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         #region 타겟 타일 변수 세팅
         if (_explode)
         {
-            m_targetTile = _tile;
+            SetTargetTile(_tile);
             m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
             m_targetType = _tile.GetComponent<Tile>().GetMyBlockType();
         }
@@ -453,7 +458,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         BlockType saveType = _changeTile.GetComponent<Tile>().GetMyBlockType();
         _originalTile.GetComponent<Tile>().SetMyBlockType(saveType);
 
-        m_targetTile = _changeTile;
+        SetTargetTile(_changeTile);
         m_targetMatrix = _changeTile.GetComponent<Tile>().GetMatrix();
 
         if (CheckMatch(_changeTile, false))
@@ -564,7 +569,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 SunExplode();
                 break;
             case BlockType.RANDOM:
-                StartCoroutine(RandomExplode(BlockType.NONE, m_contagiousObstacle));
+                StartCoroutine(RandomExplode(BlockType.NONE));
                 break;
             case BlockType.COSMIC:
                 CosmicExplode();
@@ -594,13 +599,13 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 CosmicExplode();
                 break;
             case BlockType.RANDOM_CROSS:
-                StartCoroutine(RandomExplode(BlockType.CROSS, m_contagiousObstacle));
+                StartCoroutine(RandomExplode(BlockType.CROSS));
                 break;
             case BlockType.RANDOM_SUN:
-                StartCoroutine(RandomExplode(BlockType.SUN, m_contagiousObstacle));
+                StartCoroutine(RandomExplode(BlockType.SUN));
                 break;
             case BlockType.RANDOM_MOON:
-                StartCoroutine(RandomExplode(BlockType.MOON, m_contagiousObstacle));
+                StartCoroutine(RandomExplode(BlockType.MOON));
                 break;
             default:
                 break;
@@ -614,7 +619,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         BlockType type1 = _tile1.GetComponent<Tile>().GetMyBlockType();
         BlockType type2 = _tile2.GetComponent<Tile>().GetMyBlockType();
 
-        m_targetTile = _tile2;
+        SetTargetTile(_tile2);
         m_targetMatrix = _tile2.GetComponent<Tile>().GetMatrix();
 
         _tile1.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
@@ -788,16 +793,17 @@ public class MatchMgr : BaseMgr<MatchMgr>
         SurroundingsExplode(2, 2);
     }
 
-    public void RandomMatch(BlockType _type, ObstacleType _contagiousObstacle)
+    public void RandomMatch(in GameObject _targetTile ,in BlockType _randomType, in ObstacleType _contagiousObstacle)
     {
-        StartCoroutine(RandomExplode(_type, _contagiousObstacle));
+        SetTargetTile(_targetTile);
+        m_contagiousObstacle = _contagiousObstacle;
+
+        StartCoroutine(RandomExplode(_randomType));
     }
 
-    IEnumerator RandomExplode(BlockType _type, ObstacleType _contagiousObstacle)
+    IEnumerator RandomExplode(BlockType _type)
     {
-        m_contagiousObstacle = _contagiousObstacle;
-        // 교차 시킨 블록 타입 정보 알아야 함
-        // 그 블록 타입들 서치해서 제거
+        // 교차 시킨 블록 타입 정보를 알고, 그 타입들을 서치해서 제거
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
         
         List<GameObject> explodeTiles = new List<GameObject>();
@@ -877,7 +883,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
             tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
         }
 
+        // 다 터지는 동안 대기하고 있던 랜덤 블록을 없애줌
         m_targetTile.GetComponent<Tile>().SetRandomComplete(true);
+
         MoveMgr.Instance.StartCheckEmpty();
     }
 
@@ -1117,7 +1125,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // 여기에 특수블록이면 바로 특수 블록을 터트림(장애물 위여도) 아니면 그냥 Explode
         if (_explodeType >= BlockType.CROSS)
         {
-            m_targetTile = _tile;
+            SetTargetTile(_tile);
             m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
             m_contagiousObstacle = _contagiousObstacleType;
             m_targetType = _explodeType;
