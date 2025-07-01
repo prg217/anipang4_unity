@@ -42,6 +42,8 @@ public class Tile : MonoBehaviour
     // 랜덤이 끝날 때까지 대기하기 위한 용도
     bool m_randomComplete = false;
 
+    GameObject m_myExplodeEffect;
+
     #endregion 변수 끝
 
     #region Get함수
@@ -99,7 +101,6 @@ public class Tile : MonoBehaviour
     }
     public void SetRandomComplete(in bool _setting)
     {
-        Debug.Log(transform.name + _setting);
         m_randomComplete = _setting;
     }
     #endregion
@@ -153,6 +154,11 @@ public class Tile : MonoBehaviour
         if (child != null)
         {
             m_myBackObstacle = child.gameObject;
+        }
+        child = transform.Find("ExplodeEffect");
+        if (child != null)
+        {
+            m_myExplodeEffect = child.gameObject;
         }
         #endregion
 
@@ -232,10 +238,19 @@ public class Tile : MonoBehaviour
         }
     }
 
+    IEnumerator ExplodeEffect()
+    {
+        m_myExplodeEffect.SetActive(true);
+        yield return new WaitForSeconds(0.15f);
+        m_myExplodeEffect.SetActive(false);
+    }
+
     public void Explode(in ObstacleType _contagiousObstacleType, in BlockType _newBlockType = BlockType.NONE)
     {
         // StageMgr에 터트린 블록 타입 알려줌
         OnTileExplode?.Invoke(GetMyBlockType());
+
+        StartCoroutine(ExplodeEffect());
 
         // 장애물이 있는 경우
         if (!m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty())
@@ -307,8 +322,6 @@ public class Tile : MonoBehaviour
                     }
                 }
             }
-
-            SetMyBlockType(BlockType.NONE);
         }
 
         BlockType type = _explodeType;
@@ -316,7 +329,7 @@ public class Tile : MonoBehaviour
         // 특수 블록인 경우
         if (type >= BlockType.CROSS && type != BlockType.NULL)
         {
-            MatchMgr.Instance.SpecialExplode();
+            MatchMgr.Instance.SpecialExplode(transform.gameObject, GetMyBlockType());
 
             return;
         }
@@ -338,33 +351,25 @@ public class Tile : MonoBehaviour
             case BlockType.RANDOM:
                 yield return new WaitUntil(() => m_randomComplete);
                 m_myBlock.GetComponent<Block>().SetEffect(false);
-                // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
-                SetMyBlockType(BlockType.NONE);
                 break;
             case BlockType.DOUBLE_RANDOM:
             case BlockType.RANDOM_CROSS:
             case BlockType.RANDOM_SUN:
             case BlockType.RANDOM_MOON:
-                Debug.Log("대기");
-                MatchMgr.Instance.SpecialExplode();
+                MatchMgr.Instance.SpecialExplode(transform.gameObject, GetMyBlockType());
                 yield return new WaitUntil(() => m_randomComplete);
-                Debug.Log("오잉");
 
                 m_myBlock.GetComponent<Block>().SetEffect(false);
-
-                // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
                 SetMyBlockType(BlockType.NONE);
                 break;
             default:
                 yield return new WaitForSeconds(0.3f);
                 m_myBlock.GetComponent<Block>().SetEffect(false);
 
-                // 이미 MatchMgr에서 타입을 저장했기 때문에 미리 타입을 바꿔 무한루프 예방
-                SetMyBlockType(BlockType.NONE);
-
-                MatchMgr.Instance.SpecialExplode();
+                MatchMgr.Instance.SpecialExplode(transform.gameObject, GetMyBlockType());
                 break;
         }
 
+        MoveMgr.Instance.StartCheckEmpty();
     }
 }

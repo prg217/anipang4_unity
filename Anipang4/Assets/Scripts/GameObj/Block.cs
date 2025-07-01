@@ -264,28 +264,28 @@ public class Block : MonoBehaviour
         switch (m_blockType)
         {
             case BlockType.DOUBLE_CROSS:
-                spritePath = "Block/FX2_cross_All_Combine1";
+                spritePath += "Block/FX2_cross_All_Combine1";
                 break;
             case BlockType.CROSS_SUN:
-                spritePath = "Block/FX2_cross_All_Combine2";
+                spritePath += "Block/FX2_cross_All_Combine2";
                 break;
             case BlockType.CROSS_MOON:
-                spritePath = "Moon/moonCross_01";
+                spritePath += "Moon/moonCross_01";
                 break;
             case BlockType.DOUBLE_SUN:
-                spritePath = "Block/sun_01";
+                spritePath += "Block/sun_01";
                 break;
             case BlockType.SUN_MOON:
-                spritePath = "Moon/moonSun_01";
+                spritePath += "Moon/moonSun_01";
                 break;
             case BlockType.DOUBLE_MOON:
-                spritePath = "Moon/FX2_moon_body_double";
+                spritePath += "Moon/FX2_moon_body_double";
                 break;
             case BlockType.DOUBLE_RANDOM:
             case BlockType.RANDOM_CROSS:
             case BlockType.RANDOM_SUN:
             case BlockType.RANDOM_MOON:
-                spritePath += "FX2_cosmic_glow";
+                spritePath += "Block/FX2_random_02";
                 break;
             default:
                 break;

@@ -545,8 +545,12 @@ public class MatchMgr : BaseMgr<MatchMgr>
         return false;
     }
 
-    public void SpecialExplode()
+    public void SpecialExplode(in GameObject _tile ,in BlockType _blockType)
     {
+        m_targetTile = _tile;
+        m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
+        m_targetType = _blockType;
+
         // 매치되는 타일 중 전파되는 장애물이 있는지 확인
         m_contagiousObstacle = ObstacleType.NONE;
 
@@ -1003,8 +1007,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
     void SurroundingsExplode(in int _x, in int _y) 
     {
         // 중복 터짐 방지
-        GameObject originalTile = StageMgr.Instance.GetTile(m_targetMatrix);
-        originalTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        //GameObject originalTile = StageMgr.Instance.GetTile(m_targetMatrix);
+        m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
 
         for (int x = -_x; x <= _x; x++)
         {
@@ -1044,6 +1048,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
         // 이미 처리한 타일 저장
         HashSet<GameObject> processedTile = new HashSet<GameObject>();
+
+        // 중복 터짐 방지
+        m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
 
         for (int y = -_y; y <= _y; y++)
         {
