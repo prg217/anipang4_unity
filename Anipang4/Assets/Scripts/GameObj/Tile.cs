@@ -36,11 +36,17 @@ public class Tile : MonoBehaviour
     [SerializeField]
     bool m_createTile = false;
 
+    // ====== 타일 상태 ======(구조체로 만들어야 하나?)
     // 타겟이 되었는지
     bool m_isTargeted = false;
-
+    // 터지기 대기 중인가(대기 중이라면 또 터짐 신호를 받으면 안 됨)
+    bool m_isExplodeWaiting = false;
     // 랜덤이 끝날 때까지 대기하기 위한 용도
     bool m_randomComplete = false;
+    // 랜덤으로 인해 터지는 상태인가?
+    [SerializeField]
+    bool m_randomExplode = false;
+    // =======================
 
     GameObject m_myExplodeEffect;
 
@@ -102,6 +108,10 @@ public class Tile : MonoBehaviour
     public void SetRandomComplete(in bool _setting)
     {
         m_randomComplete = _setting;
+    }
+    public void SetRandomExplode(in bool _setting)
+    {
+        m_randomExplode = _setting;
     }
     #endregion
 
@@ -247,6 +257,13 @@ public class Tile : MonoBehaviour
 
     public void Explode(in ObstacleType _contagiousObstacleType, in BlockType _newBlockType = BlockType.NONE)
     {
+        if (m_isExplodeWaiting)
+        {
+            return;
+        }
+
+        m_isExplodeWaiting = true;
+
         // StageMgr에 터트린 블록 타입 알려줌
         OnTileExplode?.Invoke(GetMyBlockType());
 
@@ -263,6 +280,12 @@ public class Tile : MonoBehaviour
 
             if (fo.GetLevel() >= 0)
             {
+                if (m_randomExplode)
+                {
+                    SetRandomExplode(false);
+
+                    MatchMgr.Instance.RandomExplodeComplete();
+                }
                 return;
             }
         }
@@ -287,10 +310,10 @@ public class Tile : MonoBehaviour
         {
             // 딜레이 후 터트림
             StartCoroutine(SpecialExplode());
-
             return;
         }
 
+        m_isExplodeWaiting = false;
         SetMyBlockType(_newBlockType);
     }
 
@@ -351,6 +374,7 @@ public class Tile : MonoBehaviour
             case BlockType.RANDOM:
                 yield return new WaitUntil(() => m_randomComplete);
                 m_myBlock.GetComponent<Block>().SetEffect(false);
+                SetMyBlockType(BlockType.NONE);
                 break;
             case BlockType.DOUBLE_RANDOM:
             case BlockType.RANDOM_CROSS:
@@ -370,6 +394,19 @@ public class Tile : MonoBehaviour
                 break;
         }
 
-        MoveMgr.Instance.StartCheckEmpty();
+        m_isExplodeWaiting = false;
+
+        // 랜덤으로 인해 실행 중이라면 랜덤 쪽에서 StartCheckEmpty를 함
+        if (!m_randomExplode && !m_randomComplete)
+        {
+            Debug.Log(GetMatrix());
+            MoveMgr.Instance.StartCheckEmpty();
+        }
+        if (m_randomExplode)
+        {
+            SetRandomExplode(false);
+
+            MatchMgr.Instance.RandomExplodeComplete();
+        }
     }
 }

@@ -23,6 +23,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
     BlockType m_newBlock = BlockType.NONE; // 특수 블록의 조건에 맞을 경우 생성될 블럭
     ObstacleType m_contagiousObstacle = ObstacleType.NONE; // 타일에 추가 될 장애물
 
+    int m_randomExplodeCompleteCount = 0;
+
     #endregion 변수 끝
 
     void SetTargetTile(in GameObject _targetTile)
@@ -809,7 +811,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
     {
         // 교차 시킨 블록 타입 정보를 알고, 그 타입들을 서치해서 제거
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
-        
+
+        m_randomExplodeCompleteCount = 0;
         List<GameObject> explodeTiles = new List<GameObject>();
 
         #region 단독으로 실행 됐을 경우
@@ -824,9 +827,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
         #region 일반 블록일 경우
         if (_type < BlockType.CROSS)
         {
-            for (int x = 0; x < maxMatrix.x; x++)
+            for (int x = 0; x <= maxMatrix.x; x++)
             {
-                for (int y = 0; y < maxMatrix.y; y++)
+                for (int y = 0; y <= maxMatrix.y; y++)
                 {
                     GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(x, y));
                     BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
@@ -854,9 +857,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
             // 제일 많은 블록을 해당하는 특수 블록으로 변경 후 터트림
             BlockType mostType = StageMgr.Instance.GetMostNormalBlockType();
 
-            for (int x = 0; x < maxMatrix.x; x++)
+            for (int x = 0; x <= maxMatrix.x; x++)
             {
-                for (int y = 0; y < maxMatrix.y; y++)
+                for (int y = 0; y <= maxMatrix.y; y++)
                 {
                     GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(x, y));
                     BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
@@ -883,6 +886,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // 다 끝나면 끝났다는 사인 보냄 해당되는 블록들에게 동시에 보냄
         foreach (GameObject tile in explodeTiles)
         {
+            tile.GetComponent<Tile>().SetRandomExplode(true);
             tile.GetComponent<Tile>().RandomEffect(false);
             tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
         }
@@ -890,7 +894,15 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // 다 터지는 동안 대기하고 있던 랜덤 블록을 없애줌
         m_targetTile.GetComponent<Tile>().SetRandomComplete(true);
 
+        // explodeTiles.Count해서 그 개수만큼 완료 신호 돌아오면 진행됨
+        yield return new WaitUntil(() => m_randomExplodeCompleteCount == explodeTiles.Count);
+
         MoveMgr.Instance.StartCheckEmpty();
+    }
+
+    public void RandomExplodeComplete()
+    {
+        m_randomExplodeCompleteCount++;
     }
 
     void CosmicExplode()

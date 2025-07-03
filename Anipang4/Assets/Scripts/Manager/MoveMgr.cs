@@ -386,6 +386,16 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
     public void StartCheckEmpty()
     {
+        // 기존에 이미 작동하고 있는 CheckEmpty가 있다면 멈추고 다시 하게 함
+        foreach (Coroutine checkEmptyCoroutine in checkEmptyCoroutines)
+        {
+            if (checkEmptyCoroutine != null)
+            {
+                StopCoroutine(checkEmptyCoroutine);
+            }
+        }
+        checkEmptyCoroutines.Clear();
+
         Coroutine coroutine = StartCoroutine(CheckEmpty());
         checkEmptyCoroutines.Add(coroutine);
     }
@@ -397,12 +407,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
             StageInfo.MoveCount--;
             StageMgr.Instance.CheckGameOver();
         }
-    }
-
-    // 외부에서 움직임 잠깐 멈춰달라고 요청
-    public void WaitMove()
-    { 
-        // 빈공간 채우기 코루틴 멈추기
     }
 
     public IEnumerator CheckEmpty()
@@ -419,6 +423,9 @@ public class MoveMgr : BaseMgr<MoveMgr>
          * 1. 본인의 아래 블록이 있다->거기로 보냄
          * 2. 아래 블록이 있는데 대각선 아래가 비었다->그 아래의 위가 움직일 수 없는 타일이라면 그쪽으로 보냄
         */
+        // ! 그냥 한 블록(가로)이 내려가면 바로 출발하고 싶은데, 완전 밑까지 내려갈 때까지 대기하는 문제
+        // -> 움직임 완료 후 다음 줄 하는데, 다음 줄도 이미 움직임 완료(한 줄 밑으로 내려간)한 녀석들이기 때문
+        // 즉, 아예 제일 밑에 있는 빈 블록을 찾은 다음 거기까지 다이렉트로 내려가게끔 해야 함
         for (int i = 0; i <= maxMatrix.y; i++)
         {
             bool isEmpty = false;
@@ -468,6 +475,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
             if (isEmpty)
             {
                 yield return new WaitUntil(() => m_moveComplete);
+                Debug.Log("움직임 완료");
             }
         }
 
