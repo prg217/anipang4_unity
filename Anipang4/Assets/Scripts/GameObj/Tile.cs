@@ -5,6 +5,7 @@ using static UnityEngine.Video.VideoPlayer;
 using System;
 
 using Random = UnityEngine.Random;
+using System.Collections.Generic;
 
 public class Tile : MonoBehaviour
 {
@@ -229,22 +230,34 @@ public class Tile : MonoBehaviour
         m_myBlock.GetComponent<Block>().SetBlockType((BlockType)random);
     }
 
-    public void EmptyMoving(GameObject _tile)
+    public void EmptyMoving(in List<Vector2Int> _points)
     {
-        if (_tile != null)
+        //if (_tile != null)
+        //{
+        //    // 둘 중 하나가 움직일 수 없으면
+        //    if (_tile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE || GetTileType() == TileType.IMMOVABLE)
+        //    {
+        //        return;
+        //    }
+        //
+        //    MoveMgr.Instance.SetClickedTileAndMoving(transform.gameObject, _tile);
+        //
+        //    if (m_createTile)
+        //    {
+        //        StartCoroutine(CreateBlock());
+        //    }
+        //}
+
+        foreach (Vector2Int point in _points)
         {
-            // 둘 중 하나가 움직일 수 없으면
-            if (_tile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE || GetTileType() == TileType.IMMOVABLE)
-            {
-                return;
-            }
+            
 
-            MoveMgr.Instance.SetClickedTileAndMoving(transform.gameObject, _tile);
+            //if ()
+        }
 
-            if (m_createTile)
-            {
-                StartCoroutine(CreateBlock());
-            }
+        if (m_createTile)
+        {
+            StartCoroutine(CreateBlock());
         }
     }
 
