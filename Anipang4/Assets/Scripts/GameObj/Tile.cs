@@ -47,6 +47,8 @@ public class Tile : MonoBehaviour
     // 랜덤으로 인해 터지는 상태인가?
     [SerializeField]
     bool m_randomExplode = false;
+    // 빈 공간 움직이기가 끝났는가?
+    bool m_emptyMovingComplete = false;
     // =======================
 
     GameObject m_myExplodeEffect;
@@ -113,6 +115,10 @@ public class Tile : MonoBehaviour
     public void SetRandomExplode(in bool _setting)
     {
         m_randomExplode = _setting;
+    }
+    public void SetEmptyMovingComplete(in bool _setting)
+    {
+        m_emptyMovingComplete = _setting;
     }
     #endregion
 
@@ -230,7 +236,12 @@ public class Tile : MonoBehaviour
         m_myBlock.GetComponent<Block>().SetBlockType((BlockType)random);
     }
 
-    public void EmptyMoving(in List<Vector2Int> _points)
+    public void BlockTeleport(in GameObject _goalTile)
+    {
+        m_myBlock.GetComponent<Block>().BlockTeleport(_goalTile);
+    }
+
+    public IEnumerator EmptyMoving(List<Vector2Int> _points)
     {
         //if (_tile != null)
         //{
@@ -247,12 +258,14 @@ public class Tile : MonoBehaviour
         //        StartCoroutine(CreateBlock());
         //    }
         //}
-
+        Debug.Log("?");
         foreach (Vector2Int point in _points)
         {
-            
+            MoveMgr.Instance.EmptyMoving(transform.gameObject, point);
 
-            //if ()
+            // 코루틴으로 멈춰놨다가 완료 신호 오면 다음 진행
+            yield return new WaitUntil(() => m_emptyMovingComplete);
+            SetEmptyMovingComplete(false);
         }
 
         if (m_createTile)

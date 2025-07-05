@@ -44,15 +44,15 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
     #endregion 변수 끝
 
-    #region Set함수
-    public void SetClickedTileAndMoving(in GameObject _tile1, in GameObject _tile2)
-    {
-        m_pClickedTile1 = _tile1;
-        m_pClickedTile2 = _tile2;
-
-        Moving();
-    }
-    #endregion
+    //#region Set함수
+    //public void SetClickedTileAndMoving(in GameObject _tile1, in GameObject _tile2)
+    //{
+    //    m_pClickedTile1 = _tile1;
+    //    m_pClickedTile2 = _tile2;
+    //
+    //    Moving();
+    //}
+    //#endregion
 
     public event System.Action OnEmptyMoveCompleteFunction;
 
@@ -465,6 +465,18 @@ public class MoveMgr : BaseMgr<MoveMgr>
         return lastEmptyMatrix;
     }
 
+    public void EmptyMoving(in GameObject _startTile, in Vector2Int _point)
+    {
+        // _point를 향해 쭉 이동(빈 공간은 바로 순간이동 시키기)
+        GameObject pointTile = StageMgr.Instance.GetTile(_point);
+
+        _startTile.GetComponent<Tile>().SetBlockMove(pointTile, true);
+        pointTile.GetComponent<Tile>().BlockTeleport(_startTile);
+
+        // 다 이동하면 _startTile에 다 이동했다고 알림
+        _startTile.GetComponent<Tile>().SetEmptyMovingComplete(true);
+    }
+
     public IEnumerator CheckEmpty()
     {
         // 빈 공간 체크하는 중에는 스테이지 매니저에 힌트를 못 하게 전달
@@ -527,9 +539,10 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 {
                     break;
                 }
+                // 위에서 걸러진 것 중에 생성 타일이 있음...
 
                 // 빈 공간을 향해 이동(포인트 별로 나눠 이동)
-                tile.GetComponent<Tile>().EmptyMoving(points);
+                StartCoroutine(tile.GetComponent<Tile>().EmptyMoving(points));
             }
         }
 
@@ -587,57 +600,57 @@ public class MoveMgr : BaseMgr<MoveMgr>
         //}
 
         // 그리고 매치 체크
-        for (int length = 0; length <= maxMatrix.y; length++)
-        {
-            for (int i = maxMatrix.y; i >= 0; i--)
-            {
-                for (int j = 0; j <= maxMatrix.x; j++)
-                {
-                    Vector2Int matrix = new Vector2Int(j, i);
-                    GameObject tile = StageMgr.Instance.GetTile(matrix);
-                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-                    // 특수 블록이 아닐 경우에만 매치 판정을 함
-                    if (type < BlockType.CROSS)
-                    {
-                        MatchMgr.Instance.CheckMatch(tile);
-                    }
-                }
-            }
-        }
+        //for (int length = 0; length <= maxMatrix.y; length++)
+        //{
+        //    for (int i = maxMatrix.y; i >= 0; i--)
+        //    {
+        //        for (int j = 0; j <= maxMatrix.x; j++)
+        //        {
+        //            Vector2Int matrix = new Vector2Int(j, i);
+        //            GameObject tile = StageMgr.Instance.GetTile(matrix);
+        //            BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+        //            // 특수 블록이 아닐 경우에만 매치 판정을 함
+        //            if (type < BlockType.CROSS)
+        //            {
+        //                MatchMgr.Instance.CheckMatch(tile);
+        //            }
+        //        }
+        //    }
+        //}
 
         // 빈 공간 없나 체크(재귀함수로 빈 공간 없을 때 까지 하기)
         // 만약 빈 공간이 있으나, 거기로 블록을 보낼 수 없는 경우(왼쪽 위, 위, 오른쪽 위가 모두 움직일 수 없는 타일) 패스
-        for (int i = 0; i <= maxMatrix.y; i++)
-        {
-            for (int j = 0; j <= maxMatrix.x; j++)
-            {
-                Vector2Int matrix = new Vector2Int(j, i);
-                GameObject tile = StageMgr.Instance.GetTile(matrix);
-
-                if (tile.GetComponent<Tile>().IsBlockEmpty())
-                {
-                    TileType tileType = tile.GetComponent<Tile>().GetTileType();
-                    if (tileType == TileType.MOVABLE)
-                    {
-                        #region 왼쪽 위, 위, 오른쪽 위가 모두 움직일 수 없나 체크
-                        Vector2Int leftUpMatrix = new Vector2Int(j - 1, i - 1);
-                        Vector2Int upMatrix = new Vector2Int(j, i - 1);
-                        Vector2Int rightUpMatrix = new Vector2Int(j + 1, i - 1);
-                        if (EmptySpaceTest(rightUpMatrix) && EmptySpaceTest(upMatrix) && EmptySpaceTest(leftUpMatrix))
-                        {
-                            break;
-                        }
-                        #endregion
-
-                        // 빈 공간이 있을 때 다시 처음부터
-                        Coroutine coroutine = StartCoroutine(CheckEmpty());
-                        checkEmptyCoroutines.Add(coroutine);
-                        yield return coroutine;
-                        yield break;
-                    }
-                }
-            }
-        }
+        //for (int i = 0; i <= maxMatrix.y; i++)
+        //{
+        //    for (int j = 0; j <= maxMatrix.x; j++)
+        //    {
+        //        Vector2Int matrix = new Vector2Int(j, i);
+        //        GameObject tile = StageMgr.Instance.GetTile(matrix);
+        //
+        //        if (tile.GetComponent<Tile>().IsBlockEmpty())
+        //        {
+        //            TileType tileType = tile.GetComponent<Tile>().GetTileType();
+        //            if (tileType == TileType.MOVABLE)
+        //            {
+        //                #region 왼쪽 위, 위, 오른쪽 위가 모두 움직일 수 없나 체크
+        //                Vector2Int leftUpMatrix = new Vector2Int(j - 1, i - 1);
+        //                Vector2Int upMatrix = new Vector2Int(j, i - 1);
+        //                Vector2Int rightUpMatrix = new Vector2Int(j + 1, i - 1);
+        //                if (EmptySpaceTest(rightUpMatrix) && EmptySpaceTest(upMatrix) && EmptySpaceTest(leftUpMatrix))
+        //                {
+        //                    break;
+        //                }
+        //                #endregion
+        //
+        //                // 빈 공간이 있을 때 다시 처음부터
+        //                Coroutine coroutine = StartCoroutine(CheckEmpty());
+        //                checkEmptyCoroutines.Add(coroutine);
+        //                yield return coroutine;
+        //                yield break;
+        //            }
+        //        }
+        //    }
+        //}
 
         // 클리어 확인
         StageMgr.Instance.CheckStageClear();
@@ -651,6 +664,8 @@ public class MoveMgr : BaseMgr<MoveMgr>
         // 다시 힌트를 줄 수 있게 설정
         StageMgr.Instance.SetHint(true);
         m_emptyMoving = false;
+
+        yield break;
     }
 
     // CheckEmpty에서 대각선 검사할 때 사용

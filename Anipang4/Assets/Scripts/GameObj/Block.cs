@@ -352,4 +352,9 @@ public class Block : MonoBehaviour
 
         transform.localPosition = shakeOffset;
     }
+
+    public void BlockTeleport(in GameObject _goalTile)
+    {
+        transform.SetParent(_goalTile.transform);
+    }
 }
