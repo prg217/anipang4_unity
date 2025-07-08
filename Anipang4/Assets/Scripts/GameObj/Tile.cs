@@ -6,6 +6,7 @@ using System;
 
 using Random = UnityEngine.Random;
 using System.Collections.Generic;
+using System.Drawing;
 
 public class Tile : MonoBehaviour
 {
@@ -67,6 +68,12 @@ public class Tile : MonoBehaviour
         if (GetMyBlockType() == BlockType.NONE) { return true; }
         return false;
     }
+    public bool IsEmptyCreateTile()
+    {
+        if (m_myBlock == null) { return false; }
+        if (GetMyBlockType() == BlockType.NONE && m_createTile) { return true; }
+        return false;
+    }
     // 전파되는 장애물
     public ObstacleType GetPropagationObstacle()
     {
@@ -115,10 +122,6 @@ public class Tile : MonoBehaviour
     public void SetRandomExplode(in bool _setting)
     {
         m_randomExplode = _setting;
-    }
-    public void SetEmptyMovingComplete(in bool _setting)
-    {
-        m_emptyMovingComplete = _setting;
     }
     #endregion
 
@@ -217,19 +220,18 @@ public class Tile : MonoBehaviour
     }
 
     // 생성 타일일 때 블록을 랜덤 생성
-    IEnumerator CreateBlock()
+    public void CreateBlock()
     {
         if (m_myBlock == null || !m_createTile)
         {
-            yield break;
+            return;
         }
 
         if (!IsBlockEmpty())
         {
-            yield break;
+            return;
         }
 
-        yield return new WaitForSeconds(0.3f);
         // StageMgr에서 설정된 블록 값으로 랜덤한 값
         int maxRandom = StageMgr.Instance.GetMaxBlockType();
         int random = Random.Range(0, maxRandom);
@@ -241,36 +243,14 @@ public class Tile : MonoBehaviour
         m_myBlock.GetComponent<Block>().BlockTeleport(_goalTile);
     }
 
-    public IEnumerator EmptyMoving(List<Vector2Int> _points)
+    public void EmptyMoving(in Vector2Int _point)
     {
-        //if (_tile != null)
-        //{
-        //    // 둘 중 하나가 움직일 수 없으면
-        //    if (_tile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE || GetTileType() == TileType.IMMOVABLE)
-        //    {
-        //        return;
-        //    }
-        //
-        //    MoveMgr.Instance.SetClickedTileAndMoving(transform.gameObject, _tile);
-        //
-        //    if (m_createTile)
-        //    {
-        //        StartCoroutine(CreateBlock());
-        //    }
-        //}
-        Debug.Log("?");
-        foreach (Vector2Int point in _points)
-        {
-            MoveMgr.Instance.EmptyMoving(transform.gameObject, point);
-
-            // 코루틴으로 멈춰놨다가 완료 신호 오면 다음 진행
-            yield return new WaitUntil(() => m_emptyMovingComplete);
-            SetEmptyMovingComplete(false);
-        }
+        MoveMgr.Instance.EmptyMoving(transform.gameObject, _point);
+        Refresh();
 
         if (m_createTile)
         {
-            StartCoroutine(CreateBlock());
+            CreateBlock();
         }
     }
 
