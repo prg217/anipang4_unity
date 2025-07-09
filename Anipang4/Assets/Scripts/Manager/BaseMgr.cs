@@ -7,7 +7,6 @@ public abstract class BaseMgr<T> : MonoBehaviour where T : BaseMgr<T>, new()
     #region ΩÃ±€≈Ê
     static T _instance;
     static readonly object _lock = new object();
-    static bool _applicationIsQuitting = false;
 
     public static T Instance
     {

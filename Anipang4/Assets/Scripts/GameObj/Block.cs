@@ -26,13 +26,11 @@ public class Block : MonoBehaviour
 
     GameObject m_goalTile;
 
-    float m_moveDurationTime = 0.5f;
-    float m_time = 0f;
+    float m_moveSpeed = 1.5f;
     #endregion
 
     [Header("흔들림 설정")]
     float m_shakeIntensity = 0.02f;  // 흔들림 강도
-    float m_shakeSpeed = 10f;       // 흔들림 속도
     bool m_shaking = false;
 
     #endregion 변수 끝
@@ -66,11 +64,11 @@ public class Block : MonoBehaviour
         // 빈자리 채우기 일 경우 빠르게
         if (_emptyMoving)
         {
-            m_moveDurationTime = 0.3f;
+            m_moveSpeed = 2f;
         }
         else
         {
-            m_moveDurationTime = 0.5f;
+            m_moveSpeed = 1.5f;
         }
 
         transform.SetParent(m_goalTile.transform);
@@ -308,25 +306,41 @@ public class Block : MonoBehaviour
     // 교환을 위한 이동
     void ChangeMoving()
     {
+        //if (m_moving)
+        //{
+        //    if (m_time < m_moveDurationTime)
+        //    {
+        //        m_time += Time.deltaTime;
+        //        float normalizedTime = m_time / m_moveDurationTime;
+        //        transform.position = Vector3.Lerp(m_start, m_goal, normalizedTime);
+        //
+        //        return;
+        //    }
+        //
+        //    // 정렬
+        //    transform.localPosition = Vector3.zero;
+        //
+        //    m_time = 0f;
+        //    m_moving = false;
+        //
+        //    // 매니저에 이동 완료 신호 보냄
+        //    MoveMgr.Instance.MoveComplete();
+        //}
+
         if (m_moving)
         {
-            if (m_time < m_moveDurationTime)
+            // 목표 지점까지 일정한 속도로 이동
+            transform.position = Vector3.MoveTowards(transform.position, m_goal, m_moveSpeed * Time.deltaTime);
+
+            // 목표 지점에 도달했는지 확인
+            if (Vector3.Distance(transform.position, m_goal) < 0.01f)
             {
-                m_time += Time.deltaTime;
-                float normalizedTime = m_time / m_moveDurationTime;
-                transform.position = Vector3.Lerp(m_start, m_goal, normalizedTime);
-
-                return;
+                // 정렬
+                transform.localPosition = Vector3.zero;
+                m_moving = false;
+                // 매니저에 이동 완료 신호 보냄
+                MoveMgr.Instance.MoveComplete();
             }
-
-            // 정렬
-            transform.localPosition = Vector3.zero;
-
-            m_time = 0f;
-            m_moving = false;
-
-            // 매니저에 이동 완료 신호 보냄
-            MoveMgr.Instance.MoveComplete();
         }
     }
 
@@ -356,5 +370,6 @@ public class Block : MonoBehaviour
     public void BlockTeleport(in GameObject _goalTile)
     {
         transform.SetParent(_goalTile.transform);
+        transform.position = _goalTile.transform.position;
     }
 }

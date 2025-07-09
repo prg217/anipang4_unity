@@ -48,8 +48,6 @@ public class Tile : MonoBehaviour
     // 랜덤으로 인해 터지는 상태인가?
     [SerializeField]
     bool m_randomExplode = false;
-    // 빈 공간 움직이기가 끝났는가?
-    bool m_emptyMovingComplete = false;
     // =======================
 
     GameObject m_myExplodeEffect;
@@ -245,13 +243,8 @@ public class Tile : MonoBehaviour
 
     public void EmptyMoving(in Vector2Int _point)
     {
+        // 밑으로 내려갔다가 올라가는 문제 있음
         MoveMgr.Instance.EmptyMoving(transform.gameObject, _point);
-        Refresh();
-
-        if (m_createTile)
-        {
-            CreateBlock();
-        }
     }
 
     IEnumerator ExplodeEffect()

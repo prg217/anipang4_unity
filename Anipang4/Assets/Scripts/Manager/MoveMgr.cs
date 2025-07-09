@@ -22,8 +22,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
     // ====== 상태 ======
     bool m_isClickMoving = false;
-    // 움직임 완료
-    bool m_moveComplete = false;
     // 움직이는 중
     bool m_moving = false;
     bool m_specialClicked = false;
@@ -43,16 +41,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
     // ==========================
 
     #endregion 변수 끝
-
-    //#region Set함수
-    //public void SetClickedTileAndMoving(in GameObject _tile1, in GameObject _tile2)
-    //{
-    //    m_pClickedTile1 = _tile1;
-    //    m_pClickedTile2 = _tile2;
-    //
-    //    Moving();
-    //}
-    //#endregion
 
     public event System.Action OnEmptyMoveCompleteFunction;
 
@@ -219,7 +207,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
             StartCoroutine(ActiveMoveEffect());
         }
         #endregion
-        m_moveComplete = false;
 
         // 타일들 정보 새로고침
         m_pClickedTile1.GetComponent<Tile>().Refresh();
@@ -295,7 +282,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
         // 블록 교환이 둘 다 완료가 되었다면
         if (m_completeCount >= 2)
         {
-            m_moveComplete = true;
             if (!m_reMoving && m_isClickMoving && !m_emptyMoving)
             {
                 BlockType type1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlockType();
@@ -484,12 +470,16 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
         _startTile.GetComponent<Tile>().Refresh();
         pointTile.GetComponent<Tile>().Refresh();
+
+        // 만약 생성 타일이였다면
+        if (_startTile.GetComponent<Tile>().IsEmptyCreateTile())
+        {
+            _startTile.GetComponent<Tile>().CreateBlock();
+        }
     }
 
     public IEnumerator CheckEmpty()
     {
-        // 2번 실행 됨 해결해야 할 것
-        Debug.Log("CheckEmpty");
         // 빈 공간 체크하는 중에는 스테이지 매니저에 힌트를 못 하게 전달
         StageMgr.Instance.SetHint(false);
 
@@ -514,70 +504,67 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
         bool isEmpty = true;
 
-        while (isEmpty)
+        for (int i = maxMatrix.y; i >= 0; i--)
         {
-            for (int i = maxMatrix.y; i >= 0; i--)
+            for (int j = 0; j <= maxMatrix.x; j++)
             {
-                for (int j = 0; j <= maxMatrix.x; j++)
+                // 본인
+                Vector2Int matrix = new Vector2Int(j, i);
+                GameObject tile = StageMgr.Instance.GetTile(matrix);
+
+                // 이동 불가 타일이라면 패스
+                if (tile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE)
                 {
-                    // 본인
-                    Vector2Int matrix = new Vector2Int(j, i);
-                    GameObject tile = StageMgr.Instance.GetTile(matrix);
+                    continue;
+                }
 
-                    // 이동 불가 타일이라면 패스
-                    if (tile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE)
-                    {
-                        continue;
-                    }
+                // 빈 공간인데, 생성 블록이라면
+                if (tile.GetComponent<Tile>().IsEmptyCreateTile())
+                {
+                    tile.GetComponent<Tile>().CreateBlock();
+                    continue;
+                }
 
-                    // 빈 공간인데, 생성 블록이라면
-                    if (tile.GetComponent<Tile>().IsEmptyCreateTile())
-                    {
-                        Debug.Log("생성 " + matrix);
-                        tile.GetComponent<Tile>().CreateBlock();
-                        continue;
-                    }
+                Vector2Int lastEmpty = new Vector2Int(-1, -1);
 
-                    Vector2Int lastEmpty = new Vector2Int(-1, -1);
-
-                    while (true)
-                    {
-                        lastEmpty = SearchLastDownEmptyTile(matrix);
-                        if (lastEmpty == new Vector2Int(-1, -1))
-                        {
-                            lastEmpty = SearchLastDiagonalEmptyTile(matrix);
-
-                            // 빈 공간이 없을 때 다음으로 넘어감
-                            if (lastEmpty == new Vector2Int(-1, -1))
-                            {
-                                break;
-                            }
-                        }
-                        break;
-                    }
-
-                    // 빈 공간이 없을 때 다음으로 넘어감
+                while (true)
+                {
+                    lastEmpty = SearchLastDownEmptyTile(matrix);
                     if (lastEmpty == new Vector2Int(-1, -1))
                     {
-                        continue;
+                        lastEmpty = SearchLastDiagonalEmptyTile(matrix);
+
+                        // 빈 공간이 없을 때 다음으로 넘어감
+                        if (lastEmpty == new Vector2Int(-1, -1))
+                        {
+                            break;
+                        }
                     }
-
-                    Debug.Log("빈공간 이동");
-                    // 빈 공간을 향해 이동
-                    tile.GetComponent<Tile>().EmptyMoving(lastEmpty);
-                    yield return new WaitForSeconds(0.2f);
+                    break;
                 }
+
+                // 빈 공간이 없을 때 다음으로 넘어감
+                if (lastEmpty == new Vector2Int(-1, -1))
+                {
+                    continue;
+                }
+
+                // 빈 공간을 향해 이동
+                tile.GetComponent<Tile>().EmptyMoving(lastEmpty);
             }
-
-            // 빈 공간 없나 체크
-            // 만약 빈 공간이 있으나, 거기로 블록을 보낼 수 없는 경우(왼쪽 위, 위, 오른쪽 위가 모두 움직일 수 없는 타일) 패스
-            isEmpty = DoubleCheckEmpty();
-            Debug.Log(isEmpty);
-
-            yield return new WaitForSeconds(0.2f);
-            // 무한루프 해결해야 함
-            isEmpty = false;
+            yield return new WaitForSeconds(0.15f);
         }
+
+        // 빈 공간 없나 체크
+        // 만약 빈 공간이 있으나, 거기로 블록을 보낼 수 없는 경우(왼쪽 위, 위, 오른쪽 위가 모두 움직일 수 없는 타일) 패스
+        isEmpty = DoubleCheckEmpty();
+
+        if (isEmpty)
+        {
+            StartCheckEmpty();
+            yield break;
+        }
+
 
         // 매치 체크
         for (int length = 0; length <= maxMatrix.y; length++)
@@ -592,14 +579,22 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     // 특수 블록이 아닐 경우에만 매치 판정을 함
                     if (type < BlockType.CROSS)
                     {
-                        MatchMgr.Instance.CheckMatch(tile);
+                        // 매치가 일어났다는 뜻은 빈 공간이 생겼다는 뜻
+                        if (MatchMgr.Instance.CheckMatch(tile))
+                        {
+                            isEmpty = true;
+                        }
                     }
                 }
             }
         }
 
-        // 매치 체크 후 다시 빈 공간 검사를 해야 함
-        // 추가 예정
+        // 매치 체크 후 다시 빈 공간 검사
+        if (isEmpty)
+        {
+            StartCheckEmpty();
+            yield break;
+        }
 
         // 클리어 확인
         StageMgr.Instance.CheckStageClear();
@@ -613,8 +608,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
         // 다시 힌트를 줄 수 있게 설정
         StageMgr.Instance.SetHint(true);
         m_emptyMoving = false;
-
-        yield break;
     }
 
     bool DoubleCheckEmpty()
