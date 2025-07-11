@@ -125,7 +125,14 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 m_newBlock = BlockType.CROSS;
                 break;
             case 5:
-                m_newBlock = BlockType.SUN;
+                if (m_saveMatchCount >= 3)
+                {
+                    m_newBlock = BlockType.SUN;
+                }
+                else
+                {
+                    m_newBlock = BlockType.RANDOM;
+                }
                 break;
             case 6:
                 m_newBlock = BlockType.SUN;

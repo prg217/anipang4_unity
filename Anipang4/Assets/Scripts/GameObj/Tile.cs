@@ -234,6 +234,8 @@ public class Tile : MonoBehaviour
         int maxRandom = StageMgr.Instance.GetMaxBlockType();
         int random = Random.Range(0, maxRandom);
         m_myBlock.GetComponent<Block>().SetBlockType((BlockType)random);
+        // 위에서 내려오는 연출
+        m_myBlock.GetComponent<Block>().CreatTileBlockMove(transform.gameObject);
     }
 
     public void BlockTeleport(in GameObject _goalTile)
@@ -243,7 +245,6 @@ public class Tile : MonoBehaviour
 
     public void EmptyMoving(in Vector2Int _point)
     {
-        // 밑으로 내려갔다가 올라가는 문제 있음
         MoveMgr.Instance.EmptyMoving(transform.gameObject, _point);
     }
 
@@ -282,7 +283,6 @@ public class Tile : MonoBehaviour
                 if (m_randomExplode)
                 {
                     SetRandomExplode(false);
-
                     MatchMgr.Instance.RandomExplodeComplete();
                 }
                 return;
@@ -309,7 +309,19 @@ public class Tile : MonoBehaviour
         {
             // 딜레이 후 터트림
             StartCoroutine(SpecialExplode());
+
+            if (m_randomExplode)
+            {
+                SetRandomExplode(false);
+                MatchMgr.Instance.RandomExplodeComplete();
+            }
             return;
+        }
+
+        if (m_randomExplode)
+        {
+            SetRandomExplode(false);
+            MatchMgr.Instance.RandomExplodeComplete();
         }
 
         m_isExplodeWaiting = false;

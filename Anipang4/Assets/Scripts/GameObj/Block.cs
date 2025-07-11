@@ -21,12 +21,13 @@ public class Block : MonoBehaviour
     #region 움직이기 위한 변수
     bool m_moving = false;
 
-    Vector3 m_start;
     Vector3 m_goal;
 
     GameObject m_goalTile;
 
     float m_moveSpeed = 1.5f;
+    float m_changeSpeed = 1.5f;
+    float m_emptyMovingSpeed = 2f;
     #endregion
 
     [Header("흔들림 설정")]
@@ -57,18 +58,17 @@ public class Block : MonoBehaviour
         }
 
         m_moving = true;
-        m_start = transform.position;
         m_goal = _goalTile.transform.position;
         m_goalTile = _goalTile;
 
         // 빈자리 채우기 일 경우 빠르게
         if (_emptyMoving)
         {
-            m_moveSpeed = 2f;
+            m_moveSpeed = m_emptyMovingSpeed;
         }
         else
         {
-            m_moveSpeed = 1.5f;
+            m_moveSpeed = m_changeSpeed;
         }
 
         transform.SetParent(m_goalTile.transform);
@@ -306,27 +306,6 @@ public class Block : MonoBehaviour
     // 교환을 위한 이동
     void ChangeMoving()
     {
-        //if (m_moving)
-        //{
-        //    if (m_time < m_moveDurationTime)
-        //    {
-        //        m_time += Time.deltaTime;
-        //        float normalizedTime = m_time / m_moveDurationTime;
-        //        transform.position = Vector3.Lerp(m_start, m_goal, normalizedTime);
-        //
-        //        return;
-        //    }
-        //
-        //    // 정렬
-        //    transform.localPosition = Vector3.zero;
-        //
-        //    m_time = 0f;
-        //    m_moving = false;
-        //
-        //    // 매니저에 이동 완료 신호 보냄
-        //    MoveMgr.Instance.MoveComplete();
-        //}
-
         if (m_moving)
         {
             // 목표 지점까지 일정한 속도로 이동
@@ -342,6 +321,26 @@ public class Block : MonoBehaviour
                 MoveMgr.Instance.MoveComplete();
             }
         }
+    }
+
+    public void CreatTileBlockMove(in GameObject _myTile)
+    {
+        // 생성 되었을 경우 좀 더 위에서 떨어지는 효과
+
+        // 타일 오브젝트가 맞는지 확인
+        if (_myTile.GetComponent<Tile>() == null)
+        {
+            return;
+        }
+
+        transform.position = transform.position + new Vector3(0, _myTile.transform.localScale.y, 0);
+
+        m_moving = true;
+        m_goal = _myTile.transform.position;
+        m_goalTile = _myTile;
+
+        // 빈자리 채우기 일 경우 빠르게
+        m_moveSpeed = m_emptyMovingSpeed;
     }
 
     public void RandomEffect(in bool _active)
@@ -369,6 +368,7 @@ public class Block : MonoBehaviour
 
     public void BlockTeleport(in GameObject _goalTile)
     {
+        m_moving = false;
         transform.SetParent(_goalTile.transform);
         transform.position = _goalTile.transform.position;
     }

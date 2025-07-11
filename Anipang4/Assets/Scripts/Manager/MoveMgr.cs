@@ -453,10 +453,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
             testMatrix = lastEmptyMatrix;
         }
-        if (lastEmptyMatrix != new Vector2Int(-1, -1))
-        {
-            Debug.Log("대각선");
-        }
+
         return lastEmptyMatrix;
     }
 
@@ -471,7 +468,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
         _startTile.GetComponent<Tile>().Refresh();
         pointTile.GetComponent<Tile>().Refresh();
 
-        // 만약 생성 타일이였다면
         if (_startTile.GetComponent<Tile>().IsEmptyCreateTile())
         {
             _startTile.GetComponent<Tile>().CreateBlock();
@@ -487,21 +483,8 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
 
-        // 위에부터 밑에 타일이 빈 블록인지 확인 후 그쪽으로 보냄
-        /*
-         * 1. 본인의 아래 블록이 있다->거기로 보냄
-         * 2. 아래 블록이 있는데 대각선 아래가 비었다->그 아래의 위가 움직일 수 없는 타일이라면 그쪽으로 보냄
-        */
-        // ! 그냥 한 블록(가로)이 내려가면 바로 출발하고 싶은데, 완전 밑까지 내려갈 때까지 대기하는 문제
-        // -> 움직임 완료 후 다음 줄 하는데, 다음 줄도 이미 움직임 완료(한 줄 밑으로 내려간)한 녀석들이기 때문
-        // 즉, 아예 제일 밑에 있는 빈 블록을 찾은 다음 거기까지 다이렉트로 내려가게끔 해야 함
-
-        // 제일 아래에 있는 빈 공간을 찾아내고 거기로 이동
-        // 빈 공간은 어차피 보이지 않으니까 순간이동 시키기
-
         // SearchEmptyTile를 이용해 가장 밑 빈 공간 타일 서치(연속으로)
-        // 대각선이 있다면 가장 밑->대각선->가장 밑(이 있다면)or대각선 순으로 이동
-
+        // 대각선이 있다면 가장 밑->대각선->가장 밑(이 있다면)or대각선 ``` 반복 순으로 이동
         bool isEmpty = true;
 
         for (int i = maxMatrix.y; i >= 0; i--)
@@ -552,7 +535,8 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 // 빈 공간을 향해 이동
                 tile.GetComponent<Tile>().EmptyMoving(lastEmpty);
             }
-            yield return new WaitForSeconds(0.15f);
+
+            yield return new WaitForSeconds(0.05f);
         }
 
         // 빈 공간 없나 체크
@@ -626,6 +610,12 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     TileType tileType = tile.GetComponent<Tile>().GetTileType();
                     if (tileType == TileType.MOVABLE)
                     {
+                        // 빈 생성 타일일 경우
+                        if (tile.GetComponent<Tile>().IsEmptyCreateTile())
+                        {
+                            return true;
+                        }
+
                         #region 왼쪽 위, 위, 오른쪽 위가 모두 움직일 수 없나 체크
                         Vector2Int leftUpMatrix = new Vector2Int(j - 1, i - 1);
                         Vector2Int upMatrix = new Vector2Int(j, i - 1);
@@ -635,7 +625,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
                             break;
                         }
                         #endregion
-
 
                         return true;
                     }
