@@ -46,8 +46,9 @@ public class Tile : MonoBehaviour
     // 랜덤이 끝날 때까지 대기하기 위한 용도
     bool m_randomComplete = false;
     // 랜덤으로 인해 터지는 상태인가?
-    [SerializeField]
     bool m_randomExplode = false;
+    // 랜덤이고, 실행중인가?
+    bool m_randomExecute = false;
     // =======================
 
     GameObject m_myExplodeEffect;
@@ -120,6 +121,10 @@ public class Tile : MonoBehaviour
     public void SetRandomExplode(in bool _setting)
     {
         m_randomExplode = _setting;
+    }
+    public void SetRandomExecute(in bool _setting)
+    {
+        m_randomExecute = _setting;
     }
     #endregion
 
@@ -285,6 +290,7 @@ public class Tile : MonoBehaviour
                     SetRandomExplode(false);
                     MatchMgr.Instance.RandomExplodeComplete();
                 }
+                m_isExplodeWaiting = false;
                 return;
             }
         }
@@ -383,19 +389,18 @@ public class Tile : MonoBehaviour
         switch (GetMyBlockType())
         {
             case BlockType.RANDOM:
-                yield return new WaitUntil(() => m_randomComplete);
-                m_myBlock.GetComponent<Block>().SetEffect(false);
-                SetMyBlockType(BlockType.NONE);
-                break;
             case BlockType.DOUBLE_RANDOM:
             case BlockType.RANDOM_CROSS:
             case BlockType.RANDOM_SUN:
             case BlockType.RANDOM_MOON:
-                MatchMgr.Instance.SpecialExplode(transform.gameObject, GetMyBlockType());
+                if (!m_randomExecute)
+                {
+                    MatchMgr.Instance.SpecialExplode(transform.gameObject, GetMyBlockType());
+                }
                 yield return new WaitUntil(() => m_randomComplete);
-
                 m_myBlock.GetComponent<Block>().SetEffect(false);
                 SetMyBlockType(BlockType.NONE);
+                SetRandomExecute(false);
                 break;
             default:
                 yield return new WaitForSeconds(0.3f);
@@ -410,7 +415,6 @@ public class Tile : MonoBehaviour
         // 랜덤으로 인해 실행 중이라면 랜덤 쪽에서 StartCheckEmpty를 함
         if (!m_randomExplode && !m_randomComplete)
         {
-            Debug.Log(GetMatrix());
             MoveMgr.Instance.StartCheckEmpty();
         }
         if (m_randomExplode)

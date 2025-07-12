@@ -386,6 +386,19 @@ public class MoveMgr : BaseMgr<MoveMgr>
         checkEmptyCoroutines.Add(coroutine);
     }
 
+    public void StopCheckEmpty()
+    {
+        // 기존에 이미 작동하고 있는 CheckEmpty가 있다면 멈춤
+        foreach (Coroutine checkEmptyCoroutine in checkEmptyCoroutines)
+        {
+            if (checkEmptyCoroutine != null)
+            {
+                StopCoroutine(checkEmptyCoroutine);
+            }
+        }
+        checkEmptyCoroutines.Clear();
+    }
+
     void ConsumeMove()
     {
         if (m_isClickMoving && !m_reMoving)

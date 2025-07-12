@@ -582,7 +582,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 SunExplode();
                 break;
             case BlockType.RANDOM:
-                StartCoroutine(RandomExplode(BlockType.NONE));
+                RandomMatch(m_targetTile, BlockType.NONE, m_contagiousObstacle);
                 break;
             case BlockType.COSMIC:
                 CosmicExplode();
@@ -612,13 +612,13 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 CosmicExplode();
                 break;
             case BlockType.RANDOM_CROSS:
-                StartCoroutine(RandomExplode(BlockType.CROSS));
+                RandomMatch(m_targetTile, BlockType.CROSS, m_contagiousObstacle);
                 break;
             case BlockType.RANDOM_SUN:
-                StartCoroutine(RandomExplode(BlockType.SUN));
+                RandomMatch(m_targetTile, BlockType.SUN, m_contagiousObstacle);
                 break;
             case BlockType.RANDOM_MOON:
-                StartCoroutine(RandomExplode(BlockType.MOON));
+                RandomMatch(m_targetTile, BlockType.MOON, m_contagiousObstacle);
                 break;
             default:
                 break;
@@ -822,6 +822,11 @@ public class MatchMgr : BaseMgr<MatchMgr>
         m_randomExplodeCompleteCount = 0;
         List<GameObject> explodeTiles = new List<GameObject>();
 
+        m_targetTile.GetComponent<Tile>().SetRandomExecute(true);
+
+        // 랜덤 진행 중에는 빈 공간 채우기 잠시 멈추기... 다시 실행 신호 보낼 때 까지?
+        //MoveMgr.Instance.StopCheckEmpty();
+
         #region 단독으로 실행 됐을 경우
         if (_type == BlockType.NONE)
         {
@@ -934,6 +939,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
     {
         // 십자칸 파괴 후 클리어 조건 중 하나 랜덤으로 가서 파괴
         #region 십자칸 파괴
+        // 중복 방지
+        m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
         // 본인 파괴
         m_targetTile.GetComponent<Tile>().Explode(m_contagiousObstacle);
 
