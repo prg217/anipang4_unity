@@ -36,11 +36,25 @@ public class MoveMgr : BaseMgr<MoveMgr>
     bool m_emptyMoving = false;
     // 빈공간 채우기 중에 클릭
     bool m_clickDuringEmptyMoving = false;
+    // 빈공간 채우기 활성 여부
+    bool m_checkEmptyEnabled = true;
 
     List<Coroutine> checkEmptyCoroutines = new List<Coroutine>();
     // ==========================
 
     #endregion 변수 끝
+
+    #region Set함수
+    public void SetCheckEmptyEnabled(in bool _setting)
+    {
+        m_checkEmptyEnabled = _setting;
+
+        if (!m_checkEmptyEnabled)
+        {
+            StopCheckEmpty();
+        }
+    }
+    #endregion
 
     public event System.Action OnEmptyMoveCompleteFunction;
 
@@ -372,6 +386,11 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
     public void StartCheckEmpty()
     {
+        if (!m_checkEmptyEnabled)
+        {
+            return;
+        }
+
         // 기존에 이미 작동하고 있는 CheckEmpty가 있다면 멈추고 다시 하게 함
         foreach (Coroutine checkEmptyCoroutine in checkEmptyCoroutines)
         {
@@ -386,7 +405,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
         checkEmptyCoroutines.Add(coroutine);
     }
 
-    public void StopCheckEmpty()
+    void StopCheckEmpty()
     {
         // 기존에 이미 작동하고 있는 CheckEmpty가 있다면 멈춤
         foreach (Coroutine checkEmptyCoroutine in checkEmptyCoroutines)
@@ -666,12 +685,23 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 {
                     if (downTile.GetComponent<Tile>().IsBlockEmpty())
                     {
-                        //originalTile.GetComponent<Tile>().EmptyMoving(downTile);
                         return true;
                     }
                 }
             }
         }
+
+        // 움직일 수 없는 경우만 하고 있는데, 계속 빈 공간인... 상황 있음
+        // 만약 false일 때 추가 기회를 줘서 아래가 움직일 수 없는 블록, 대각선이 빈 공간일 때 움직일 수 있게?
+        // 근데 이 방법이면 그 위에껀 안 됨
+        // 그러면 이제 대각선 검사로 빈 공간이 된 타일에는 bool 변수로 표시를 하고... checkTile에 그 변수가 활성화 되어 있을 경우
+        // 그 아래 타일을 빈공간 체크 한 후 그쪽으로?
+
+        // 타일쪽에 직접적으로 하지 말고 여기에서 따로 저장하고... 빈공간 체크 시작 시에만 clear해주고
+        // 아래부터 검사하니까... 음... 안 되려나...
+
+        // 그러면 y축 쭉 검사해서 위쪽에 그냥 블록이 없고(다 빈공간이고)맨 위가 이동 불가라면
+        // 대각선ok하기?
 
         return false;
     }

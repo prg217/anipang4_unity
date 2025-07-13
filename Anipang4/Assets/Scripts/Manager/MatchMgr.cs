@@ -824,8 +824,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
         m_targetTile.GetComponent<Tile>().SetRandomExecute(true);
 
-        // 랜덤 진행 중에는 빈 공간 채우기 잠시 멈추기... 다시 실행 신호 보낼 때 까지?
-        //MoveMgr.Instance.StopCheckEmpty();
+        // 랜덤 진행 중에는 빈 공간 채우기 잠시 멈추기... 다시 실행 신호 보낼 때 까지
+        MoveMgr.Instance.SetCheckEmptyEnabled(false);
 
         #region 단독으로 실행 됐을 경우
         if (_type == BlockType.NONE)
@@ -909,6 +909,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // explodeTiles.Count해서 그 개수만큼 완료 신호 돌아오면 진행됨
         yield return new WaitUntil(() => m_randomExplodeCompleteCount == explodeTiles.Count);
 
+        // 다시 빈공간 채우기 활성화
+        MoveMgr.Instance.SetCheckEmptyEnabled(true);
         MoveMgr.Instance.StartCheckEmpty();
     }
 
