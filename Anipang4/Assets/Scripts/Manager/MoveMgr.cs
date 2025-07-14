@@ -142,19 +142,22 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 // 특수 블록을 한 번 클릭했을 경우
                 if (m_specialClicked)
                 {
-                    // 직접 움직였을 때만 moveCount차감
-                    ConsumeMove();
-
-                    m_specialClicked = false;
-                    m_isClickMoving = true;
-
-                    ObstacleType obType = m_pClickedTile1.GetComponent<Tile>().GetPropagationObstacle();
-                    MatchMgr.Instance.CheckMatch(m_pClickedTile1);
-                    // 매치 후 빈 공간 채우기 실행
-                    if (!m_emptyMoving)
+                    // 앞 장애물이 있는 경우 터트리지 않음
+                    if (m_pClickedTile1.GetComponent<Tile>().GetFrontObstacleEmpty())
                     {
-                        StartCheckEmpty();
-                    }
+                        // 직접 움직였을 때만 moveCount차감
+                        ConsumeMove();
+
+                        m_specialClicked = false;
+                        m_isClickMoving = true;
+
+                        MatchMgr.Instance.CheckMatch(m_pClickedTile1);
+                        // 매치 후 빈 공간 채우기 실행
+                        if (!m_emptyMoving)
+                        {
+                            StartCheckEmpty();
+                        }
+                    }  
                 }
 
                 m_pClickedTile1 = null;
@@ -670,38 +673,51 @@ public class MoveMgr : BaseMgr<MoveMgr>
     bool DiagonalTest(in Vector2Int _originalMatrix, in Vector2Int _checkMatrix)
     {
         GameObject originalTile = StageMgr.Instance.GetTile(_originalMatrix);
-        GameObject checkTile = StageMgr.Instance.GetTile(_checkMatrix);
 
-        if (originalTile != null && checkTile != null)
+        if (originalTile == null)
         {
-            TileType type = checkTile.GetComponent<Tile>().GetTileType();
-            if (type == TileType.IMMOVABLE)
-            {
-                // 움직일 수 없는 경우 밑 검사
-                Vector2Int downMatrix = new Vector2Int(_checkMatrix.x, _checkMatrix.y + 1);
-                GameObject downTile = StageMgr.Instance.GetTile(downMatrix);
+            return false;
+        }
 
-                if (downTile != null)
+        // y축 위를 쭉 검사해서 위쪽에 그냥 블록이 없고(다 빈공간이고)맨 위가 이동 불가라면 대각선 이동
+        for (int y = _checkMatrix.y; y >= 0; y--)
+        {
+            GameObject checkUpTile = StageMgr.Instance.GetTile(new Vector2Int(_checkMatrix.x, y));
+
+            if (checkUpTile != null)
+            {
+                TileType type = checkUpTile.GetComponent<Tile>().GetTileType();
+
+                // 만약 막혀있는 맨 위가 이동 불가라면 대각선 이동 테스트 시도
+                if (type == TileType.IMMOVABLE)
                 {
-                    if (downTile.GetComponent<Tile>().IsBlockEmpty())
+                    // 움직일 수 없는 경우 밑 검사
+                    Vector2Int downMatrix = new Vector2Int(_checkMatrix.x, _checkMatrix.y + 1);
+                    GameObject downTile = StageMgr.Instance.GetTile(downMatrix);
+
+                    if (downTile != null)
                     {
-                        return true;
+                        if (downTile.GetComponent<Tile>().IsBlockEmpty())
+                        {
+                            return true;
+                        }
                     }
+                    break;
+                }
+
+                // 내려갈 수 있는 블록이 있다면 빠져나옴
+                if (!checkUpTile.GetComponent<Tile>().IsBlockEmpty())
+                {
+                    break;
+                }
+
+                // 생성 블록이라면 빠져나옴
+                if (checkUpTile.GetComponent<Tile>().IsEmptyCreateTile())
+                {
+                    break;
                 }
             }
         }
-
-        // 움직일 수 없는 경우만 하고 있는데, 계속 빈 공간인... 상황 있음
-        // 만약 false일 때 추가 기회를 줘서 아래가 움직일 수 없는 블록, 대각선이 빈 공간일 때 움직일 수 있게?
-        // 근데 이 방법이면 그 위에껀 안 됨
-        // 그러면 이제 대각선 검사로 빈 공간이 된 타일에는 bool 변수로 표시를 하고... checkTile에 그 변수가 활성화 되어 있을 경우
-        // 그 아래 타일을 빈공간 체크 한 후 그쪽으로?
-
-        // 타일쪽에 직접적으로 하지 말고 여기에서 따로 저장하고... 빈공간 체크 시작 시에만 clear해주고
-        // 아래부터 검사하니까... 음... 안 되려나...
-
-        // 그러면 y축 쭉 검사해서 위쪽에 그냥 블록이 없고(다 빈공간이고)맨 위가 이동 불가라면
-        // 대각선ok하기?
 
         return false;
     }
