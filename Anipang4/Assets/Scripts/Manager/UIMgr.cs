@@ -130,6 +130,11 @@ public class UIMgr : BaseMgr<UIMgr>
 
         foreach (GameObject condition in m_ConditionList)
         {
+            if (condition == null)
+            {
+                continue; 
+            }
+
             MissionType missionType = condition.GetComponent<Condition>().GetMissionType();
 
             if (missionType.TryGetObstacleType(out ObstacleType obstacleType))
