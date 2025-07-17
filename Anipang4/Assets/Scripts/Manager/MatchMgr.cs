@@ -423,6 +423,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     void Explode()
     {
+        // 로그 추가
+        LogMgr.Instance.AddMatchLog(m_targetType, m_targetTile, m_matchTiles, m_newBlock);
+
         // 매치되는 타일 중 전파되는 장애물이 있는지 확인
         m_contagiousObstacle = ObstacleType.NONE;
         ObstacleType obstacleType = m_targetTile.GetComponent<Tile>().GetPropagationObstacle();
@@ -559,6 +562,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
         m_targetTile = _tile;
         m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
         m_targetType = _blockType;
+
+        m_newBlock = BlockType.NONE;
+        m_matchTiles.Clear();
 
         // 매치되는 타일 중 전파되는 장애물이 있는지 확인
         m_contagiousObstacle = ObstacleType.NONE;
@@ -931,10 +937,12 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(i, j));
                 if (tile != null)
                 {
-                    tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
+                    m_matchTiles.Add(tile);
                 }
             }
         }
+
+        Explode();
     }
 
     void MoonExplode()
@@ -943,87 +951,31 @@ public class MatchMgr : BaseMgr<MatchMgr>
         #region 십자칸 파괴
         // 중복 방지
         m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
-        // 본인 파괴
-        m_targetTile.GetComponent<Tile>().Explode(m_contagiousObstacle);
 
         // 상하좌우 파괴
         GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x - 1, m_targetMatrix.y));
         if (tile != null)
         {
-            BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-            // 일반 블록인 경우
-            if (type < BlockType.CROSS)
-            {
-                tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
-            }
-            // 특수 블록인 경우
-            else if (type != BlockType.NULL)
-            {
-                // 특수 블록의 위치 기준으로 매치 실행
-                if (m_targetTile != tile)
-                {
-                    CheckMatch(tile);
-                }
-            }
+            m_matchTiles.Add(tile);
         }
         tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x + 1, m_targetMatrix.y));
         if (tile != null)
         {
-            BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-            // 일반 블록인 경우
-            if (type < BlockType.CROSS)
-            {
-                tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
-            }
-            // 특수 블록인 경우
-            else if (type != BlockType.NULL)
-            {
-                // 특수 블록의 위치 기준으로 매치 실행
-                if (m_targetTile != tile)
-                {
-                    CheckMatch(tile);
-                }
-            }
+            m_matchTiles.Add(tile);
         }
         tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x, m_targetMatrix.y - 1));
         if (tile != null)
         {
-            BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-            // 일반 블록인 경우
-            if (type < BlockType.CROSS)
-            {
-                tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
-            }
-            // 특수 블록인 경우
-            else if (type != BlockType.NULL)
-            {
-                // 특수 블록의 위치 기준으로 매치 실행
-                if (m_targetTile != tile)
-                {
-                    CheckMatch(tile);
-                }
-            }
+            m_matchTiles.Add(tile);
         }
         tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x, m_targetMatrix.y + 1));
         if (tile != null)
         {
-            BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-            // 일반 블록인 경우
-            if (type < BlockType.CROSS)
-            {
-                tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
-            }
-            // 특수 블록인 경우
-            else if (type != BlockType.NULL)
-            {
-                // 특수 블록의 위치 기준으로 매치 실행
-                if (m_targetTile != tile)
-                {
-                    CheckMatch(tile);
-                }
-            }
+            m_matchTiles.Add(tile);
         }
         #endregion
+
+        Explode();
 
         #region 클리어 조건 중 하나 랜덤으로 가서 파괴
         // 달 추격 프리팹 소환
@@ -1035,7 +987,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
     void SurroundingsExplode(in int _x, in int _y) 
     {
         // 중복 터짐 방지
-        //GameObject originalTile = StageMgr.Instance.GetTile(m_targetMatrix);
         m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
 
         for (int x = -_x; x <= _x; x++)
@@ -1043,39 +994,20 @@ public class MatchMgr : BaseMgr<MatchMgr>
             for (int y = -_y; y <= _y; y++)
             {
                 GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x + x, m_targetMatrix.y + y));
-                if (tile != null)
+                if (tile != null && m_targetTile != tile)
                 {
-                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-                    // 일반 블록인 경우
-                    if (type < BlockType.CROSS)
-                    {
-                        tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
-                    }
-                    // 특수 블록인 경우
-                    else if (type != BlockType.NULL)
-                    {
-                        // 특수 블록의 위치 기준으로 매치 실행
-                        if (m_targetTile == tile)
-                        {
-                            tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
-                        }
-                        else
-                        {
-                            CheckMatch(tile);
-                        }
-                    }
+                    m_matchTiles.Add(tile);
                 }
             }
         }
+
+        Explode();
     }
 
     // 가로세로 터트림 : Cross 관련 함수에서 사용
     void LengthAndWidthExplode(in int _x, in int _y)
     {
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
-
-        // 이미 처리한 타일 저장
-        HashSet<GameObject> processedTile = new HashSet<GameObject>();
 
         // 중복 터짐 방지
         m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
@@ -1086,33 +1018,15 @@ public class MatchMgr : BaseMgr<MatchMgr>
             {
                 GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(x, m_targetMatrix.y + y));
 
-                if (tile != null)
+                if (tile != null && m_targetTile != tile)
                 {
                     // 이미 처리한 타일 건너뜀
-                    if (processedTile.Contains(tile))
+                    if (m_matchTiles.Contains(tile))
+                    {
                         continue;
-
-                    processedTile.Add(tile);
-
-                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-                    // 일반 블록인 경우
-                    if (type < BlockType.CROSS)
-                    {
-                        tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                     }
-                    // 특수 블록인 경우
-                    else if (type != BlockType.NULL)
-                    {
-                        // 특수 블록의 위치 기준으로 매치 실행
-                        if (m_targetTile == tile)
-                        {
-                            tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
-                        }
-                        else
-                        {
-                            CheckMatch(tile);
-                        }
-                    }
+
+                    m_matchTiles.Add(tile);
                 }
             }
         }
@@ -1123,40 +1037,26 @@ public class MatchMgr : BaseMgr<MatchMgr>
             {
                 GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x + x, y));
 
-                if (tile != null)
+                if (tile != null && m_targetTile != tile)
                 {
                     // 이미 처리한 타일 건너뜀
-                    if (processedTile.Contains(tile))
+                    if (m_matchTiles.Contains(tile))
+                    {
                         continue;
-
-                    processedTile.Add(tile);
-
-                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-                    // 일반 블록인 경우
-                    if (type < BlockType.CROSS)
-                    {
-                        tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                     }
-                    // 특수 블록인 경우
-                    else if (type != BlockType.NULL)
-                    {
-                        // 특수 블록의 위치 기준으로 매치 실행
-                        if (m_targetTile == tile)
-                        {
-                            tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
-                        }
-                        else
-                        {
-                            CheckMatch(tile);
-                        }
-                    }
+
+                    m_matchTiles.Add(tile);
                 }
             }
         }
+
+        Explode();
     }
 
     public void ChasingMoonExplode(in GameObject _tile, in ObstacleType _contagiousObstacleType = ObstacleType.NONE, in BlockType _explodeType = BlockType.NONE)
     {
+        LogMgr.Instance.ChasingMoonExplodeLog(_tile);
+
         // 여기에 특수블록이면 바로 특수 블록을 터트림(장애물 위여도) 아니면 그냥 Explode
         if (_explodeType >= BlockType.CROSS)
         {
