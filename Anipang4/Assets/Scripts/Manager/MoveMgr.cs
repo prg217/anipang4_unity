@@ -615,6 +615,9 @@ public class MoveMgr : BaseMgr<MoveMgr>
             yield break;
         }
 
+        // 로그 갱신
+        LogMgr.Instance.UpdateLog();
+
         // 클리어 확인
         StageMgr.Instance.CheckStageClear();
 

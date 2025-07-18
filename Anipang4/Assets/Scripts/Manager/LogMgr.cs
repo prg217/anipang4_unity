@@ -6,7 +6,7 @@ public class LogMgr : BaseMgr<LogMgr>
     #region 변수
 
     // 매치 로그
-    List<string> matchLogs = new List<string>();
+    List<string> m_matchLogs = new List<string>();
 
     // 매치 직전 사진 로그
 
@@ -42,10 +42,10 @@ public class LogMgr : BaseMgr<LogMgr>
 
         // 매치 기준 타입을 알려줌
         string log = _targetType.ToString();
+        log += _targetTile.GetComponent<Tile>().GetMatrix().ToString();
         log += " : ";
 
         // 매치 되는 타일 행렬 알려줌
-        log += _targetTile.GetComponent<Tile>().GetMatrix().ToString();
         foreach (var tile in _matchTiles)
         {
             log += ", ";
@@ -61,9 +61,7 @@ public class LogMgr : BaseMgr<LogMgr>
         }
 
         // 로그 저장
-        matchLogs.Add(log);
-
-        // UIMgr에 연동
+        m_matchLogs.Add(log);
     }
 
     public void ChasingMoonExplodeLog(in GameObject _targetTile)
@@ -76,14 +74,11 @@ public class LogMgr : BaseMgr<LogMgr>
         log += _targetTile.GetComponent<Tile>().GetMatrix().ToString();
 
         // 로그 저장
-        matchLogs.Add(log);
-
-        // UIMgr에 연동
+        m_matchLogs.Add(log);
     }
 
-    // 다음 로그로 넘어감? <-아직 고민 중
-    public void NextLog()
+    public void UpdateLog()
     {
-
+        UIMgr.Instance.LogUpdate(m_matchLogs);
     }
 }
