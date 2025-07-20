@@ -213,18 +213,14 @@ public class UIMgr : BaseMgr<UIMgr>
 
     public void LogUpdate(in List<string> _matchLogs)
     {
+        Debug.Log("업데이트");
         ClearAllLogs();
 
-        // 최신 로그부터 최대 개수만 표시
-        int displayCount = Mathf.Min(_matchLogs.Count, m_maxLogCount);
-        int startIndex = Mathf.Max(0, _matchLogs.Count - displayCount);
-
-        // 최신 로그부터 역순으로 생성 (최신이 위로 오게끔)
-        for (int i = _matchLogs.Count - 1; i >= startIndex; i--)
+        // 최신 로그부터
+        for (int i = 0; i < _matchLogs.Count; i++)
         {
             CreateLog(_matchLogs[i]);
         }
-     
     }
 
     void CreateLog(in string _matchLog)

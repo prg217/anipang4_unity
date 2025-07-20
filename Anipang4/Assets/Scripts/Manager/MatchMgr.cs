@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.Rendering.UI;
 
 public class MatchMgr : BaseMgr<MatchMgr>
 {
@@ -155,7 +156,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
             // 특수 블록 생성 조건 만족함
             if (_explode)
             {
-                Explode();
+                Explode(false);
             }
             else
             {
@@ -172,7 +173,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 // 터트리는 함수
                 if (_explode)
                 {
-                    Explode();
+                    Explode(false);
                 }
                 else
                 {
@@ -188,7 +189,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
             // 터트리는 함수
             if (_explode)
             {
-                Explode();
+                Explode(false);
             }
             else
             {
@@ -421,30 +422,34 @@ public class MatchMgr : BaseMgr<MatchMgr>
         return false;
     }
 
-    void Explode()
+    void Explode(in bool _isSpecial)
     {
         // 로그 추가
         LogMgr.Instance.AddMatchLog(m_targetType, m_targetTile, m_matchTiles, m_newBlock);
 
         // 매치되는 타일 중 전파되는 장애물이 있는지 확인
-        m_contagiousObstacle = ObstacleType.NONE;
-        ObstacleType obstacleType = m_targetTile.GetComponent<Tile>().GetPropagationObstacle();
-        if (obstacleType != ObstacleType.NONE)
+        if (!_isSpecial)
         {
-            m_contagiousObstacle = obstacleType;
-        }
+            m_contagiousObstacle = ObstacleType.NONE;
+            ObstacleType obstacleType = m_targetTile.GetComponent<Tile>().GetPropagationObstacle();
 
-        foreach (GameObject tile in m_matchTiles)
-        {
-            obstacleType = tile.GetComponent<Tile>().GetPropagationObstacle();
-            // 있다면 전파되는 장애물로 장애물을 추가하게 함
             if (obstacleType != ObstacleType.NONE)
             {
                 m_contagiousObstacle = obstacleType;
             }
+
+            foreach (GameObject tile in m_matchTiles)
+            {
+                obstacleType = tile.GetComponent<Tile>().GetPropagationObstacle();
+                // 있다면 전파되는 장애물로 장애물을 추가하게 함
+                if (obstacleType != ObstacleType.NONE)
+                {
+                    m_contagiousObstacle = obstacleType;
+                }
+            }
         }
 
-        // 특수 블록 조건에 해당 될 경우
+        // 특수 블록 생성 조건에 해당 될 경우
         if (m_newBlock >= BlockType.CROSS)
         {
             m_targetTile.GetComponent<Tile>().Explode(m_contagiousObstacle, m_newBlock);
@@ -458,7 +463,10 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // m_matchTiles에 등록된 타일들을 터트림
         foreach (GameObject tile in m_matchTiles)
         {
-            tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
+            if (tile.GetComponent<Tile>().GetMyBlockType() != BlockType.NULL)
+            {
+                tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
+            }
         }
     }
 
@@ -942,7 +950,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
             }
         }
 
-        Explode();
+        Explode(true);
     }
 
     void MoonExplode()
@@ -975,7 +983,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
         #endregion
 
-        Explode();
+        Explode(true);
 
         #region 클리어 조건 중 하나 랜덤으로 가서 파괴
         // 달 추격 프리팹 소환
@@ -1001,7 +1009,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
             }
         }
 
-        Explode();
+        Explode(true);
     }
 
     // 가로세로 터트림 : Cross 관련 함수에서 사용
@@ -1050,7 +1058,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
             }
         }
 
-        Explode();
+        Explode(true);
     }
 
     public void ChasingMoonExplode(in GameObject _tile, in ObstacleType _contagiousObstacleType = ObstacleType.NONE, in BlockType _explodeType = BlockType.NONE)
