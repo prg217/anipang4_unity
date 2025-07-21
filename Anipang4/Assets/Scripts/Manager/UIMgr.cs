@@ -30,9 +30,18 @@ public class UIMgr : BaseMgr<UIMgr>
 
     [Header("로그 관련")]
     [SerializeField]
+    GameObject m_matchLogViewUI;
+    [SerializeField]
     GameObject m_logContent;
     [SerializeField]
+    GameObject m_matchCaptureUI;
+    [SerializeField]
+    Image m_matchCaptureImg;
+    [SerializeField]
+    TextMeshProUGUI m_matchCaptureLogText;
+    [SerializeField]
     GameObject m_logPrefab;
+
     int m_maxLogCount = 30;
 
     #endregion
@@ -213,17 +222,16 @@ public class UIMgr : BaseMgr<UIMgr>
 
     public void LogUpdate(in List<string> _matchLogs)
     {
-        Debug.Log("업데이트");
         ClearAllLogs();
 
         // 최신 로그부터
         for (int i = 0; i < _matchLogs.Count; i++)
         {
-            CreateLog(_matchLogs[i]);
+            CreateLog(_matchLogs[i], i);
         }
     }
 
-    void CreateLog(in string _matchLog)
+    void CreateLog(in string _matchLog, in int _index)
     {
         // 프리팹으로부터 버튼 생성
         GameObject newButton = Instantiate(m_logPrefab, m_logContent.transform);
@@ -237,6 +245,9 @@ public class UIMgr : BaseMgr<UIMgr>
         {
             buttonTextComponent.text = _matchLog;
         }
+
+        // 인덱스 부여
+        newButton.GetComponent<MatchLog>().SetIndex(_index);
 
         // 최대 개수 초과 시 오래된 항목 제거
         RemoveOldLog();
@@ -271,5 +282,21 @@ public class UIMgr : BaseMgr<UIMgr>
                 }
             }
         }
+    }
+
+    public void LogCaptureChangesButton()
+    {
+        m_matchLogViewUI.SetActive(!m_matchLogViewUI.activeSelf);
+        m_matchCaptureUI.SetActive(!m_matchCaptureUI.activeSelf);
+    }
+
+    public void ShowCaptureLog(in int _index)
+    {
+        if (m_matchCaptureLogText != null)
+        {
+            m_matchCaptureLogText.text = LogMgr.Instance.GetMatchLog(_index);
+        }
+
+        // 이미지 집어넣을 예정
     }
 }
