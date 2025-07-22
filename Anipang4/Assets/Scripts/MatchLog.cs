@@ -18,6 +18,6 @@ public class MatchLog : MonoBehaviour
 
     void LogButton()
     {
-        LogMgr.Instance.ShowCaptureLog(m_index);
+        UIMgr.Instance.ShowCaptureLog(m_index);
     }
 }

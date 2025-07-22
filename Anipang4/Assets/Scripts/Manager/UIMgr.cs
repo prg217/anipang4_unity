@@ -297,6 +297,8 @@ public class UIMgr : BaseMgr<UIMgr>
             m_matchCaptureLogText.text = LogMgr.Instance.GetMatchLog(_index);
         }
 
-        // 이미지 집어넣을 예정
+        Texture2D tex = LogMgr.Instance.GetCaptureLog(_index);
+        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+        m_matchCaptureImg.sprite = sprite;
     }
 }

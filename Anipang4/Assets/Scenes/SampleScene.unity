@@ -2460,7 +2460,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1905901453}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.9999999
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -5484,7 +5484,7 @@ GameObject:
   - component: {fileID: 375979437}
   m_Layer: 0
   m_Name: LogCaptureCamera
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5582,7 +5582,7 @@ Camera:
   field of view: 34
   orthographic: 1
   orthographic size: 3.26
-  m_Depth: -1
+  m_Depth: 10
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 55
@@ -7786,7 +7786,7 @@ Camera:
   field of view: 34
   orthographic: 1
   orthographic size: 7.8
-  m_Depth: 0
+  m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 55
@@ -15455,10 +15455,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1113002345}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &993627050
 MonoBehaviour:
@@ -15507,15 +15507,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
+  m_fontSize: 72
   m_fontSizeBase: 40
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -18216,8 +18216,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 412.8, y: -871.1}
-  m_SizeDelta: {x: 501.6, y: 20.3}
+  m_AnchoredPosition: {x: 422.29996, y: -1031.5}
+  m_SizeDelta: {x: 482.6, y: 341.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1113002346
 MonoBehaviour:
@@ -23262,7 +23262,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.0000371933}
+  m_AnchoredPosition: {x: 0, y: 0.00006729353}
   m_SizeDelta: {x: 0, y: 539.22}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1481956404

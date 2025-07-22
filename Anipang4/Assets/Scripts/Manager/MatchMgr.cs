@@ -94,7 +94,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
             // 특수 블록 터트림
             if (_explode)
             {
-                m_targetTile.GetComponent<Tile>().Explode(m_contagiousObstacle);
+                Explode(true);
+                //m_targetTile.GetComponent<Tile>().Explode(m_contagiousObstacle);
             }
 
             return true;
@@ -426,6 +427,19 @@ public class MatchMgr : BaseMgr<MatchMgr>
     {
         // 로그 추가
         LogMgr.Instance.AddMatchLog(m_targetType, m_targetTile, m_matchTiles, m_newBlock);
+
+        // 미리 터질 타일에 신호
+        m_targetTile.GetComponent<Tile>().StartExplodeEffect();
+        foreach (GameObject tile in m_matchTiles)
+        {
+            if (tile.GetComponent<Tile>().GetMyBlockType() != BlockType.NULL)
+            {
+                tile.GetComponent<Tile>().StartExplodeEffect();
+            }
+        }
+
+        // 캡쳐 로그 추가
+        LogMgr.Instance.CaptureLog();
 
         // 매치되는 타일 중 전파되는 장애물이 있는지 확인
         if (!_isSpecial)
@@ -1064,6 +1078,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
     public void ChasingMoonExplode(in GameObject _tile, in ObstacleType _contagiousObstacleType = ObstacleType.NONE, in BlockType _explodeType = BlockType.NONE)
     {
         LogMgr.Instance.ChasingMoonExplodeLog(_tile);
+
+        _tile.GetComponent<Tile>().StartExplodeEffect();
+        LogMgr.Instance.CaptureLog();
 
         // 여기에 특수블록이면 바로 특수 블록을 터트림(장애물 위여도) 아니면 그냥 Explode
         if (_explodeType >= BlockType.CROSS)

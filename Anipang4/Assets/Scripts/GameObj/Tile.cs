@@ -260,6 +260,11 @@ public class Tile : MonoBehaviour
         m_myExplodeEffect.SetActive(false);
     }
 
+    public void StartExplodeEffect()
+    {
+        StartCoroutine(ExplodeEffect());
+    }
+
     public void Explode(in ObstacleType _contagiousObstacleType, in BlockType _newBlockType = BlockType.NONE)
     {
         if (m_isExplodeWaiting)
@@ -271,8 +276,6 @@ public class Tile : MonoBehaviour
 
         // StageMgr에 터트린 블록 타입 알려줌
         OnTileExplode?.Invoke(GetMyBlockType());
-
-        StartCoroutine(ExplodeEffect());
 
         // 장애물이 있는 경우
         if (!m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty())

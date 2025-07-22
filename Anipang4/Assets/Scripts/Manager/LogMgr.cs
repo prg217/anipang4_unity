@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class LogMgr : BaseMgr<LogMgr>
@@ -19,6 +20,10 @@ public class LogMgr : BaseMgr<LogMgr>
     public string GetMatchLog(in int _index)
     {
         return m_matchLogs[_index];
+    }
+    public Texture2D GetCaptureLog(in int _index)
+    {
+        return m_captureLogs[_index];
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -57,8 +62,6 @@ public class LogMgr : BaseMgr<LogMgr>
 
         // 로그 저장
         m_matchLogs.Add(log);
-
-        CaptureLog();
     }
 
     public void ChasingMoonExplodeLog(in GameObject _targetTile)
@@ -72,18 +75,17 @@ public class LogMgr : BaseMgr<LogMgr>
 
         // 로그 저장
         m_matchLogs.Add(log);
-
-        CaptureLog();
     }
 
-    void CaptureLog()
+    public void CaptureLog()
     {
-        m_captureLogs = new List<Texture2D>(m_captureCamera.GetComponent<CaptureCamera>().Capture());
-    }
-
-    public Texture2D ShowCaptureLog(in int _index)
-    {
-        return m_captureLogs[_index];
+        if (m_captureCamera != null)
+        {
+            if (m_captureCamera.GetComponent<CaptureCamera>() != null)
+            {
+                m_captureLogs = new List<Texture2D>(m_captureCamera.GetComponent<CaptureCamera>().Capture());
+            }
+        }
     }
 
     public void UpdateLog()
