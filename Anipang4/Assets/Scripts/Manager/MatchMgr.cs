@@ -95,7 +95,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
             if (_explode)
             {
                 Explode(true);
-                //m_targetTile.GetComponent<Tile>().Explode(m_contagiousObstacle);
             }
 
             return true;
@@ -331,6 +330,12 @@ public class MatchMgr : BaseMgr<MatchMgr>
             2. 동일한 타입이 있을 시 왼쪽 위는 왼쪽과 위를 검사 *** 동일하게 나머지도 검사
             3. 만약 m_matchCount가 3이라면 그거 포함해서 터트리고(MOON인데 터트릴 것이 5개인 경우), 아니라면 여기서 추가 검사한 것만 터트림(4개)
         */
+
+        /*
+         * 대각선 왼쪽 위, 오른쪽 위, 왼쪽 아래, 오른쪽 아래에 동일한 타입이 있는지 검사
+         * 동일한 타입이 있을 시 왼쪽 위는 왼쪽과 위를 검사 *** 동일하게 나머지도 검사
+         * + 이제 본인을 기준으로 3개 매치가 되는게 있는지도 검사(5개 일 경우)
+         */
 
         // 오른쪽 아래
         if (Inspect(new Vector2Int(1, 1)))
