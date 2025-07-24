@@ -671,6 +671,45 @@ public class StageMgr : BaseMgr<StageMgr>
 
         return tiles;
     }
+    // 제외하고 검색
+    public List<GameObject> SearchTilesExcept(ObstacleType _obstacleType)
+    {
+        List<GameObject> tiles = new List<GameObject>();
+
+        for (int i = 0; i <= m_maxMatrix.y; i++)
+        {
+            for (int j = 0; j <= m_maxMatrix.x; j++)
+            {
+                Vector2Int matrix = new Vector2Int(j, i);
+                GameObject tile = GetTile(matrix);
+
+                // 장애물 타입이 조건에 맞는지
+                if (_obstacleType != ObstacleType.NONE)
+                {
+                    ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
+                    ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
+
+                    if (backObstacleType != ObstacleType.NONE)
+                    {
+                        if (backObstacleType != _obstacleType)
+                        {
+                            tiles.Add(tile);
+                        }
+                    }
+
+                    if (frontObstacleType != ObstacleType.NONE)
+                    {
+                        if (frontObstacleType != _obstacleType)
+                        {
+                            tiles.Add(tile);
+                        }
+                    }
+                }
+            }
+        }
+
+        return tiles;
+    }
 
     public void CheckGameOver()
     {

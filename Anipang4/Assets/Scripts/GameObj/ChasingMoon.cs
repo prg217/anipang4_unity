@@ -134,6 +134,19 @@ public class ChasingMoon : MonoBehaviour
                     {
                         List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTiles(type));
                         int randomIndex = Random.Range(0, tiles.Count);
+
+                        // 본인일 경우 다른 타일을 선택하게 함
+                        if (m_myTile == tiles[randomIndex])
+                        {
+                            if (tiles.Count - 1 == randomIndex)
+                            {
+                                randomIndex = 0;
+                            }
+                            else
+                            {
+                                randomIndex++;
+                            }
+                        }
                         m_target = tiles[randomIndex];
                         return;
                     }
@@ -147,14 +160,28 @@ public class ChasingMoon : MonoBehaviour
                 // 클리어 조건에 있는 장애물인가?
                 if (obstacleTypes.ContainsKey(type))
                 {
-                    // 전염되는 장애물이면
+                    // 전염되는 장애물인가?
                     if (type.GetContagious())
                     {
                         // 아직 장애물 조건을 만족하기 전이라면
                         if (obstacleTypes[type] == false)
                         {
-                            List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTiles(type));
+                            // 아직 전염되기 전의 타일을 우선으로
+                            List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTilesExcept(type));
                             int randomIndex = Random.Range(0, tiles.Count);
+
+                            // 본인일 경우 다른 타일을 선택하게 함
+                            if (m_myTile == tiles[randomIndex])
+                            {
+                                if (tiles.Count - 1 == randomIndex)
+                                {
+                                    randomIndex = 0;
+                                }
+                                else
+                                {
+                                    randomIndex++;
+                                }
+                            }
                             m_target = tiles[randomIndex];
                             return;
                         }
@@ -173,6 +200,19 @@ public class ChasingMoon : MonoBehaviour
 
             List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTiles((BlockType)randomType));
             int randomIndex = Random.Range(0, tiles.Count);
+
+            // 본인일 경우 다른 타일을 선택하게 함
+            if (m_myTile == tiles[randomIndex])
+            {
+                if (tiles.Count - 1 == randomIndex)
+                {
+                    randomIndex = 0;
+                }
+                else
+                {
+                    randomIndex++;
+                }
+            }
             m_target = tiles[randomIndex];
             return;
         }
@@ -183,6 +223,11 @@ public class ChasingMoon : MonoBehaviour
 
     void Move()
     {
+        if (m_target == null)
+        {
+            return;
+        }
+
         m_currentTime += Time.deltaTime;
         float progress = m_currentTime / m_duration;
 

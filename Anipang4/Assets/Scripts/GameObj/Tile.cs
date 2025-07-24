@@ -372,7 +372,8 @@ public class Tile : MonoBehaviour
         // 특수 블록인 경우
         if (type >= BlockType.CROSS && type != BlockType.NULL)
         {
-            MatchMgr.Instance.SpecialExplode(transform.gameObject, GetMyBlockType());
+            Debug.Log("터짐");
+            MatchMgr.Instance.SpecialExplode(transform.gameObject, _explodeType);
 
             return;
         }

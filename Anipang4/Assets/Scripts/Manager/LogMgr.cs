@@ -64,10 +64,10 @@ public class LogMgr : BaseMgr<LogMgr>
         m_matchLogs.Add(log);
     }
 
-    public void ChasingMoonExplodeLog(in GameObject _targetTile)
+    public void ChasingMoonExplodeLog(in GameObject _targetTile, in BlockType _explodeType)
     {
         string log = "MOON 추격 터짐 -> ";
-        log += _targetTile.GetComponent<Tile>().GetMyBlockType().ToString();
+        log += _explodeType;
         log += " : ";
 
         // 매치 되는 타일 행렬 알려줌

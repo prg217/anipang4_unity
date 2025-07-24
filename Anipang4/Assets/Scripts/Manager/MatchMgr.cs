@@ -401,7 +401,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
             m_newBlock = BlockType.MOON;
 
             Vector2Int matrix = m_targetMatrix;
-            matrix += new Vector2Int(1, 1);
+            matrix += _AddMatrix;
             GameObject tile = StageMgr.Instance.GetTile(matrix);
             m_matchTiles.Add(tile);
 
@@ -1082,7 +1082,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     public void ChasingMoonExplode(in GameObject _tile, in ObstacleType _contagiousObstacleType = ObstacleType.NONE, in BlockType _explodeType = BlockType.NONE)
     {
-        LogMgr.Instance.ChasingMoonExplodeLog(_tile);
+        LogMgr.Instance.ChasingMoonExplodeLog(_tile, _explodeType);
 
         _tile.GetComponent<Tile>().StartExplodeEffect();
         LogMgr.Instance.CaptureLog();
