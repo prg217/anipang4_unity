@@ -301,6 +301,11 @@ public class MoveMgr : BaseMgr<MoveMgr>
         {
             if (!m_reMoving && m_isClickMoving && !m_emptyMoving)
             {
+                if (m_pClickedTile1 == null)
+                {
+                    return;
+                }
+
                 BlockType type1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlockType();
                 BlockType type2 = m_pClickedTile2.GetComponent<Tile>().GetMyBlockType();
 

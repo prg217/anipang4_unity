@@ -133,6 +133,12 @@ public class ChasingMoon : MonoBehaviour
                     if (obstacleTypes[type] == false)
                     {
                         List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTiles(type));
+                        if (tiles.Count == 0)
+                        {
+                            Debug.Log("카운트가 0");
+                            break;
+                        }
+
                         int randomIndex = Random.Range(0, tiles.Count);
 
                         // 본인일 경우 다른 타일을 선택하게 함
@@ -166,24 +172,34 @@ public class ChasingMoon : MonoBehaviour
                         // 아직 장애물 조건을 만족하기 전이라면
                         if (obstacleTypes[type] == false)
                         {
-                            // 아직 전염되기 전의 타일을 우선으로
-                            List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTilesExcept(type));
-                            int randomIndex = Random.Range(0, tiles.Count);
-
-                            // 본인일 경우 다른 타일을 선택하게 함
-                            if (m_myTile == tiles[randomIndex])
+                            // 본인이 전염 장애물에 해당한다면
+                            if (m_contagiousObstacleType == type)
                             {
-                                if (tiles.Count - 1 == randomIndex)
+                                // 아직 전염되기 전의 타일을 우선으로
+                                List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTilesExcept(type));
+                                if (tiles.Count == 0)
                                 {
-                                    randomIndex = 0;
+                                    Debug.Log("카운트가 0");
+                                    break;
                                 }
-                                else
+
+                                int randomIndex = Random.Range(0, tiles.Count);
+
+                                // 본인일 경우 다른 타일을 선택하게 함
+                                if (m_myTile == tiles[randomIndex])
                                 {
-                                    randomIndex++;
+                                    if (tiles.Count - 1 == randomIndex)
+                                    {
+                                        randomIndex = 0;
+                                    }
+                                    else
+                                    {
+                                        randomIndex++;
+                                    }
                                 }
+                                m_target = tiles[randomIndex];
+                                return;
                             }
-                            m_target = tiles[randomIndex];
-                            return;
                         }
                     }
                 }

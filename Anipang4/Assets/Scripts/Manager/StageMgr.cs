@@ -686,20 +686,20 @@ public class StageMgr : BaseMgr<StageMgr>
                 // 장애물 타입이 조건에 맞는지
                 if (_obstacleType != ObstacleType.NONE)
                 {
-                    ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
-                    ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
-
-                    if (backObstacleType != ObstacleType.NONE)
+                    if (_obstacleType < ObstacleType.FRONT_END)
                     {
-                        if (backObstacleType != _obstacleType)
+                        ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
+
+                        if (frontObstacleType != _obstacleType)
                         {
                             tiles.Add(tile);
                         }
                     }
-
-                    if (frontObstacleType != ObstacleType.NONE)
+                    else
                     {
-                        if (frontObstacleType != _obstacleType)
+                        ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
+
+                        if (backObstacleType != _obstacleType)
                         {
                             tiles.Add(tile);
                         }
