@@ -28,6 +28,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     #endregion º¯¼ö ³¡
 
+    public int GetMatchCount() { return m_matchCount; }
+    public List<GameObject> GetMatchTiles() { return m_matchTiles; }
+
     void SetTargetTile(in GameObject _targetTile)
     {
         m_targetTile = _targetTile;

@@ -582,6 +582,11 @@ public class StageMgr : BaseMgr<StageMgr>
                 Vector2Int matrix = new Vector2Int(j, i);
                 GameObject tile = GetTile(matrix);
 
+                if (tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NULL)
+                {
+                    continue;
+                }
+
                 // 블록 타입이 조건에 맞는지
                 if (_blockType != BlockType.NONE)
                 {
@@ -623,6 +628,11 @@ public class StageMgr : BaseMgr<StageMgr>
                 Vector2Int matrix = new Vector2Int(j, i);
                 GameObject tile = GetTile(matrix);
 
+                if (tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NULL)
+                {
+                    continue;
+                }
+
                 // 블록 타입이 조건에 맞는지
                 if (_blockType != BlockType.NONE)
                 {
@@ -651,6 +661,11 @@ public class StageMgr : BaseMgr<StageMgr>
             {
                 Vector2Int matrix = new Vector2Int(j, i);
                 GameObject tile = GetTile(matrix);
+
+                if (tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NULL)
+                {
+                    continue;
+                }
 
                 // 장애물 타입이 조건에 맞는지
                 if (_obstacleType != ObstacleType.NONE)
@@ -682,6 +697,11 @@ public class StageMgr : BaseMgr<StageMgr>
             {
                 Vector2Int matrix = new Vector2Int(j, i);
                 GameObject tile = GetTile(matrix);
+
+                if (tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NULL)
+                {
+                    continue;
+                }
 
                 // 장애물 타입이 조건에 맞는지
                 if (_obstacleType != ObstacleType.NONE)
