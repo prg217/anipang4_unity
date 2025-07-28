@@ -604,29 +604,32 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     // 특수 블록이 아닐 경우에만 매치 판정을 함
                     if (type < BlockType.CROSS)
                     {
-                        if (MatchMgr.Instance.CheckMatch(tile, false))
+                        var(result, matchCount, matchTiles) = MatchMgr.Instance.CheckMatchWithStatus(tile, false);
+
+                        if (result)
                         {
                             Debug.Log("매치 판정");
                             // 매치 가능하면 그 매치 가능한 타일들 각자를 또 검사
                             // ->제일 많은 매치 카운트를 가진 타일로 터트림
                             GameObject mostMatchCountTile = tile;
 
-                            int matchCount = MatchMgr.Instance.GetMatchCount();
                             Debug.Log("매치 카운트 : " + matchCount);
-                            List<GameObject> matchTiles = new List<GameObject>(MatchMgr.Instance.GetMatchTiles());
                             Debug.Log("매치 타일 : " + matchTiles);
                             foreach (GameObject matchTile in matchTiles)
                             {
-                                if (MatchMgr.Instance.CheckMatch(tile, false))
+                                var (result2, matchCount2, _) = MatchMgr.Instance.CheckMatchWithStatus(tile, false);
+                                Debug.Log("matchTiles result2 : " + result2);
+                                Debug.Log("matchTiles matchCount2 : " + matchCount2);
+                                if (result2)
                                 {
-                                    if (matchCount < MatchMgr.Instance.GetMatchCount())
+                                    if (matchCount < matchCount2)
                                     {
-                                        matchCount = MatchMgr.Instance.GetMatchCount();
+                                        matchCount = matchCount2;
                                         mostMatchCountTile = matchTile;
                                     }
                                 }
                             }
-
+                            Debug.Log("매치 : " + mostMatchCountTile);
                             MatchMgr.Instance.CheckMatch(mostMatchCountTile);
                             // 매치가 일어났다는 뜻은 빈 공간이 생겼다는 뜻
                             isEmpty = true;

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Rendering.UI;
@@ -77,12 +78,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
         #endregion
 
         #region 타겟 타일 변수 세팅
-        if (_explode)
-        {
-            SetTargetTile(_tile);
-            m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
-            m_targetType = _tile.GetComponent<Tile>().GetMyBlockType();
-        }
+        SetTargetTile(_tile);
+        m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
+        m_targetType = _tile.GetComponent<Tile>().GetMyBlockType();
         #endregion
 
         // 타입이 비어 있는 경우 return
@@ -148,12 +146,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 break;
         }
 
-        if (_explode && m_matchCount >= 3)
-        {
-            Debug.Log("count : " + m_matchCount);
-            Debug.Log("터지는 타입 : " + m_newBlock);
-        }
-
         if (m_newBlock >= BlockType.CROSS)
         {
             // 특수 블록 생성 조건 만족함
@@ -204,9 +196,236 @@ public class MatchMgr : BaseMgr<MatchMgr>
         return false;
     }
 
+    public bool CheckMatchSimulation(in GameObject _tile)
+    {
+        if (_tile == null)
+        {
+            return false;
+        }
+
+        List<GameObject> matchTiles = new List<GameObject>();
+        List<GameObject> saveMatchTiles = new List<GameObject>();
+
+        // 타입이 비어 있는 경우 return
+        if (m_targetType == BlockType.NONE)
+        {
+            return false;
+        }
+
+        // 특수 블록인 경우 특수 블록을 바로 터트림
+        if (m_targetType >= BlockType.CROSS && m_targetType != BlockType.NULL)
+        {
+            return true;
+        }
+
+        // 상하 검사
+        UpDownInspect();
+        // 특수 블록 조건 맞으면 일단 저장
+        m_saveMatchCount = m_matchCount;
+        m_saveMatchTiles.Clear();
+        m_saveMatchTiles = new List<GameObject>(m_matchTiles);
+        switch (m_matchCount)
+        {
+            case 4:
+                m_newBlock = BlockType.CROSS;
+                break;
+            case 5:
+                m_newBlock = BlockType.RANDOM;
+                break;
+            default:
+                break;
+        }
+
+        // 좌우 검사
+        LeftRightInspect();
+        switch (m_matchCount)
+        {
+            case 4:
+                m_newBlock = BlockType.CROSS;
+                break;
+            case 5:
+                if (m_saveMatchCount >= 3 && m_saveMatchCount < 5)
+                {
+                    m_newBlock = BlockType.SUN;
+                }
+                else
+                {
+                    m_newBlock = BlockType.RANDOM;
+                }
+                break;
+            case 6:
+                m_newBlock = BlockType.SUN;
+                break;
+            case 7:
+                m_newBlock = BlockType.COSMIC;
+                break;
+            default:
+                break;
+        }
+
+        if (m_newBlock >= BlockType.CROSS)
+        {
+            StageMgr.Instance.SetMatchOK(m_matchTiles);
+            return true;
+        }
+
+        // 만약 특수 블록에 해당되지 않는다면 MOON 검사 실시
+        if (m_newBlock == BlockType.NONE)
+        {
+            if (MoonInspect())
+            {
+                StageMgr.Instance.SetMatchOK(m_matchTiles);
+                return true;
+            }
+        }
+
+        // MOON의 조건에도 되지 않는다면 기본으로 터트림
+        if (m_matchCount == 3)
+        {
+            StageMgr.Instance.SetMatchOK(m_matchTiles);
+            return true;
+        }
+
+        return false;
+    }
+
+    // 상태값 반환 기능 추가
+    public (bool result, int matchCount, List<GameObject> matchTile) CheckMatchWithStatus(in GameObject _tile, in bool _explode = true)
+    {
+        if (_tile == null)
+        {
+            return (false, 0, null);
+        }
+
+        #region 초기화
+        m_matchTiles.Clear();
+        m_saveMatchTiles.Clear();
+        m_matchCount = 1;
+        m_saveMatchCount = 1;
+        m_newBlock = BlockType.NONE;
+        #endregion
+
+        #region 타겟 타일 변수 세팅
+        SetTargetTile(_tile);
+        m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
+        m_targetType = _tile.GetComponent<Tile>().GetMyBlockType();
+        #endregion
+
+        // 타입이 비어 있는 경우 return
+        if (m_targetType == BlockType.NONE)
+        {
+            return (false, 0, null);
+        }
+
+        // 특수 블록인 경우 특수 블록을 바로 터트림
+        if (m_targetType >= BlockType.CROSS && m_targetType != BlockType.NULL)
+        {
+            // 특수 블록 터트림
+            if (_explode)
+            {
+                Explode(true);
+            }
+            return (true, m_matchCount, m_matchTiles.ToList());
+        }
+
+        // 상하 검사
+        UpDownInspect();
+        // 특수 블록 조건 맞으면 일단 저장
+        m_saveMatchCount = m_matchCount;
+        m_saveMatchTiles.Clear();
+        m_saveMatchTiles = new List<GameObject>(m_matchTiles);
+        switch (m_matchCount)
+        {
+            case 4:
+                m_newBlock = BlockType.CROSS;
+                break;
+            case 5:
+                m_newBlock = BlockType.RANDOM;
+                break;
+            default:
+                break;
+        }
+
+        // 좌우 검사
+        LeftRightInspect();
+        switch (m_matchCount)
+        {
+            case 4:
+                m_newBlock = BlockType.CROSS;
+                break;
+            case 5:
+                if (m_saveMatchCount >= 3 && m_saveMatchCount < 5)
+                {
+                    m_newBlock = BlockType.SUN;
+                }
+                else
+                {
+                    m_newBlock = BlockType.RANDOM;
+                }
+                break;
+            case 6:
+                m_newBlock = BlockType.SUN;
+                break;
+            case 7:
+                m_newBlock = BlockType.COSMIC;
+                break;
+            default:
+                break;
+        }
+
+        if (m_newBlock >= BlockType.CROSS)
+        {
+            // 특수 블록 생성 조건 만족함
+            if (_explode)
+            {
+                Explode(false);
+            }
+            else
+            {
+                StageMgr.Instance.SetMatchOK(m_matchTiles);
+            }
+            return (true, m_matchCount, m_matchTiles.ToList());
+        }
+
+        // 만약 특수 블록에 해당되지 않는다면 MOON 검사 실시
+        if (m_newBlock == BlockType.NONE)
+        {
+            if (MoonInspect())
+            {
+                // 터트리는 함수
+                if (_explode)
+                {
+                    Explode(false);
+                }
+                else
+                {
+                    StageMgr.Instance.SetMatchOK(m_matchTiles);
+                }
+                return (true, m_matchCount, m_matchTiles.ToList());
+            }
+        }
+
+        // MOON의 조건에도 되지 않는다면 기본으로 터트림
+        if (m_matchCount == 3)
+        {
+            // 터트리는 함수
+            if (_explode)
+            {
+                Explode(false);
+            }
+            else
+            {
+                StageMgr.Instance.SetMatchOK(m_matchTiles);
+            }
+            return (true, m_matchCount, m_matchTiles.ToList());
+        }
+
+        return (false, 0, null);
+    }
+
     void UpDownInspect()
     {
-        for (int i = 1; i <= 2; i++)
+        for (int i = 1; i <= 4; i++)
         {
             Vector2Int matrix = m_targetMatrix;
             matrix.y = m_targetMatrix.y + i;
@@ -230,7 +449,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
             }
         }
 
-        for (int i = 1; i <= 2; i++)
+        for (int i = 1; i <= 4; i++)
         {
             Vector2Int matrix = m_targetMatrix;
             matrix.y = m_targetMatrix.y - i;
@@ -265,7 +484,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
     void LeftRightInspect()
     {
         int count = 1;
-        for (int i = 1; i <= 2; i++)
+        for (int i = 1; i <= 4; i++)
         {
             Vector2Int matrix = m_targetMatrix;
             matrix.x = m_targetMatrix.x - i;
@@ -290,7 +509,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
             }
         }
 
-        for (int i = 1; i <= 2; i++)
+        for (int i = 1; i <= 4; i++)
         {
             Vector2Int matrix = m_targetMatrix;
             matrix.x = m_targetMatrix.x + i;
@@ -503,7 +722,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         SetTargetTile(_changeTile);
         m_targetMatrix = _changeTile.GetComponent<Tile>().GetMatrix();
 
-        if (CheckMatch(_changeTile, false))
+        if (CheckMatchSimulation(_changeTile))
         {
             _originalTile.GetComponent<Tile>().SetMyBlockType(m_targetType);
             return true;
