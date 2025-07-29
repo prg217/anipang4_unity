@@ -153,10 +153,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
             {
                 Explode(false);
             }
-            else
-            {
-                StageMgr.Instance.SetMatchOK(m_matchTiles);
-            }
             return true;
         }
 
@@ -170,10 +166,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 {
                     Explode(false);
                 }
-                else
-                {
-                    StageMgr.Instance.SetMatchOK(m_matchTiles);
-                }
                 return true;
             }
         }
@@ -185,10 +177,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
             if (_explode)
             {
                 Explode(false);
-            }
-            else
-            {
-                StageMgr.Instance.SetMatchOK(m_matchTiles);
             }
             return true;
         }
@@ -203,8 +191,13 @@ public class MatchMgr : BaseMgr<MatchMgr>
             return false;
         }
 
-        List<GameObject> matchTiles = new List<GameObject>();
-        List<GameObject> saveMatchTiles = new List<GameObject>();
+        #region 초기화
+        m_matchTiles.Clear();
+        m_saveMatchTiles.Clear();
+        m_matchCount = 1;
+        m_saveMatchCount = 1;
+        m_newBlock = BlockType.NONE;
+        #endregion
 
         // 타입이 비어 있는 경우 return
         if (m_targetType == BlockType.NONE)
@@ -265,7 +258,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
         if (m_newBlock >= BlockType.CROSS)
         {
-            StageMgr.Instance.SetMatchOK(m_matchTiles);
             return true;
         }
 
@@ -274,7 +266,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
         {
             if (MoonInspect())
             {
-                StageMgr.Instance.SetMatchOK(m_matchTiles);
                 return true;
             }
         }
@@ -282,7 +273,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // MOON의 조건에도 되지 않는다면 기본으로 터트림
         if (m_matchCount == 3)
         {
-            StageMgr.Instance.SetMatchOK(m_matchTiles);
             return true;
         }
 
@@ -380,10 +370,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
             {
                 Explode(false);
             }
-            else
-            {
-                StageMgr.Instance.SetMatchOK(m_matchTiles);
-            }
             return (true, m_matchCount, m_matchTiles.ToList());
         }
 
@@ -397,10 +383,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 {
                     Explode(false);
                 }
-                else
-                {
-                    StageMgr.Instance.SetMatchOK(m_matchTiles);
-                }
                 return (true, m_matchCount, m_matchTiles.ToList());
             }
         }
@@ -412,10 +394,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
             if (_explode)
             {
                 Explode(false);
-            }
-            else
-            {
-                StageMgr.Instance.SetMatchOK(m_matchTiles);
             }
             return (true, m_matchCount, m_matchTiles.ToList());
         }
@@ -731,30 +709,32 @@ public class MatchMgr : BaseMgr<MatchMgr>
         return false;
     }
 
-    public bool SimulateBlockMove(in GameObject _tile)
+    public (bool result, List<GameObject> simulateTiles) SimulateBlockMove(in GameObject _tile)
     {
         // 상하좌우로 이동시켜서 매치가 되는지 테스트
+
         if (_tile == null)
         {
-            return false;
+            return (false, null);
         }
 
         // 움직일 수 없는 타일 일 경우 매치 시도 불가능
         if (_tile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE)
         {
-            return false;
+            return (false, null);
         }
 
         // 빈 블록일 경우 매치 시도 불가능
-        if (_tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NONE)
+        if (_tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NONE || _tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NULL)
         {
-            return false;
+            return (false, null);
         }
 
         // 특수 블록일 경우 매치 가능
         if (_tile.GetComponent<Tile>().GetMyBlockType() >= BlockType.CROSS)
         {
-            return true;
+            // 일단 임시로 null
+            return (true, null);
         }
 
         Vector2Int matrix = _tile.GetComponent<Tile>().GetMatrix();
@@ -764,28 +744,28 @@ public class MatchMgr : BaseMgr<MatchMgr>
         Vector2Int upMatrix = new Vector2Int(matrix.x, matrix.y - 1);
         if (SimulationInspect(matrix, upMatrix))
         {
-            return true;
+            return (true, m_matchTiles.ToList());
         }
 
         Vector2Int downMatrix = new Vector2Int(matrix.x, matrix.y + 1);
         if (SimulationInspect(matrix, downMatrix))
         {
-            return true;
+            return (true, m_matchTiles.ToList());
         }
 
         Vector2Int leftMatrix = new Vector2Int(matrix.x - 1, matrix.y);
         if (SimulationInspect(matrix, leftMatrix))
         {
-            return true;
+            return (true, m_matchTiles.ToList());
         }
 
         Vector2Int rightMatrix = new Vector2Int(matrix.x + 1, matrix.y);
         if (SimulationInspect(matrix, rightMatrix))
         {
-            return true;
+            return (true, m_matchTiles.ToList());
         }
 
-        return false;
+        return (false, null);
     }
 
     bool SimulationInspect(in Vector2Int _originalMatrix, in Vector2Int _changeMatrix)
@@ -828,6 +808,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
             }
         }
 
+        MoveMgr.Instance.SetCheckEmptyEnabled(false);
         switch (m_targetType)
         {
             case BlockType.CROSS:
@@ -876,6 +857,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 RandomMatch(m_targetTile, BlockType.MOON, m_contagiousObstacle);
                 break;
             default:
+                MoveMgr.Instance.SetCheckEmptyEnabled(true);
                 break;
         }
     }
@@ -892,6 +874,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
         _tile1.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
 
+        MoveMgr.Instance.SetCheckEmptyEnabled(false);
         switch (type1)
         {
             case BlockType.CROSS:
@@ -996,6 +979,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 }
                 break;
             default:
+                MoveMgr.Instance.SetCheckEmptyEnabled(true);
                 break;
         }
 
@@ -1079,8 +1063,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
         m_targetTile.GetComponent<Tile>().SetRandomExecute(true);
 
-        // 랜덤 진행 중에는 빈 공간 채우기 잠시 멈추기... 다시 실행 신호 보낼 때 까지
-        MoveMgr.Instance.SetCheckEmptyEnabled(false);
+        // 랜덤 진행 중에는 빈 공간 채우기 잠시 멈추기 -> 다시 실행 신호 보낼 때 까지
+        //MoveMgr.Instance.SetCheckEmptyEnabled(false);
 
         #region 단독으로 실행 됐을 경우
         if (_type == BlockType.NONE)
@@ -1165,8 +1149,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         yield return new WaitUntil(() => m_randomExplodeCompleteCount == explodeTiles.Count);
 
         // 다시 빈공간 채우기 활성화
-        MoveMgr.Instance.SetCheckEmptyEnabled(true);
-        MoveMgr.Instance.StartCheckEmpty();
+        MoveMgr.Instance.ActiveCheckEmpty();
     }
 
     public void RandomExplodeComplete()
@@ -1192,6 +1175,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         Explode(true);
+
+        MoveMgr.Instance.ActiveCheckEmpty();
     }
 
     void MoonExplode()
@@ -1230,6 +1215,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // 달 추격 프리팹 소환
         SummonChasingMoon(BlockType.NONE);
         #endregion
+
+        MoveMgr.Instance.ActiveCheckEmpty();
     }
 
     // 주변 터트림 : Sun 관련 함수에서 사용, 특수 블록 합성 Moon에서도 사용
@@ -1251,6 +1238,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         Explode(true);
+
+        MoveMgr.Instance.ActiveCheckEmpty();
     }
 
     // 가로세로 터트림 : Cross 관련 함수에서 사용
@@ -1300,6 +1289,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         Explode(true);
+
+        MoveMgr.Instance.ActiveCheckEmpty();
     }
 
     public void ChasingMoonExplode(in GameObject _tile, in ObstacleType _contagiousObstacleType = ObstacleType.NONE, in BlockType _explodeType = BlockType.NONE)

@@ -427,6 +427,12 @@ public class MoveMgr : BaseMgr<MoveMgr>
         checkEmptyCoroutines.Clear();
     }
 
+    public void ActiveCheckEmpty()
+    {
+        SetCheckEmptyEnabled(true);
+        StartCheckEmpty();
+    }
+
     void ConsumeMove()
     {
         if (m_isClickMoving && !m_reMoving)

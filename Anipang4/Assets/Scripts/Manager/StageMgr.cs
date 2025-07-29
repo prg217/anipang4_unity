@@ -10,6 +10,7 @@ using Random = UnityEngine.Random;
 using System.Runtime.ConstrainedExecution;
 using System.Reflection;
 using static UnityEditor.PlayerSettings;
+using System.Text.RegularExpressions;
 
 public class StageMgr : BaseMgr<StageMgr>
 {
@@ -38,7 +39,6 @@ public class StageMgr : BaseMgr<StageMgr>
 
     #region Hint 관련 변수
     // 매치가 가능한 블록들 저장
-    List<GameObject> m_matchOK = new List<GameObject>();
     List<List<GameObject>> m_matchOKs = new List<List<GameObject>>();
     bool m_hint = false;
     bool m_hintStart = false;
@@ -130,10 +130,6 @@ public class StageMgr : BaseMgr<StageMgr>
     #endregion
 
     #region Set함수
-    public void SetMatchOK(in List<GameObject> _matchOK)
-    {
-        m_matchOK = new List<GameObject>(_matchOK);
-    }
     public void SetHint(in bool _hint)
     {
         m_hint = _hint;
@@ -273,26 +269,24 @@ public class StageMgr : BaseMgr<StageMgr>
         {
             for (int j = 0; j <= m_maxMatrix.x; j++)
             {
-                m_matchOK.Clear();
-
                 Vector2Int matrix = new Vector2Int(j, i);
                 GameObject tile = GetTile(matrix);
 
-                if (MatchMgr.Instance.SimulateBlockMove(tile))
-                {
-                    m_matchOK.Add(tile);
-                    m_hint = true;
+                var(result, matchOK) = MatchMgr.Instance.SimulateBlockMove(tile);
 
-                    // 힌트를 위해 매치 되는 블록의 정보를 저장함
-                    if (m_matchOK.Count >= 3)
+                if (result)
+                {
+                    if (matchOK != null)
                     {
-                        m_matchOKs.Add(new List<GameObject>(m_matchOK));
+                        matchOK.Add(tile);
+                        m_hint = true;
+
+                        // 힌트를 위해 매치 되는 블록의 정보를 저장함
+                        if (matchOK.Count >= 3)
+                        {
+                            m_matchOKs.Add(new List<GameObject>(matchOK));
+                        }
                     }
-                    // 특수 블록 일 경우
-                    //else if (m_matchOK.Count == 1)
-                    //{
-                    //    m_matchOKs.Add(new List<GameObject>(m_matchOK));
-                    //}
                 }
             }
         }
@@ -506,7 +500,7 @@ public class StageMgr : BaseMgr<StageMgr>
             if (type != BlockType.NULL && type >= BlockType.CROSS)
             {
                 tile.Value.GetComponent<Tile>().Explode(ObstacleType.NONE);
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.3f);
             }
         }
 

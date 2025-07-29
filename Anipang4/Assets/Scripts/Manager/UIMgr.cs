@@ -162,7 +162,6 @@ public class UIMgr : BaseMgr<UIMgr>
                     // 클리어 상태 : 기존에 등록된 것이 있다면 삭제
                     if (_clear)
                     {
-                        Debug.Log(_type + "파괴");
                         Destroy(condition);
 
                         return;
@@ -173,6 +172,12 @@ public class UIMgr : BaseMgr<UIMgr>
                     return;
                 }
             }
+        }
+
+        // 클리어 했을 경우 뒤 코드는 넘어감
+        if (_clear)
+        {
+            return;
         }
 
         // 기존에 없었으면 추가
