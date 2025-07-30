@@ -40,6 +40,9 @@ public class MoveMgr : BaseMgr<MoveMgr>
     // 빈공간 채우기 활성 여부
     bool m_checkEmptyEnabled = true;
 
+    // 빈공간 채우기 멈춤 시 카운트 증가
+    int m_stopCount = 0;
+
     List<Coroutine> checkEmptyCoroutines = new List<Coroutine>();
     // ==========================
 
@@ -425,12 +428,23 @@ public class MoveMgr : BaseMgr<MoveMgr>
             }
         }
         checkEmptyCoroutines.Clear();
+
+        m_stopCount++;
+        Debug.Log("멈춤");
     }
 
     public void ActiveCheckEmpty()
     {
+        if (m_stopCount > 1)
+        {
+            m_stopCount--;
+            Debug.Log("m_stopCount : " + m_stopCount);
+            return;
+        }
+        Debug.Log("시작");
         SetCheckEmptyEnabled(true);
         StartCheckEmpty();
+        m_stopCount = 0;
     }
 
     void ConsumeMove()
@@ -614,18 +628,14 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
                         if (result)
                         {
-                            Debug.Log("매치 판정");
                             // 매치 가능하면 그 매치 가능한 타일들 각자를 또 검사
                             // ->제일 많은 매치 카운트를 가진 타일로 터트림
                             GameObject mostMatchCountTile = tile;
 
-                            Debug.Log("매치 카운트 : " + matchCount);
-                            Debug.Log("매치 타일 : " + matchTiles);
                             foreach (GameObject matchTile in matchTiles)
                             {
                                 var (result2, matchCount2, _) = MatchMgr.Instance.CheckMatchWithStatus(tile, false);
-                                Debug.Log("matchTiles result2 : " + result2);
-                                Debug.Log("matchTiles matchCount2 : " + matchCount2);
+
                                 if (result2)
                                 {
                                     if (matchCount < matchCount2)
@@ -635,7 +645,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
                                     }
                                 }
                             }
-                            Debug.Log("매치 : " + mostMatchCountTile);
+
                             MatchMgr.Instance.CheckMatch(mostMatchCountTile);
                             // 매치가 일어났다는 뜻은 빈 공간이 생겼다는 뜻
                             isEmpty = true;
@@ -662,7 +672,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
         OnEmptyMoveCompleteFunction?.Invoke();
 
         // 앞으로 매치가 가능한지 체크
-        StageMgr.Instance.CheckPossibleMatch();
+        StageMgr.Instance.StartCheckPossibleMatch();
 
         // 다시 힌트를 줄 수 있게 설정
         StageMgr.Instance.SetHint(true);

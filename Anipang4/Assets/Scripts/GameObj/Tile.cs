@@ -390,6 +390,8 @@ public class Tile : MonoBehaviour
         m_myBlock.GetComponent<Block>().SetEffect(true);
         SetRandomComplete(false);
 
+        MoveMgr.Instance.SetCheckEmptyEnabled(false);
+
         switch (GetMyBlockType())
         {
             case BlockType.RANDOM:

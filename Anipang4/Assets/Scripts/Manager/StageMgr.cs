@@ -206,7 +206,7 @@ public class StageMgr : BaseMgr<StageMgr>
         }
 
         // 시작 시 맵 체크(스테이지 블록 구성을 랜덤으로 했을 경우 대비)
-        CheckPossibleMatch();
+        StartCheckPossibleMatch();
 
         // UI에 클리어 조건 넘겨줌
         UIMgr.Instance.UpdateStageClearConditions(m_stageClearConditions);
@@ -258,8 +258,13 @@ public class StageMgr : BaseMgr<StageMgr>
         m_hintStart = false;
     }
 
+    public void StartCheckPossibleMatch()
+    {
+        StartCoroutine(CheckPossibleMatch());
+    }
+
     // 움직여서 매치가 될 수 있나 확인
-    public void CheckPossibleMatch()
+    IEnumerator CheckPossibleMatch()
     {
         m_matchOKs.Clear();
 
@@ -294,8 +299,11 @@ public class StageMgr : BaseMgr<StageMgr>
         // 매치 불가능
         if (!m_hint)
         {
-            Debug.Log("매치 불가능");
+            UIMgr.Instance.RandomPlacementUI(true);
+            yield return new WaitForSeconds(0.5f);
             RandomPlacement();
+            yield return new WaitForSeconds(0.5f);
+            UIMgr.Instance.RandomPlacementUI(false);
         }
     }
 
@@ -355,7 +363,7 @@ public class StageMgr : BaseMgr<StageMgr>
         } while (loof);
 
         // 다시 움직여서 매치가 될 수 있는지 확인
-        CheckPossibleMatch();
+        StartCheckPossibleMatch();
     }
 
     // 클리어 조건 확인
@@ -500,7 +508,8 @@ public class StageMgr : BaseMgr<StageMgr>
             if (type != BlockType.NULL && type >= BlockType.CROSS)
             {
                 tile.Value.GetComponent<Tile>().Explode(ObstacleType.NONE);
-                yield return new WaitForSeconds(0.3f);
+                MoveMgr.Instance.ActiveCheckEmpty();
+                yield return new WaitForSeconds(0.5f);
             }
         }
 

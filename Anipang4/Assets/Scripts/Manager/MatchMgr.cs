@@ -682,9 +682,12 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // m_matchTiles에 등록된 타일들을 터트림
         foreach (GameObject tile in m_matchTiles)
         {
-            if (tile.GetComponent<Tile>().GetMyBlockType() != BlockType.NULL)
+            if (tile != null)
             {
-                tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
+                if (tile.GetComponent<Tile>().GetMyBlockType() != BlockType.NULL)
+                {
+                    tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
+                }
             }
         }
     }
@@ -808,7 +811,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
             }
         }
 
-        MoveMgr.Instance.SetCheckEmptyEnabled(false);
         switch (m_targetType)
         {
             case BlockType.CROSS:
@@ -874,7 +876,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
         _tile1.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
 
-        MoveMgr.Instance.SetCheckEmptyEnabled(false);
+        //MoveMgr.Instance.SetCheckEmptyEnabled(false);
         switch (type1)
         {
             case BlockType.CROSS:
@@ -1169,12 +1171,14 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(i, j));
                 if (tile != null)
                 {
-                    m_matchTiles.Add(tile);
+                    if (tile.GetComponent<Tile>().GetMyBlockType() != BlockType.NULL)
+                    {
+                        tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+                        tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
+                    }
                 }
             }
         }
-
-        Explode(true);
 
         MoveMgr.Instance.ActiveCheckEmpty();
     }
@@ -1215,8 +1219,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // 달 추격 프리팹 소환
         SummonChasingMoon(BlockType.NONE);
         #endregion
-
-        MoveMgr.Instance.ActiveCheckEmpty();
     }
 
     // 주변 터트림 : Sun 관련 함수에서 사용, 특수 블록 합성 Moon에서도 사용
@@ -1315,6 +1317,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
             _tile.GetComponent<Tile>().Explode(_contagiousObstacleType);
         }
 
-        MoveMgr.Instance.StartCheckEmpty();
+        MoveMgr.Instance.ActiveCheckEmpty();
     }
 }

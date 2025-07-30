@@ -18,6 +18,10 @@ public class UIMgr : BaseMgr<UIMgr>
 
     List<GameObject> m_ConditionList = new List<GameObject>();
 
+    [Header("무작위 배치")]
+    [SerializeField]
+    GameObject m_randomPlacement;
+
     [Header("스테이지 종료 관련 UI")]
     [SerializeField]
     Image m_blackScreen;
@@ -205,6 +209,12 @@ public class UIMgr : BaseMgr<UIMgr>
                 m_ConditionList.Add(child.gameObject);
             }
         }
+    }
+
+    public void RandomPlacementUI(bool _active)
+    {
+        m_blackScreen.gameObject.SetActive(_active);
+        m_randomPlacement.gameObject.SetActive(_active);
     }
 
     public void StageClear(bool _active)
