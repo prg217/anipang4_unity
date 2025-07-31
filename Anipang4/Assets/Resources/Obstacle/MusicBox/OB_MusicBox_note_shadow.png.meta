@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_MusicBox_note_shadow_0: -6362233796533655417
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

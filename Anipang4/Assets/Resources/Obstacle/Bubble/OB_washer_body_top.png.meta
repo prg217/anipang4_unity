@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_washer_body_top_0: 6542988234539348903
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

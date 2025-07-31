@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_prison_top_broken2_0: -3138000560637780598
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

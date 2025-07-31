@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_aircap_effect_0: 5313166454307909477
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

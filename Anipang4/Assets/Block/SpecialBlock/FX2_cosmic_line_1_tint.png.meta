@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FX2_cosmic_line_1_tint_0: -6310512482884017269
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

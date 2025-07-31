@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_MusicBox_tone arm_shadow_0: 2787792845333515532
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

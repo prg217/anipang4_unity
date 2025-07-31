@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 
 #region enum
-public enum BlockType
+public enum EBlockType
 {
     NONE = -1,
 
@@ -39,7 +39,7 @@ public enum BlockType
     NULL,
 }
 
-public enum TileType
+public enum ETileType
 {
     //NULL = -1, // 블록이 없는 상태(움직일 수도 없음)
     IMMOVABLE = 0, // 움직일 수 없는 상태
@@ -47,7 +47,7 @@ public enum TileType
 }
 
 
-public enum ObstacleType
+public enum EObstacleType
 {
     NONE,
 
@@ -61,6 +61,27 @@ public enum ObstacleType
     PAINT, // 페인트
 
     BACK_END,
+}
+
+public enum EBGM
+{
+    STAGE,
+}
+
+public enum ESFX
+{
+    NOMAL_MATCH,
+    SPECIAL_MATCH_1,
+    SPECIAL_MATCH_2,
+    SPECIAL_MATCH_3,
+    SPECIAL_MATCH_4,
+    SPECIAL_MATCH_5,
+    SPECIAL_COMPOSITION,
+
+    BLOCK_SWAP,
+
+    PRISON,
+    PAINT,
 }
 #endregion
 

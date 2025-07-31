@@ -14,18 +14,18 @@ public struct MissionType
     }
 
     Category category;
-    BlockType blockType;
-    ObstacleType obstacleType;
+    EBlockType blockType;
+    EObstacleType obstacleType;
 
     // 생성자들
-    public MissionType(BlockType type)
+    public MissionType(EBlockType type)
     {
         category = Category.BLOCK;
         blockType = type;
         obstacleType = default;
     }
 
-    public MissionType(ObstacleType type)
+    public MissionType(EObstacleType type)
     {
         category = Category.OBSTACLE;
         obstacleType = type;
@@ -37,13 +37,13 @@ public struct MissionType
     public bool IsObstacle() => category == Category.OBSTACLE;
 
     // 안전한 값 가져오기
-    public bool TryGetBlockType(out BlockType type)
+    public bool TryGetBlockType(out EBlockType type)
     {
         type = blockType;
         return category == Category.BLOCK;
     }
 
-    public bool TryGetObstacleType(out ObstacleType type)
+    public bool TryGetObstacleType(out EObstacleType type)
     {
         type = obstacleType;
         return category == Category.OBSTACLE;
@@ -73,7 +73,7 @@ public class Condition : MonoBehaviour
 
     public MissionType GetMissionType() { return m_type; }
 
-    public void UpdateCondition(in BlockType _type, in int _count, in int _clearCount)
+    public void UpdateCondition(in EBlockType _type, in int _count, in int _clearCount)
     {
         m_type = new MissionType(_type);
 
@@ -90,7 +90,7 @@ public class Condition : MonoBehaviour
         m_text.text = count.ToString();
     }
 
-    public void UpdateCondition(in ObstacleType _type, in int _count, in int _clearCount)
+    public void UpdateCondition(in EObstacleType _type, in int _count, in int _clearCount)
     {
         m_type = new MissionType(_type);
 
@@ -98,10 +98,10 @@ public class Condition : MonoBehaviour
         string spritePath = "UI/";
         switch (_type)
         {
-            case ObstacleType.PRISON:
+            case EObstacleType.PRISON:
                 spritePath += "mission_3_9";
                 break;
-            case ObstacleType.PAINT:
+            case EObstacleType.PAINT:
                 spritePath += "mission_2_3";
                 break;
             default:

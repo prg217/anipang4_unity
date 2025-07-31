@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_acrylic_04_0: 3917986942202260707
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

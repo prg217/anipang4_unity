@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_washer_door_glow_0: -2006007557986857616
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -38,7 +38,7 @@ public class LogMgr : BaseMgr<LogMgr>
         
     }
 
-    public void AddMatchLog(in BlockType _targetType, in GameObject _targetTile, in List<GameObject> _matchTiles, in BlockType _newBlockType = BlockType.NONE)
+    public void AddMatchLog(in EBlockType _targetType, in GameObject _targetTile, in List<GameObject> _matchTiles, in EBlockType _newBlockType = EBlockType.NONE)
     {
         // 매치 기준 타입을 알려줌
         string log = _targetType.ToString();
@@ -53,7 +53,7 @@ public class LogMgr : BaseMgr<LogMgr>
         }
         
         // 새로 생성되는 특수 블록
-        if (_newBlockType != BlockType.NONE)
+        if (_newBlockType != EBlockType.NONE)
         {
             log += " = ";
             log += _newBlockType.ToString();
@@ -64,7 +64,7 @@ public class LogMgr : BaseMgr<LogMgr>
         m_matchLogs.Add(log);
     }
 
-    public void ChasingMoonExplodeLog(in GameObject _targetTile, in BlockType _explodeType)
+    public void ChasingMoonExplodeLog(in GameObject _targetTile, in EBlockType _explodeType)
     {
         string log = "MOON 추격 터짐 -> ";
         log += _explodeType;

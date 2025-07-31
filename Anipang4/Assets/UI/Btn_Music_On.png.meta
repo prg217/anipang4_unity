@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Btn_Music_On_0: -5152963670323449687
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -17,9 +17,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
     GameObject m_pClickedTile2;
     // ======================================
 
-
     int m_completeCount = 0;
-
 
     // ====== 상태 ======
     bool m_isClickMoving = false;
@@ -114,8 +112,8 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     m_pClickedTile1 = clickedTransform.gameObject;
 
                     // 특수 블록인 경우 마우스 한 번 클릭에도 매치(Random 제외)
-                    BlockType type = m_pClickedTile1.GetComponent<Tile>().GetMyBlockType();
-                    if (type >= BlockType.CROSS && type != BlockType.RANDOM)
+                    EBlockType type = m_pClickedTile1.GetComponent<Tile>().GetMyBlockType();
+                    if (type >= EBlockType.CROSS && type != EBlockType.RANDOM)
                     {
                         m_specialClicked = true;
                     }
@@ -216,6 +214,8 @@ public class MoveMgr : BaseMgr<MoveMgr>
         // 직접 움직였을 때만 moveCount차감
         ConsumeMove();
 
+        SoundMgr.Instance.PlaySFX(ESFX.BLOCK_SWAP);
+
         #region 블록 움직이기
         // 타일이 가지고 있는 블록에게 상대 타일쪽으로 움직이라고 함
         m_pClickedTile1.GetComponent<Tile>().SetBlockMove(m_pClickedTile2, m_emptyMoving);
@@ -280,11 +280,11 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
     bool IsMovementImpossible()
     {
-        TileType tileType1 = m_pClickedTile1.GetComponent<Tile>().GetTileType();
-        TileType tileType2 = m_pClickedTile2.GetComponent<Tile>().GetTileType();
+        ETileType tileType1 = m_pClickedTile1.GetComponent<Tile>().GetTileType();
+        ETileType tileType2 = m_pClickedTile2.GetComponent<Tile>().GetTileType();
 
         // 둘 중 하나라도 움직일 수 없는 상태라면 움직이지 않음
-        if (tileType1 == TileType.IMMOVABLE || tileType2 == TileType.IMMOVABLE)
+        if (tileType1 == ETileType.IMMOVABLE || tileType2 == ETileType.IMMOVABLE)
         {
             m_moving = false;
             m_pClickedTile1 = null;
@@ -310,30 +310,30 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     return;
                 }
 
-                BlockType type1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlockType();
-                BlockType type2 = m_pClickedTile2.GetComponent<Tile>().GetMyBlockType();
+                EBlockType type1 = m_pClickedTile1.GetComponent<Tile>().GetMyBlockType();
+                EBlockType type2 = m_pClickedTile2.GetComponent<Tile>().GetMyBlockType();
 
                 #region 장애물 설정
-                ObstacleType obType1 = m_pClickedTile1.GetComponent<Tile>().GetPropagationObstacle();
-                ObstacleType obType2 = m_pClickedTile2.GetComponent<Tile>().GetPropagationObstacle();
-                ObstacleType obType = obType1;
+                EObstacleType obType1 = m_pClickedTile1.GetComponent<Tile>().GetPropagationObstacle();
+                EObstacleType obType2 = m_pClickedTile2.GetComponent<Tile>().GetPropagationObstacle();
+                EObstacleType obType = obType1;
 
-                if (obType1 != ObstacleType.NONE)
+                if (obType1 != EObstacleType.NONE)
                 {
                     obType = obType1;
                 }
-                else if (obType2 != ObstacleType.NONE)
+                else if (obType2 != EObstacleType.NONE)
                 {
                     obType = obType2;
                 }
                 #endregion
 
                 // 둘 다 특수 블록인 경우->특수 블록 합성
-                if (type1 >= BlockType.CROSS && type2 >= BlockType.CROSS)
+                if (type1 >= EBlockType.CROSS && type2 >= EBlockType.CROSS)
                 {
                     MatchMgr.Instance.SpecialCompositionExplode(m_pClickedTile1, m_pClickedTile2, obType);
 
-                    if (type1 == BlockType.RANDOM || type2 == BlockType.RANDOM)
+                    if (type1 == EBlockType.RANDOM || type2 == EBlockType.RANDOM)
                     {
                         return;
                     }
@@ -344,11 +344,11 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     #region 랜덤+일반
 
                     // 랜덤과 일반 블록인 경우->랜덤 Explode 실행
-                    if (type1 == BlockType.RANDOM)
+                    if (type1 == EBlockType.RANDOM)
                     {
                         MatchMgr.Instance.RandomMatch(m_pClickedTile1, type2, obType);
                     }
-                    else if (type2 == BlockType.RANDOM)
+                    else if (type2 == EBlockType.RANDOM)
                     {
                         MatchMgr.Instance.RandomMatch(m_pClickedTile2, type1, obType);
                     }
@@ -359,7 +359,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
                     bool match1 = MatchMgr.Instance.CheckMatch(m_pClickedTile1);
                     bool match2 = MatchMgr.Instance.CheckMatch(m_pClickedTile2);
 
-                    if (type1 == BlockType.RANDOM || type2 == BlockType.RANDOM)
+                    if (type1 == EBlockType.RANDOM || type2 == EBlockType.RANDOM)
                     {
                         return;
                     }
@@ -557,7 +557,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 GameObject tile = StageMgr.Instance.GetTile(matrix);
 
                 // 이동 불가 타일이라면 패스
-                if (tile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE)
+                if (tile.GetComponent<Tile>().GetTileType() == ETileType.IMMOVABLE)
                 {
                     continue;
                 }
@@ -620,9 +620,9 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 {
                     Vector2Int matrix = new Vector2Int(j, i);
                     GameObject tile = StageMgr.Instance.GetTile(matrix);
-                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+                    EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
                     // 특수 블록이 아닐 경우에만 매치 판정을 함
-                    if (type < BlockType.CROSS)
+                    if (type < EBlockType.CROSS)
                     {
                         var(result, matchCount, matchTiles) = MatchMgr.Instance.CheckMatchWithStatus(tile, false);
 
@@ -692,8 +692,8 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
                 if (tile.GetComponent<Tile>().IsBlockEmpty())
                 {
-                    TileType tileType = tile.GetComponent<Tile>().GetTileType();
-                    if (tileType == TileType.MOVABLE)
+                    ETileType tileType = tile.GetComponent<Tile>().GetTileType();
+                    if (tileType == ETileType.MOVABLE)
                     {
                         // 빈 생성 타일일 경우
                         if (tile.GetComponent<Tile>().IsEmptyCreateTile())
@@ -736,10 +736,10 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
             if (checkUpTile != null)
             {
-                TileType type = checkUpTile.GetComponent<Tile>().GetTileType();
+                ETileType type = checkUpTile.GetComponent<Tile>().GetTileType();
 
                 // 만약 막혀있는 맨 위가 이동 불가라면 대각선 이동 테스트 시도
-                if (type == TileType.IMMOVABLE)
+                if (type == ETileType.IMMOVABLE)
                 {
                     // 움직일 수 없는 경우 밑 검사
                     Vector2Int downMatrix = new Vector2Int(_checkMatrix.x, _checkMatrix.y + 1);
@@ -778,8 +778,8 @@ public class MoveMgr : BaseMgr<MoveMgr>
         GameObject tile = StageMgr.Instance.GetTile(_matrix);
         if (tile != null)
         {
-            TileType type = tile.GetComponent<Tile>().GetTileType();
-            if (type == TileType.IMMOVABLE)
+            ETileType type = tile.GetComponent<Tile>().GetTileType();
+            if (type == ETileType.IMMOVABLE)
             {
                 return true;
             }

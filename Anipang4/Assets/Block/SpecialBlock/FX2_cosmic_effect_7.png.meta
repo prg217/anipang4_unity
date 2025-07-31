@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FX2_cosmic_effect_7_0: -9092560439398610992
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

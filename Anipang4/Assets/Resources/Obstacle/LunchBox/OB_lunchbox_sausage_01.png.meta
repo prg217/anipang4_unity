@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_lunchbox_sausage_01_0: -8741536756426669344
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FX2_focus_tile_0: -2864903729210643609
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_MusicBox_baloon_0: -2850071359258010721
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

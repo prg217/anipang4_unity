@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FX2_moon_shadow_0: -7105571896098336680
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

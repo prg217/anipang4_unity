@@ -11,7 +11,7 @@ public class Block : MonoBehaviour
     #region 변수
 
     [SerializeField]
-    BlockType m_blockType;
+    EBlockType m_blockType;
     [SerializeField]
     bool m_isSpecial = false;
 
@@ -39,13 +39,13 @@ public class Block : MonoBehaviour
     #region Get함수
     public bool GetIsEmpty()
     {
-        if (m_blockType == BlockType.NONE)
+        if (m_blockType == EBlockType.NONE)
         {
             return true;
         }
         return false;
     }
-    public BlockType GetBlockType() { return m_blockType; }
+    public EBlockType GetBlockType() { return m_blockType; }
     #endregion
 
     #region Set함수
@@ -74,19 +74,19 @@ public class Block : MonoBehaviour
         transform.SetParent(m_goalTile.transform);
     }
 
-    public void SetBlockType(in BlockType _Type)
+    public void SetBlockType(in EBlockType _Type)
     {
         GetComponent<Renderer>().enabled = true;
         GetComponent<Animator>().enabled = true;
         m_blockType = _Type;
 
         // 특수 블록 여부
-        if ((int)m_blockType >= (int)BlockType.DOUBLE_CROSS)
+        if ((int)m_blockType >= (int)EBlockType.DOUBLE_CROSS)
         {
             SpecialComposition(_Type);
             return;
         }
-        else if ((int)m_blockType >= (int)BlockType.CROSS)
+        else if ((int)m_blockType >= (int)EBlockType.CROSS)
         {
             m_isSpecial = true;
         }
@@ -109,19 +109,19 @@ public class Block : MonoBehaviour
             // 특수 블록 전용
             switch (m_blockType)
             {
-                case BlockType.CROSS:
+                case EBlockType.CROSS:
                     aniPath += "cross";
                     break;
-                case BlockType.SUN:
+                case EBlockType.SUN:
                     aniPath += "sun";
                     break;
-                case BlockType.RANDOM:
+                case EBlockType.RANDOM:
                     aniPath += "random";
                     break;
-                case BlockType.COSMIC:
+                case EBlockType.COSMIC:
                     aniPath += "cosmic";
                     break;
-                case BlockType.MOON:
+                case EBlockType.MOON:
                     aniPath += "moon";
                     break;
                 default:
@@ -131,7 +131,7 @@ public class Block : MonoBehaviour
         else
         {
             // 안 보이게 함
-            if (m_blockType == BlockType.NONE)
+            if (m_blockType == EBlockType.NONE)
             {
                 GetComponent<Renderer>().enabled = false;
             }
@@ -169,40 +169,40 @@ public class Block : MonoBehaviour
 
             switch (m_blockType)
             {
-                case BlockType.CROSS:
+                case EBlockType.CROSS:
                     // 회전
                     spritePath += "FX2_cross_body_effect_0";
                     break;
-                case BlockType.SUN:
+                case EBlockType.SUN:
                     // 원형 파앗...기운...이펙트
                     spritePath += "FX2_cross_All_Combine2_fx_01";
                     break;
-                case BlockType.RANDOM:
+                case EBlockType.RANDOM:
                     // 겉에 링 생기고 회전(해당하는 블록들 반짝반짝)
                     spritePath += "FX2_cosmic_glow";
                     break;
-                case BlockType.COSMIC:
+                case EBlockType.COSMIC:
                     spritePath += "FX2_cosmic_glow";
                     break;
-                case BlockType.MOON:
+                case EBlockType.MOON:
                     spritePath += "FX2_moon_effect";
                     break;
-                case BlockType.DOUBLE_CROSS:
+                case EBlockType.DOUBLE_CROSS:
                     spritePath += "FX2_cross_body_effect_0";
                     break;
-                case BlockType.CROSS_SUN:
+                case EBlockType.CROSS_SUN:
                     spritePath += "FX2_cross_All_Combine2_fx_01";
                     break;
-                case BlockType.CROSS_MOON:
+                case EBlockType.CROSS_MOON:
                     spritePath += "FX2_moon_effect";
                     break;
-                case BlockType.DOUBLE_SUN:
+                case EBlockType.DOUBLE_SUN:
                     spritePath += "FX2_cross_All_Combine2_fx_01";
                     break;
-                case BlockType.SUN_MOON:
+                case EBlockType.SUN_MOON:
                     spritePath += "FX2_moon_effect";
                     break;
-                case BlockType.DOUBLE_MOON:
+                case EBlockType.DOUBLE_MOON:
                     spritePath += "FX2_moon_double_effect";
                     break;
                 default:
@@ -248,7 +248,7 @@ public class Block : MonoBehaviour
         }
 
     }
-    void SpecialComposition(BlockType _Type)
+    void SpecialComposition(EBlockType _Type)
     {
         // 합성일 경우->이펙트+잠깐 멈추기
         // 아닐 경우->터질 때 이펙트+잠깐 멈추기
@@ -261,28 +261,28 @@ public class Block : MonoBehaviour
 
         switch (m_blockType)
         {
-            case BlockType.DOUBLE_CROSS:
+            case EBlockType.DOUBLE_CROSS:
                 spritePath += "Block/FX2_cross_All_Combine1";
                 break;
-            case BlockType.CROSS_SUN:
+            case EBlockType.CROSS_SUN:
                 spritePath += "Block/FX2_cross_All_Combine2";
                 break;
-            case BlockType.CROSS_MOON:
+            case EBlockType.CROSS_MOON:
                 spritePath += "Moon/moonCross_01";
                 break;
-            case BlockType.DOUBLE_SUN:
+            case EBlockType.DOUBLE_SUN:
                 spritePath += "Block/sun_01";
                 break;
-            case BlockType.SUN_MOON:
+            case EBlockType.SUN_MOON:
                 spritePath += "Moon/moonSun_01";
                 break;
-            case BlockType.DOUBLE_MOON:
+            case EBlockType.DOUBLE_MOON:
                 spritePath += "Moon/FX2_moon_body_double";
                 break;
-            case BlockType.DOUBLE_RANDOM:
-            case BlockType.RANDOM_CROSS:
-            case BlockType.RANDOM_SUN:
-            case BlockType.RANDOM_MOON:
+            case EBlockType.DOUBLE_RANDOM:
+            case EBlockType.RANDOM_CROSS:
+            case EBlockType.RANDOM_SUN:
+            case EBlockType.RANDOM_MOON:
                 spritePath += "Block/FX2_random_02";
                 break;
             default:

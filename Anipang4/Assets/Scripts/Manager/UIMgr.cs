@@ -9,9 +9,9 @@ public class UIMgr : BaseMgr<UIMgr>
     #region 변수
 
     [SerializeField]
-    UIInfo m_UIInfo;
+    SUIInfo m_UIInfo;
 
-    StageClearConditions m_stageClearConditions;
+    SStageClearConditions m_stageClearConditions;
 
     [SerializeField]
     GameObject m_ConditionPrefab;
@@ -62,7 +62,7 @@ public class UIMgr : BaseMgr<UIMgr>
         
     }
 
-    public void UpdateStageClearConditions(in StageClearConditions _stageClearConditions)
+    public void UpdateStageClearConditions(in SStageClearConditions _stageClearConditions)
     {
         m_stageClearConditions = _stageClearConditions;
     }
@@ -75,7 +75,7 @@ public class UIMgr : BaseMgr<UIMgr>
         // m_stageClearConditions에 해당되는 블록, 장애물 업데이트
         for (int i = 0; i < m_stageClearConditions.blockTypes.Count; i++)
         {
-            BlockType blockType = m_stageClearConditions.blockTypes[i].type;
+            EBlockType blockType = m_stageClearConditions.blockTypes[i].type;
             bool clear = m_stageClearConditions.blockTypes[i].clear;
 
             UpdateClearBlockTypeConditions(blockType, clear);
@@ -83,7 +83,7 @@ public class UIMgr : BaseMgr<UIMgr>
 
         for (int i = 0; i < m_stageClearConditions.obstacleTypes.Count; i++)
         {
-            ObstacleType obstacleType = m_stageClearConditions.obstacleTypes[i].type;
+            EObstacleType obstacleType = m_stageClearConditions.obstacleTypes[i].type;
             bool clear = m_stageClearConditions.obstacleTypes[i].clear;
 
             UpdateClearObstacleTypeConditions(obstacleType, clear);
@@ -100,7 +100,7 @@ public class UIMgr : BaseMgr<UIMgr>
         m_UIInfo.tensPlace.text = tensPlace.ToString();
     }
 
-    void UpdateClearBlockTypeConditions(in BlockType _type, in bool _clear)
+    void UpdateClearBlockTypeConditions(in EBlockType _type, in bool _clear)
     {
         // 클리어를 위해 필요한 개수, 현재 개수
         int clearCount = m_stageClearConditions.GetTypeCount(_type);
@@ -110,7 +110,7 @@ public class UIMgr : BaseMgr<UIMgr>
         {
             MissionType missionType = condition.GetComponent<Condition>().GetMissionType();
 
-            if (missionType.TryGetBlockType(out BlockType blockType))
+            if (missionType.TryGetBlockType(out EBlockType blockType))
             {
                 // 같은 타입이라면
                 if (blockType == _type)
@@ -143,7 +143,7 @@ public class UIMgr : BaseMgr<UIMgr>
         m_ConditionList.Add(conditionObj);
     }
 
-    void UpdateClearObstacleTypeConditions(in ObstacleType _type, in bool _clear)
+    void UpdateClearObstacleTypeConditions(in EObstacleType _type, in bool _clear)
     {
         // 클리어를 위해 필요한 개수, 현재 개수
         int clearCount = m_stageClearConditions.GetTypeCount(_type);
@@ -158,7 +158,7 @@ public class UIMgr : BaseMgr<UIMgr>
 
             MissionType missionType = condition.GetComponent<Condition>().GetMissionType();
 
-            if (missionType.TryGetObstacleType(out ObstacleType obstacleType))
+            if (missionType.TryGetObstacleType(out EObstacleType obstacleType))
             {
                 // 같은 타입이라면
                 if (obstacleType == _type)

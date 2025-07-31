@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_AppleBox_Basket_0: 3557948601962983325
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      ICON_star_light #82041_0: -3672585725864136490
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

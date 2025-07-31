@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_lunchbox_top_button2_0: 5597271020458060654
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

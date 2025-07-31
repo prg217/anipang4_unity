@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FX2_moon_body_double_0: 8447752612500637809
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

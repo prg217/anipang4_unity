@@ -1,16 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using static Unity.VisualScripting.Metadata;
 using System.Collections;
-using Unity.Burst.CompilerServices;
 using System;
 
 using Random = UnityEngine.Random;
-using System.Runtime.ConstrainedExecution;
-using System.Reflection;
-using static UnityEditor.PlayerSettings;
-using System.Text.RegularExpressions;
 
 public class StageMgr : BaseMgr<StageMgr>
 {
@@ -34,7 +27,7 @@ public class StageMgr : BaseMgr<StageMgr>
     int m_maxMoveCount = 20;
 
     [SerializeField]
-    StageClearConditions m_stageClearConditions;
+    SStageClearConditions m_stageClearConditions;
     #endregion
 
     #region Hint 관련 변수
@@ -51,26 +44,26 @@ public class StageMgr : BaseMgr<StageMgr>
     #endregion 변수 끝
 
     #region Get함수
-    public GameObject GetTile(in Vector2Int _Matrix)
+    public GameObject GetTile(in Vector2Int _matrix)
     { 
-        if (m_tiles.ContainsKey(_Matrix))
+        if (m_tiles.ContainsKey(_matrix))
         {
-            return m_tiles[_Matrix];
+            return m_tiles[_matrix];
         }
 
         return null;
     }
     public int GetMaxBlockType() { return m_maxBlockType; }
     public Vector2Int GetMaxMatrix() { return m_maxMatrix; }
-    public Dictionary<ObstacleType, bool> GetClearObstacleTypes()
+    public Dictionary<EObstacleType, bool> GetClearObstacleTypes()
     {
         if (m_stageClearConditions.obstacleTypes != null)
         {
-            Dictionary<ObstacleType, bool> types = new Dictionary<ObstacleType, bool>();
+            Dictionary<EObstacleType, bool> types = new Dictionary<EObstacleType, bool>();
 
             for (int i = 0; i < m_stageClearConditions.obstacleTypes.Count; i++)
             {
-                ObstacleType obstacleType = m_stageClearConditions.obstacleTypes[i].type;
+                EObstacleType obstacleType = m_stageClearConditions.obstacleTypes[i].type;
                 bool clear = m_stageClearConditions.obstacleTypes[i].clear;
                 types.Add(obstacleType, clear);
             }
@@ -79,15 +72,15 @@ public class StageMgr : BaseMgr<StageMgr>
         }
         return null;
     }
-    public Dictionary<BlockType, bool> GetClearBlockTypes()
+    public Dictionary<EBlockType, bool> GetClearBlockTypes()
     {
         if (m_stageClearConditions.blockTypes != null)
         {
-            Dictionary<BlockType, bool> types = new Dictionary<BlockType, bool>();
+            Dictionary<EBlockType, bool> types = new Dictionary<EBlockType, bool>();
 
             for (int i = 0; i < m_stageClearConditions.blockTypes.Count; i++)
             {
-                BlockType blockType = m_stageClearConditions.blockTypes[i].type;
+                EBlockType blockType = m_stageClearConditions.blockTypes[i].type;
                 bool clear = m_stageClearConditions.blockTypes[i].clear;
                 types.Add(blockType, clear);
             }
@@ -103,25 +96,25 @@ public class StageMgr : BaseMgr<StageMgr>
             Vector2Int randomMatrix = new Vector2Int(Random.Range(0, m_maxMatrix.x + 1), Random.Range(0, m_maxMatrix.y + 1));
             GameObject tile = GetTile(randomMatrix);
             // 유효 타일일 경우
-            if (tile.GetComponent<Tile>().GetMyBlockType() != BlockType.NULL)
+            if (tile.GetComponent<Tile>().GetMyBlockType() != EBlockType.NULL)
             {
                 return tile;
             }
         }
     }
 
-    public BlockType GetMostNormalBlockType()
+    public EBlockType GetMostNormalBlockType()
     {
-        BlockType mostType = BlockType.NULL;
+        EBlockType mostType = EBlockType.NULL;
         int mostCount = 0;
         // 일반 블록 타입 별로 카운트
-        for (int i = 0; i < (int)BlockType.CROSS; i++)
+        for (int i = 0; i < (int)EBlockType.CROSS; i++)
         {
-            int count = SearchTiles((BlockType)i).Count;
+            int count = SearchTiles((EBlockType)i).Count;
             if (mostCount < count)
             {
                 mostCount = count;
-                mostType = (BlockType)i;
+                mostType = (EBlockType)i;
             }
         }
         
@@ -153,7 +146,7 @@ public class StageMgr : BaseMgr<StageMgr>
 
     #region 이벤트
     // 타일의 Explode가 실행될 때마다 어떤 타일이 터졌는지 누적
-    void HandleTileExplode(BlockType _type)
+    void HandleTileExplode(EBlockType _type)
     {
         StageInfo.AddBlock(_type, 1);
     }
@@ -213,6 +206,10 @@ public class StageMgr : BaseMgr<StageMgr>
 
         // 스테이지 클리어 체크
         CheckStageClear();
+
+        // BGM 재생
+        // 추후 스테이지 추가 시 스테이지에 따라 할 수 있게 변경할 것
+        SoundMgr.Instance.PlayBGM(EBGM.STAGE);
     }
 
     // Update is called once per frame
@@ -311,8 +308,8 @@ public class StageMgr : BaseMgr<StageMgr>
     void RandomPlacement()
     {
         List<GameObject> tiles = new List<GameObject>();
-        List<BlockType> blockTypes = new List<BlockType>();
-        List<BlockType> saveBlockTypes = new List<BlockType>();
+        List<EBlockType> blockTypes = new List<EBlockType>();
+        List<EBlockType> saveBlockTypes = new List<EBlockType>();
 
         for (int i = 0; i <= m_maxMatrix.y; i++)
         {
@@ -325,21 +322,21 @@ public class StageMgr : BaseMgr<StageMgr>
                     break;
                 }
 
-                TileType tileType = tile.GetComponent<Tile>().GetTileType(); 
+                ETileType tileType = tile.GetComponent<Tile>().GetTileType(); 
 
                 // 타일 타입이 움직일 수 있는 경우에만 저장
-                if (tileType == TileType.MOVABLE)
+                if (tileType == ETileType.MOVABLE)
                 {
                     // 움직일 수 있는 타일 저장
                     tiles.Add(tile);
 
                     // 블록 타입 저장
-                    BlockType blockType = tile.GetComponent<Tile>().GetMyBlockType();
+                    EBlockType blockType = tile.GetComponent<Tile>().GetMyBlockType();
                     blockTypes.Add(blockType);
                 }
             }
         }
-        saveBlockTypes = new List<BlockType>(blockTypes);
+        saveBlockTypes = new List<EBlockType>(blockTypes);
 
         bool loof = false;
         do
@@ -354,7 +351,7 @@ public class StageMgr : BaseMgr<StageMgr>
                 // 만약 바로 매치가 된다면 재실행
                 if (MatchMgr.Instance.CheckMatch(tile, false))
                 {
-                    blockTypes = new List<BlockType>(saveBlockTypes);
+                    blockTypes = new List<EBlockType>(saveBlockTypes);
                     loof = true;
                     break;
                 }
@@ -379,7 +376,7 @@ public class StageMgr : BaseMgr<StageMgr>
         {
             for (int i = 0; i < m_stageClearConditions.blockTypes.Count; i++)
             {
-                BlockType blockType = m_stageClearConditions.blockTypes[i].type;
+                EBlockType blockType = m_stageClearConditions.blockTypes[i].type;
                 int blockCount = m_stageClearConditions.blockTypes[i].count;
 
                 if (StageInfo.GetBlockCount(blockType) < blockCount)
@@ -400,7 +397,7 @@ public class StageMgr : BaseMgr<StageMgr>
         {
             for(int i = 0; i < m_stageClearConditions.obstacleTypes.Count; i++)
             {
-                ObstacleType obstacleType = m_stageClearConditions.obstacleTypes[i].type;
+                EObstacleType obstacleType = m_stageClearConditions.obstacleTypes[i].type;
                 int obstacleCount = m_stageClearConditions.obstacleTypes[i].count;
 
                 if (StageInfo.GetObstacleCount(obstacleType) != obstacleCount)
@@ -455,7 +452,7 @@ public class StageMgr : BaseMgr<StageMgr>
 
         // 남은 moveCount 횟수에 따라 랜덤한 블록(특수 블록 제외)을 특수블록으로 만든 다음
         // 랜덤, 코즈믹 제외 특수 블록
-        BlockType[] selectableBlockTypes = { BlockType.CROSS, BlockType.SUN, BlockType.MOON };
+        EBlockType[] selectableBlockTypes = { EBlockType.CROSS, EBlockType.SUN, EBlockType.MOON };
         // 중복 방지
         HashSet<Vector2Int> usedPositions = new HashSet<Vector2Int>();
         while (StageInfo.MoveCount > 0)
@@ -485,13 +482,13 @@ public class StageMgr : BaseMgr<StageMgr>
                 usedPositions.Add(randomPos);
 
                 GameObject tile = m_tiles[randomPos];
-                BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+                EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
 
                 // 타일이 일반 블록인지 확인
-                if (type > BlockType.NONE && type < BlockType.CROSS)
+                if (type > EBlockType.NONE && type < EBlockType.CROSS)
                 {
                     // 랜덤한 특수 블록으로 변환(랜덤, 코즈믹 제외)
-                    BlockType randomBlockType = selectableBlockTypes[Random.Range(0, selectableBlockTypes.Length)];
+                    EBlockType randomBlockType = selectableBlockTypes[Random.Range(0, selectableBlockTypes.Length)];
                     tile.GetComponent<Tile>().SetMyBlockType(randomBlockType);
                     break;
                 }
@@ -503,11 +500,11 @@ public class StageMgr : BaseMgr<StageMgr>
         // 특수블록들을 터트림
         foreach (KeyValuePair<Vector2Int, GameObject> tile in m_tiles)
         {
-            BlockType type = tile.Value.GetComponent<Tile>().GetMyBlockType();
+            EBlockType type = tile.Value.GetComponent<Tile>().GetMyBlockType();
 
-            if (type != BlockType.NULL && type >= BlockType.CROSS)
+            if (type != EBlockType.NULL && type >= EBlockType.CROSS)
             {
-                tile.Value.GetComponent<Tile>().Explode(ObstacleType.NONE);
+                tile.Value.GetComponent<Tile>().Explode(EObstacleType.NONE);
                 MoveMgr.Instance.ActiveCheckEmpty();
                 yield return new WaitForSeconds(0.5f);
             }
@@ -552,7 +549,7 @@ public class StageMgr : BaseMgr<StageMgr>
     void StageInfoUpdate()
     {
         // 장애물 개수 초기화
-        foreach (ObstacleType type in Enum.GetValues(typeof(ObstacleType)))
+        foreach (EObstacleType type in Enum.GetValues(typeof(EObstacleType)))
         {
             StageInfo.ResetObstacle();
         }
@@ -565,16 +562,16 @@ public class StageMgr : BaseMgr<StageMgr>
                 GameObject tile = GetTile(matrix);
 
                 // 장애물 개수
-                ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
+                EObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
                 StageInfo.AddObstacle(frontObstacleType, 1);
-                ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
+                EObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
                 StageInfo.AddObstacle(backObstacleType, 1);
             }
         }
     }
 
     // 조건을 입력하고 해당하는 타일들을 반환
-    public List<GameObject> SearchTiles(BlockType _blockType = BlockType.NONE, ObstacleType _obstacleType = ObstacleType.NONE)
+    public List<GameObject> SearchTiles(EBlockType _blockType = EBlockType.NONE, EObstacleType _obstacleType = EObstacleType.NONE)
     {
         List<GameObject> tiles = new List<GameObject>();
 
@@ -585,15 +582,15 @@ public class StageMgr : BaseMgr<StageMgr>
                 Vector2Int matrix = new Vector2Int(j, i);
                 GameObject tile = GetTile(matrix);
 
-                if (tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NULL)
+                if (tile.GetComponent<Tile>().GetMyBlockType() == EBlockType.NULL)
                 {
                     continue;
                 }
 
                 // 블록 타입이 조건에 맞는지
-                if (_blockType != BlockType.NONE)
+                if (_blockType != EBlockType.NONE)
                 {
-                    BlockType blockType = tile.GetComponent<Tile>().GetMyBlockType();
+                    EBlockType blockType = tile.GetComponent<Tile>().GetMyBlockType();
 
                     if (blockType != _blockType)
                     {
@@ -602,10 +599,10 @@ public class StageMgr : BaseMgr<StageMgr>
                 }
 
                 // 장애물 타입이 조건에 맞는지
-                if (_obstacleType != ObstacleType.NONE)
+                if (_obstacleType != EObstacleType.NONE)
                 {
-                    ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
-                    ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
+                    EObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
+                    EObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
 
                     if (backObstacleType != _obstacleType && frontObstacleType != _obstacleType)
                     {
@@ -620,7 +617,7 @@ public class StageMgr : BaseMgr<StageMgr>
 
         return tiles;
     }
-    public List<GameObject> SearchTiles(BlockType _blockType = BlockType.NONE)
+    public List<GameObject> SearchTiles(EBlockType _blockType = EBlockType.NONE)
     {
         List<GameObject> tiles = new List<GameObject>();
 
@@ -631,15 +628,15 @@ public class StageMgr : BaseMgr<StageMgr>
                 Vector2Int matrix = new Vector2Int(j, i);
                 GameObject tile = GetTile(matrix);
 
-                if (tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NULL)
+                if (tile.GetComponent<Tile>().GetMyBlockType() == EBlockType.NULL)
                 {
                     continue;
                 }
 
                 // 블록 타입이 조건에 맞는지
-                if (_blockType != BlockType.NONE)
+                if (_blockType != EBlockType.NONE)
                 {
-                    BlockType blockType = tile.GetComponent<Tile>().GetMyBlockType();
+                    EBlockType blockType = tile.GetComponent<Tile>().GetMyBlockType();
 
                     if (blockType != _blockType)
                     {
@@ -654,7 +651,7 @@ public class StageMgr : BaseMgr<StageMgr>
 
         return tiles;
     }
-    public List<GameObject> SearchTiles(ObstacleType _obstacleType)
+    public List<GameObject> SearchTiles(EObstacleType _obstacleType)
     {
         List<GameObject> tiles = new List<GameObject>();
 
@@ -665,16 +662,16 @@ public class StageMgr : BaseMgr<StageMgr>
                 Vector2Int matrix = new Vector2Int(j, i);
                 GameObject tile = GetTile(matrix);
 
-                if (tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NULL)
+                if (tile.GetComponent<Tile>().GetMyBlockType() == EBlockType.NULL)
                 {
                     continue;
                 }
 
                 // 장애물 타입이 조건에 맞는지
-                if (_obstacleType != ObstacleType.NONE)
+                if (_obstacleType != EObstacleType.NONE)
                 {
-                    ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
-                    ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
+                    EObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
+                    EObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
 
                     if (backObstacleType != _obstacleType && frontObstacleType != _obstacleType)
                     {
@@ -690,7 +687,7 @@ public class StageMgr : BaseMgr<StageMgr>
         return tiles;
     }
     // 제외하고 검색
-    public List<GameObject> SearchTilesExcept(ObstacleType _obstacleType)
+    public List<GameObject> SearchTilesExcept(EObstacleType _obstacleType)
     {
         List<GameObject> tiles = new List<GameObject>();
 
@@ -701,17 +698,17 @@ public class StageMgr : BaseMgr<StageMgr>
                 Vector2Int matrix = new Vector2Int(j, i);
                 GameObject tile = GetTile(matrix);
 
-                if (tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NULL)
+                if (tile.GetComponent<Tile>().GetMyBlockType() == EBlockType.NULL)
                 {
                     continue;
                 }
 
                 // 장애물 타입이 조건에 맞는지
-                if (_obstacleType != ObstacleType.NONE)
+                if (_obstacleType != EObstacleType.NONE)
                 {
-                    if (_obstacleType < ObstacleType.FRONT_END)
+                    if (_obstacleType < EObstacleType.FRONT_END)
                     {
-                        ObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
+                        EObstacleType frontObstacleType = tile.GetComponent<Tile>().GetMyFrontObstacleType();
 
                         if (frontObstacleType != _obstacleType)
                         {
@@ -720,7 +717,7 @@ public class StageMgr : BaseMgr<StageMgr>
                     }
                     else
                     {
-                        ObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
+                        EObstacleType backObstacleType = tile.GetComponent<Tile>().GetMyBackObstacleType();
 
                         if (backObstacleType != _obstacleType)
                         {

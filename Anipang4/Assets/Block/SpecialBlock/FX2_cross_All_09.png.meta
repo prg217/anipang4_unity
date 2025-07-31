@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FX2_cross_All_09_0: -7680439650541340485
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

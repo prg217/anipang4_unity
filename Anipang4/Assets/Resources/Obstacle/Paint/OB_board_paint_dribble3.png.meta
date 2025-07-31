@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_board_paint_dribble3_0: -6632608727097554309
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FX2_cosmic_glow_0: 9074178432831770669
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

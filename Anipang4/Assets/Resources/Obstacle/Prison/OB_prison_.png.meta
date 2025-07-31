@@ -222,7 +222,11 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_prison__0: 7950357117781594002
+      OB_prison__1: 4409511411345317169
+      OB_prison__2: -8906835545252260747
+      OB_prison__3: -8927751746802566330
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

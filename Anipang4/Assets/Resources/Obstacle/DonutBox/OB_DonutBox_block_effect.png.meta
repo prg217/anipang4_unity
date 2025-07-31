@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_DonutBox_block_effect_0: -3192585355294289987
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

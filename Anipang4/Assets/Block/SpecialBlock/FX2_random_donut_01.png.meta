@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FX2_random_donut_01_0: -1571563277272777620
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

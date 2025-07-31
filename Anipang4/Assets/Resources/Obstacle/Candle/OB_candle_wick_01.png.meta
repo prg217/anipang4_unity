@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_candle_wick_01_0: 471564124750438038
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

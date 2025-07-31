@@ -13,8 +13,8 @@ public class ChasingMoon : MonoBehaviour
     #region 변수
     GameObject m_myTile;
     GameObject m_target;
-    BlockType m_blockType;
-    ObstacleType m_contagiousObstacleType;
+    EBlockType m_blockType;
+    EObstacleType m_contagiousObstacleType;
 
     #region 포물선 이동 변수
     float m_backwardDistance = 0.5f; // 뒤로 가는 거리
@@ -42,12 +42,12 @@ public class ChasingMoon : MonoBehaviour
     {
         m_myTile = _tile;
     }
-    public void SetBlockType(BlockType _type)
+    public void SetBlockType(EBlockType _type)
     {
         m_blockType = _type;
         ChangeSprite();
     }
-    public void SetContagiousObstacleType(ObstacleType _type)
+    public void SetContagiousObstacleType(EObstacleType _type)
     {
         m_contagiousObstacleType = _type;
     }
@@ -92,10 +92,10 @@ public class ChasingMoon : MonoBehaviour
 
         switch (m_blockType)
         {
-            case BlockType.CROSS:
+            case EBlockType.CROSS:
                 spritePath += "moonCross_01";
                 break;
-            case BlockType.SUN:
+            case EBlockType.SUN:
                 spritePath += "moonSun_01";
                 break;
             default:
@@ -114,12 +114,12 @@ public class ChasingMoon : MonoBehaviour
     {
         #region 장애물 타입
         // 클리어 조건 장애물을 가져와서 해당하는 장애물만 검사
-        Dictionary<ObstacleType, bool> obstacleTypes = new Dictionary<ObstacleType, bool>(StageMgr.Instance.GetClearObstacleTypes());
+        Dictionary<EObstacleType, bool> obstacleTypes = new Dictionary<EObstacleType, bool>(StageMgr.Instance.GetClearObstacleTypes());
         if (obstacleTypes != null)
         {
-            for (int i = 0; i < (int)ObstacleType.BACK_END; i++)
+            for (int i = 0; i < (int)EObstacleType.BACK_END; i++)
             {
-                ObstacleType type = (ObstacleType)Enum.ToObject(typeof(ObstacleType), i);
+                EObstacleType type = (EObstacleType)Enum.ToObject(typeof(EObstacleType), i);
                 // 클리어 조건에 있는 장애물인가?
                 if (obstacleTypes.ContainsKey(type))
                 {
@@ -135,7 +135,6 @@ public class ChasingMoon : MonoBehaviour
                         List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTiles(type));
                         if (tiles.Count == 0)
                         {
-                            Debug.Log("카운트가 0");
                             break;
                         }
 
@@ -160,9 +159,9 @@ public class ChasingMoon : MonoBehaviour
             }
 
             // 만약 위 조건을 만족하지 못했다면 전염되는 장애물을 검사
-            for (int i = 0; i < (int)ObstacleType.BACK_END; i++)
+            for (int i = 0; i < (int)EObstacleType.BACK_END; i++)
             {
-                ObstacleType type = (ObstacleType)Enum.ToObject(typeof(ObstacleType), i);
+                EObstacleType type = (EObstacleType)Enum.ToObject(typeof(EObstacleType), i);
                 // 클리어 조건에 있는 장애물인가?
                 if (obstacleTypes.ContainsKey(type))
                 {
@@ -179,7 +178,6 @@ public class ChasingMoon : MonoBehaviour
                                 List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTilesExcept(type));
                                 if (tiles.Count == 0)
                                 {
-                                    Debug.Log("카운트가 0");
                                     break;
                                 }
 
@@ -208,13 +206,21 @@ public class ChasingMoon : MonoBehaviour
         #endregion
 
         #region 블록 타입
-        Dictionary<BlockType, bool> blockTypes = new Dictionary<BlockType, bool>(StageMgr.Instance.GetClearBlockTypes());
+        Dictionary<EBlockType, bool> blockTypes = new Dictionary<EBlockType, bool>(StageMgr.Instance.GetClearBlockTypes());
         if (blockTypes != null)
         {
-            List<BlockType> keys = new List<BlockType>(blockTypes.Keys);
+            List<EBlockType> keys = new List<EBlockType>(blockTypes.Keys);
             int randomType = Random.Range(0, keys.Count);
 
-            List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTiles((BlockType)randomType));
+            List<GameObject> tiles = new List<GameObject>(StageMgr.Instance.SearchTiles((EBlockType)randomType));
+
+            // 비어있다면
+            if (tiles.Count == 0)
+            {
+                TargetEmpty();
+                return;
+            }
+
             int randomIndex = Random.Range(0, tiles.Count);
 
             // 본인일 경우 다른 타일을 선택하게 함
@@ -235,6 +241,13 @@ public class ChasingMoon : MonoBehaviour
         #endregion
 
         m_target = StageMgr.Instance.GetRandomTile();
+    }
+
+    void TargetEmpty()
+    {
+        Destroy(transform.gameObject);
+        m_target.GetComponent<Tile>().SetIsTargeted(false);
+        MoveMgr.Instance.ActiveCheckEmpty();
     }
 
     void Move()

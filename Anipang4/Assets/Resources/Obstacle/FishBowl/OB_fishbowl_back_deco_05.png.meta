@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_fishbowl_back_deco_05_0: -3852389790494379469
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_AppleBox_bullet_light_0: -8091072929201921277
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

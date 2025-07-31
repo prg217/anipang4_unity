@@ -14,7 +14,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
     GameObject m_chasingMoonPrefab; // 추격하는 달 프리팹 등록
 
     Vector2Int m_targetMatrix;
-    BlockType m_targetType;
+    EBlockType m_targetType;
     GameObject m_targetTile;
 
     int m_matchCount = 1; // 본인 포함으로 계산
@@ -22,8 +22,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
     List<GameObject> m_matchTiles = new List<GameObject>(); // 매치가 되는 타일들 저장(후에 터트림)
     List<GameObject> m_saveMatchTiles = new List<GameObject>();
 
-    BlockType m_newBlock = BlockType.NONE; // 특수 블록의 조건에 맞을 경우 생성될 블럭
-    ObstacleType m_contagiousObstacle = ObstacleType.NONE; // 타일에 추가 될 장애물
+    EBlockType m_newBlock = EBlockType.NONE; // 특수 블록의 조건에 맞을 경우 생성될 블럭
+    EObstacleType m_contagiousObstacle = EObstacleType.NONE; // 타일에 추가 될 장애물
 
     int m_randomExplodeCompleteCount = 0;
 
@@ -74,7 +74,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         m_saveMatchTiles.Clear();
         m_matchCount = 1;
         m_saveMatchCount = 1;
-        m_newBlock = BlockType.NONE;
+        m_newBlock = EBlockType.NONE;
         #endregion
 
         #region 타겟 타일 변수 세팅
@@ -84,13 +84,13 @@ public class MatchMgr : BaseMgr<MatchMgr>
         #endregion
 
         // 타입이 비어 있는 경우 return
-        if (m_targetType == BlockType.NONE)
+        if (m_targetType == EBlockType.NONE)
         {
             return false;
         }
 
         // 특수 블록인 경우 특수 블록을 바로 터트림
-        if (m_targetType >= BlockType.CROSS && m_targetType != BlockType.NULL)
+        if (m_targetType >= EBlockType.CROSS && m_targetType != EBlockType.NULL)
         {
             // 특수 블록 터트림
             if (_explode)
@@ -110,10 +110,10 @@ public class MatchMgr : BaseMgr<MatchMgr>
         switch (m_matchCount)
         {
             case 4:
-                m_newBlock = BlockType.CROSS;
+                m_newBlock = EBlockType.CROSS;
                 break;
             case 5:
-                m_newBlock = BlockType.RANDOM;
+                m_newBlock = EBlockType.RANDOM;
                 break;
             default:
                 break;
@@ -124,29 +124,29 @@ public class MatchMgr : BaseMgr<MatchMgr>
         switch (m_matchCount)
         {
             case 4:
-                m_newBlock = BlockType.CROSS;
+                m_newBlock = EBlockType.CROSS;
                 break;
             case 5:
                 if (m_saveMatchCount >= 3 && m_saveMatchCount < 5)
                 {
-                    m_newBlock = BlockType.SUN;
+                    m_newBlock = EBlockType.SUN;
                 }
                 else
                 {
-                    m_newBlock = BlockType.RANDOM;
+                    m_newBlock = EBlockType.RANDOM;
                 }
                 break;
             case 6:
-                m_newBlock = BlockType.SUN;
+                m_newBlock = EBlockType.SUN;
                 break;
             case 7:
-                m_newBlock = BlockType.COSMIC;
+                m_newBlock = EBlockType.COSMIC;
                 break;
             default:
                 break;
         }
 
-        if (m_newBlock >= BlockType.CROSS)
+        if (m_newBlock >= EBlockType.CROSS)
         {
             // 특수 블록 생성 조건 만족함
             if (_explode)
@@ -157,7 +157,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         // 만약 특수 블록에 해당되지 않는다면 MOON 검사 실시
-        if (m_newBlock == BlockType.NONE)
+        if (m_newBlock == EBlockType.NONE)
         {
             if (MoonInspect())
             {
@@ -176,6 +176,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
             // 터트리는 함수
             if (_explode)
             {
+                SoundMgr.Instance.PlaySFX(ESFX.NOMAL_MATCH);
+
                 Explode(false);
             }
             return true;
@@ -196,17 +198,17 @@ public class MatchMgr : BaseMgr<MatchMgr>
         m_saveMatchTiles.Clear();
         m_matchCount = 1;
         m_saveMatchCount = 1;
-        m_newBlock = BlockType.NONE;
+        m_newBlock = EBlockType.NONE;
         #endregion
 
         // 타입이 비어 있는 경우 return
-        if (m_targetType == BlockType.NONE)
+        if (m_targetType == EBlockType.NONE)
         {
             return false;
         }
 
         // 특수 블록인 경우 특수 블록을 바로 터트림
-        if (m_targetType >= BlockType.CROSS && m_targetType != BlockType.NULL)
+        if (m_targetType >= EBlockType.CROSS && m_targetType != EBlockType.NULL)
         {
             return true;
         }
@@ -220,10 +222,10 @@ public class MatchMgr : BaseMgr<MatchMgr>
         switch (m_matchCount)
         {
             case 4:
-                m_newBlock = BlockType.CROSS;
+                m_newBlock = EBlockType.CROSS;
                 break;
             case 5:
-                m_newBlock = BlockType.RANDOM;
+                m_newBlock = EBlockType.RANDOM;
                 break;
             default:
                 break;
@@ -234,35 +236,35 @@ public class MatchMgr : BaseMgr<MatchMgr>
         switch (m_matchCount)
         {
             case 4:
-                m_newBlock = BlockType.CROSS;
+                m_newBlock = EBlockType.CROSS;
                 break;
             case 5:
                 if (m_saveMatchCount >= 3 && m_saveMatchCount < 5)
                 {
-                    m_newBlock = BlockType.SUN;
+                    m_newBlock = EBlockType.SUN;
                 }
                 else
                 {
-                    m_newBlock = BlockType.RANDOM;
+                    m_newBlock = EBlockType.RANDOM;
                 }
                 break;
             case 6:
-                m_newBlock = BlockType.SUN;
+                m_newBlock = EBlockType.SUN;
                 break;
             case 7:
-                m_newBlock = BlockType.COSMIC;
+                m_newBlock = EBlockType.COSMIC;
                 break;
             default:
                 break;
         }
 
-        if (m_newBlock >= BlockType.CROSS)
+        if (m_newBlock >= EBlockType.CROSS)
         {
             return true;
         }
 
         // 만약 특수 블록에 해당되지 않는다면 MOON 검사 실시
-        if (m_newBlock == BlockType.NONE)
+        if (m_newBlock == EBlockType.NONE)
         {
             if (MoonInspect())
             {
@@ -292,7 +294,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         m_saveMatchTiles.Clear();
         m_matchCount = 1;
         m_saveMatchCount = 1;
-        m_newBlock = BlockType.NONE;
+        m_newBlock = EBlockType.NONE;
         #endregion
 
         #region 타겟 타일 변수 세팅
@@ -302,13 +304,13 @@ public class MatchMgr : BaseMgr<MatchMgr>
         #endregion
 
         // 타입이 비어 있는 경우 return
-        if (m_targetType == BlockType.NONE)
+        if (m_targetType == EBlockType.NONE)
         {
             return (false, 0, null);
         }
 
         // 특수 블록인 경우 특수 블록을 바로 터트림
-        if (m_targetType >= BlockType.CROSS && m_targetType != BlockType.NULL)
+        if (m_targetType >= EBlockType.CROSS && m_targetType != EBlockType.NULL)
         {
             // 특수 블록 터트림
             if (_explode)
@@ -327,10 +329,10 @@ public class MatchMgr : BaseMgr<MatchMgr>
         switch (m_matchCount)
         {
             case 4:
-                m_newBlock = BlockType.CROSS;
+                m_newBlock = EBlockType.CROSS;
                 break;
             case 5:
-                m_newBlock = BlockType.RANDOM;
+                m_newBlock = EBlockType.RANDOM;
                 break;
             default:
                 break;
@@ -341,29 +343,29 @@ public class MatchMgr : BaseMgr<MatchMgr>
         switch (m_matchCount)
         {
             case 4:
-                m_newBlock = BlockType.CROSS;
+                m_newBlock = EBlockType.CROSS;
                 break;
             case 5:
                 if (m_saveMatchCount >= 3 && m_saveMatchCount < 5)
                 {
-                    m_newBlock = BlockType.SUN;
+                    m_newBlock = EBlockType.SUN;
                 }
                 else
                 {
-                    m_newBlock = BlockType.RANDOM;
+                    m_newBlock = EBlockType.RANDOM;
                 }
                 break;
             case 6:
-                m_newBlock = BlockType.SUN;
+                m_newBlock = EBlockType.SUN;
                 break;
             case 7:
-                m_newBlock = BlockType.COSMIC;
+                m_newBlock = EBlockType.COSMIC;
                 break;
             default:
                 break;
         }
 
-        if (m_newBlock >= BlockType.CROSS)
+        if (m_newBlock >= EBlockType.CROSS)
         {
             // 특수 블록 생성 조건 만족함
             if (_explode)
@@ -374,7 +376,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         // 만약 특수 블록에 해당되지 않는다면 MOON 검사 실시
-        if (m_newBlock == BlockType.NONE)
+        if (m_newBlock == EBlockType.NONE)
         {
             if (MoonInspect())
             {
@@ -415,7 +417,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 break;
             }
 
-            BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+            EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
             if (type == m_targetType)
             {
                 m_matchTiles.Add(tile);
@@ -439,7 +441,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 break;
             }
 
-            BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+            EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
             if (type == m_targetType)
             {
                 m_matchTiles.Add(tile);
@@ -474,7 +476,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 break;
             }
 
-            BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+            EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
             if (type == m_targetType)
             {
                 m_matchTiles.Add(tile);
@@ -499,7 +501,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 break;
             }
 
-            BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+            EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
             if (type == m_targetType)
             {
                 m_matchTiles.Add(tile);
@@ -585,7 +587,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
             return false;
         }
 
-        BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+        EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
         if (type == m_targetType)
         {
             return true;
@@ -598,7 +600,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
     {
         if (Inspect(new Vector2Int(_AddMatrix.x, 0)) == true && Inspect(new Vector2Int(0, _AddMatrix.y)) == true)
         {
-            m_newBlock = BlockType.MOON;
+            m_newBlock = EBlockType.MOON;
 
             Vector2Int matrix = m_targetMatrix;
             matrix += _AddMatrix;
@@ -637,7 +639,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         m_targetTile.GetComponent<Tile>().StartExplodeEffect();
         foreach (GameObject tile in m_matchTiles)
         {
-            if (tile.GetComponent<Tile>().GetMyBlockType() != BlockType.NULL)
+            if (tile.GetComponent<Tile>().GetMyBlockType() != EBlockType.NULL)
             {
                 tile.GetComponent<Tile>().StartExplodeEffect();
             }
@@ -649,10 +651,10 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // 매치되는 타일 중 전파되는 장애물이 있는지 확인
         if (!_isSpecial)
         {
-            m_contagiousObstacle = ObstacleType.NONE;
-            ObstacleType obstacleType = m_targetTile.GetComponent<Tile>().GetPropagationObstacle();
+            m_contagiousObstacle = EObstacleType.NONE;
+            EObstacleType obstacleType = m_targetTile.GetComponent<Tile>().GetPropagationObstacle();
 
-            if (obstacleType != ObstacleType.NONE)
+            if (obstacleType != EObstacleType.NONE)
             {
                 m_contagiousObstacle = obstacleType;
             }
@@ -661,7 +663,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
             {
                 obstacleType = tile.GetComponent<Tile>().GetPropagationObstacle();
                 // 있다면 전파되는 장애물로 장애물을 추가하게 함
-                if (obstacleType != ObstacleType.NONE)
+                if (obstacleType != EObstacleType.NONE)
                 {
                     m_contagiousObstacle = obstacleType;
                 }
@@ -669,7 +671,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         // 특수 블록 생성 조건에 해당 될 경우
-        if (m_newBlock >= BlockType.CROSS)
+        if (m_newBlock >= EBlockType.CROSS)
         {
             m_targetTile.GetComponent<Tile>().Explode(m_contagiousObstacle, m_newBlock);
         }
@@ -684,7 +686,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         {
             if (tile != null)
             {
-                if (tile.GetComponent<Tile>().GetMyBlockType() != BlockType.NULL)
+                if (tile.GetComponent<Tile>().GetMyBlockType() != EBlockType.NULL)
                 {
                     tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                 }
@@ -697,7 +699,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // 테스트할 타입으로 매치 실행
         m_targetType = _originalTile.GetComponent<Tile>().GetMyBlockType();
 
-        BlockType saveType = _changeTile.GetComponent<Tile>().GetMyBlockType();
+        EBlockType saveType = _changeTile.GetComponent<Tile>().GetMyBlockType();
         _originalTile.GetComponent<Tile>().SetMyBlockType(saveType);
 
         SetTargetTile(_changeTile);
@@ -722,19 +724,19 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         // 움직일 수 없는 타일 일 경우 매치 시도 불가능
-        if (_tile.GetComponent<Tile>().GetTileType() == TileType.IMMOVABLE)
+        if (_tile.GetComponent<Tile>().GetTileType() == ETileType.IMMOVABLE)
         {
             return (false, null);
         }
 
         // 빈 블록일 경우 매치 시도 불가능
-        if (_tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NONE || _tile.GetComponent<Tile>().GetMyBlockType() == BlockType.NULL)
+        if (_tile.GetComponent<Tile>().GetMyBlockType() == EBlockType.NONE || _tile.GetComponent<Tile>().GetMyBlockType() == EBlockType.NULL)
         {
             return (false, null);
         }
 
         // 특수 블록일 경우 매치 가능
-        if (_tile.GetComponent<Tile>().GetMyBlockType() >= BlockType.CROSS)
+        if (_tile.GetComponent<Tile>().GetMyBlockType() >= EBlockType.CROSS)
         {
             // 일단 임시로 null
             return (true, null);
@@ -780,7 +782,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
         if (changeTile != null)
         {
-            if (changeTile.GetComponent<Tile>().GetTileType() == TileType.MOVABLE)
+            if (changeTile.GetComponent<Tile>().GetTileType() == ETileType.MOVABLE)
             {
                 return SimulationMatch(originalTile, changeTile);
             }
@@ -789,23 +791,23 @@ public class MatchMgr : BaseMgr<MatchMgr>
         return false;
     }
 
-    public void SpecialExplode(in GameObject _tile ,in BlockType _blockType)
+    public void SpecialExplode(in GameObject _tile ,in EBlockType _blockType)
     {
         m_targetTile = _tile;
         m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
         m_targetType = _blockType;
 
-        m_newBlock = BlockType.NONE;
+        m_newBlock = EBlockType.NONE;
         m_matchTiles.Clear();
 
         // 매치되는 타일 중 전파되는 장애물이 있는지 확인
-        m_contagiousObstacle = ObstacleType.NONE;
+        m_contagiousObstacle = EObstacleType.NONE;
 
         // 앞 장애물이 없을 경우
-        if (m_targetTile.GetComponent<Tile>().GetMyFrontObstacleType() == ObstacleType.NONE)
+        if (m_targetTile.GetComponent<Tile>().GetMyFrontObstacleType() == EObstacleType.NONE)
         {
-            ObstacleType obstacleType = m_targetTile.GetComponent<Tile>().GetPropagationObstacle();
-            if (obstacleType != ObstacleType.NONE)
+            EObstacleType obstacleType = m_targetTile.GetComponent<Tile>().GetPropagationObstacle();
+            if (obstacleType != EObstacleType.NONE)
             {
                 m_contagiousObstacle = obstacleType;
             }
@@ -813,50 +815,50 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
         switch (m_targetType)
         {
-            case BlockType.CROSS:
+            case EBlockType.CROSS:
                 CrossExplode();
                 break;
-            case BlockType.SUN:
+            case EBlockType.SUN:
                 SunExplode();
                 break;
-            case BlockType.RANDOM:
-                RandomMatch(m_targetTile, BlockType.NONE, m_contagiousObstacle);
+            case EBlockType.RANDOM:
+                RandomMatch(m_targetTile, EBlockType.NONE, m_contagiousObstacle);
                 break;
-            case BlockType.COSMIC:
+            case EBlockType.COSMIC:
                 CosmicExplode();
                 break;
-            case BlockType.MOON:
+            case EBlockType.MOON:
                 MoonExplode();
                 break;
-            case BlockType.DOUBLE_CROSS:
+            case EBlockType.DOUBLE_CROSS:
                 DoubleCrossExplode();
                 break;
-            case BlockType.CROSS_SUN:
+            case EBlockType.CROSS_SUN:
                 CrossSunExplode();
                 break;
-            case BlockType.CROSS_MOON:
-                SpecialMoonExplode(BlockType.CROSS);
+            case EBlockType.CROSS_MOON:
+                SpecialMoonExplode(EBlockType.CROSS);
                 break;
-            case BlockType.DOUBLE_SUN:
+            case EBlockType.DOUBLE_SUN:
                 DoubleSunExplode();
                 break;
-            case BlockType.SUN_MOON:
-                SpecialMoonExplode(BlockType.SUN);
+            case EBlockType.SUN_MOON:
+                SpecialMoonExplode(EBlockType.SUN);
                 break;
-            case BlockType.DOUBLE_MOON:
-                SpecialMoonExplode(BlockType.MOON);
+            case EBlockType.DOUBLE_MOON:
+                SpecialMoonExplode(EBlockType.MOON);
                 break;
-            case BlockType.DOUBLE_RANDOM:
+            case EBlockType.DOUBLE_RANDOM:
                 CosmicExplode();
                 break;
-            case BlockType.RANDOM_CROSS:
-                RandomMatch(m_targetTile, BlockType.CROSS, m_contagiousObstacle);
+            case EBlockType.RANDOM_CROSS:
+                RandomMatch(m_targetTile, EBlockType.CROSS, m_contagiousObstacle);
                 break;
-            case BlockType.RANDOM_SUN:
-                RandomMatch(m_targetTile, BlockType.SUN, m_contagiousObstacle);
+            case EBlockType.RANDOM_SUN:
+                RandomMatch(m_targetTile, EBlockType.SUN, m_contagiousObstacle);
                 break;
-            case BlockType.RANDOM_MOON:
-                RandomMatch(m_targetTile, BlockType.MOON, m_contagiousObstacle);
+            case EBlockType.RANDOM_MOON:
+                RandomMatch(m_targetTile, EBlockType.MOON, m_contagiousObstacle);
                 break;
             default:
                 MoveMgr.Instance.SetCheckEmptyEnabled(true);
@@ -864,116 +866,117 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
     }
 
-    public void SpecialCompositionExplode(in GameObject _tile1, in GameObject _tile2, in ObstacleType _contagiousObstacle)
+    public void SpecialCompositionExplode(in GameObject _tile1, in GameObject _tile2, in EObstacleType _contagiousObstacle)
     {
         m_contagiousObstacle = _contagiousObstacle;
 
-        BlockType type1 = _tile1.GetComponent<Tile>().GetMyBlockType();
-        BlockType type2 = _tile2.GetComponent<Tile>().GetMyBlockType();
+        EBlockType type1 = _tile1.GetComponent<Tile>().GetMyBlockType();
+        EBlockType type2 = _tile2.GetComponent<Tile>().GetMyBlockType();
 
         SetTargetTile(_tile2);
         m_targetMatrix = _tile2.GetComponent<Tile>().GetMatrix();
 
-        _tile1.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        _tile1.GetComponent<Tile>().SetMyBlockType(EBlockType.NONE);
 
-        //MoveMgr.Instance.SetCheckEmptyEnabled(false);
+        SoundMgr.Instance.PlaySFX(ESFX.SPECIAL_COMPOSITION);
+
         switch (type1)
         {
-            case BlockType.CROSS:
+            case EBlockType.CROSS:
                 {
                     switch (type2)
                     {
-                        case BlockType.CROSS:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.DOUBLE_CROSS);
+                        case EBlockType.CROSS:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.DOUBLE_CROSS);
                             break;
-                        case BlockType.SUN:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_SUN);
+                        case EBlockType.SUN:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.CROSS_SUN);
                             break;
-                        case BlockType.RANDOM:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_CROSS);
+                        case EBlockType.RANDOM:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.RANDOM_CROSS);
                             break;
-                        case BlockType.COSMIC:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
+                        case EBlockType.COSMIC:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.COSMIC);
                             break;
-                        case BlockType.MOON:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_MOON);
+                        case EBlockType.MOON:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.CROSS_MOON);
                             break;
                         default:
                             break;
                     }
                 }                
                 break;
-            case BlockType.SUN:
+            case EBlockType.SUN:
                 {
                     switch (type2)
                     {
-                        case BlockType.CROSS:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_SUN);
+                        case EBlockType.CROSS:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.CROSS_SUN);
                             break;
-                        case BlockType.SUN:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.DOUBLE_SUN);
+                        case EBlockType.SUN:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.DOUBLE_SUN);
                             break;
-                        case BlockType.RANDOM:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_SUN);
+                        case EBlockType.RANDOM:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.RANDOM_SUN);
                             break;
-                        case BlockType.COSMIC:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
+                        case EBlockType.COSMIC:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.COSMIC);
                             break;
-                        case BlockType.MOON:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.SUN_MOON);
+                        case EBlockType.MOON:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.SUN_MOON);
                             break;
                         default:
                             break;
                     }
                 }
                 break;
-            case BlockType.RANDOM:
+            case EBlockType.RANDOM:
                 {
                     switch (type2)
                     {
-                        case BlockType.CROSS:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_CROSS);
+                        case EBlockType.CROSS:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.RANDOM_CROSS);
                             break;
-                        case BlockType.SUN:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_SUN);
+                        case EBlockType.SUN:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.RANDOM_SUN);
                             break;
-                        case BlockType.MOON:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_MOON);
+                        case EBlockType.MOON:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.RANDOM_MOON);
                             break;
-                        case BlockType.RANDOM:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
+                        case EBlockType.RANDOM:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.COSMIC);
                             break;
-                        case BlockType.COSMIC:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
+                        case EBlockType.COSMIC:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.COSMIC);
                             break;
                         default:
                             break;
                     }
                 }
                 break;
-            case BlockType.COSMIC:
+            case EBlockType.COSMIC:
                 {
-                    _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
+                    _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.COSMIC);
                 }
                 break;
-            case BlockType.MOON:
+            case EBlockType.MOON:
                 {
                     switch (type2)
                     {
-                        case BlockType.CROSS:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.CROSS_MOON);
+                        case EBlockType.CROSS:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.CROSS_MOON);
                             break;
-                        case BlockType.SUN:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.SUN_MOON);
+                        case EBlockType.SUN:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.SUN_MOON);
                             break;
-                        case BlockType.RANDOM:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.RANDOM_MOON);
+                        case EBlockType.RANDOM:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.RANDOM_MOON);
                             break;
-                        case BlockType.COSMIC:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.COSMIC);
+                        case EBlockType.COSMIC:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.COSMIC);
                             break;
-                        case BlockType.MOON:
-                            _tile2.GetComponent<Tile>().SetMyBlockType(BlockType.DOUBLE_MOON);
+                        case EBlockType.MOON:
+                            _tile2.GetComponent<Tile>().SetMyBlockType(EBlockType.DOUBLE_MOON);
                             break;
                         default:
                             break;
@@ -1007,14 +1010,14 @@ public class MatchMgr : BaseMgr<MatchMgr>
         SurroundingsExplode(4, 4);
     }
 
-    void SpecialMoonExplode(in BlockType _specialType)
+    void SpecialMoonExplode(in EBlockType _specialType)
     {
         // 주변 8곳 터트림
         SurroundingsExplode(1, 1);
 
         #region 클리어 조건 중 하나 랜덤으로 가서 파괴
         // 달 추격 프리팹 소환
-        if (_specialType == BlockType.MOON)
+        if (_specialType == EBlockType.MOON)
         {
             SummonChasingMoon(_specialType);
             SummonChasingMoon(_specialType);
@@ -1027,7 +1030,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         #endregion
     }
 
-    void SummonChasingMoon(in BlockType _specialType)
+    void SummonChasingMoon(in EBlockType _specialType)
     {
         GameObject chasingMoon = Instantiate(m_chasingMoonPrefab, m_targetTile.transform.position, m_targetTile.transform.rotation);
         chasingMoon.GetComponent<ChasingMoon>().SetMyTile(m_targetTile);
@@ -1047,7 +1050,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         SurroundingsExplode(2, 2);
     }
 
-    public void RandomMatch(in GameObject _targetTile ,in BlockType _randomType, in ObstacleType _contagiousObstacle)
+    public void RandomMatch(in GameObject _targetTile ,in EBlockType _randomType, in EObstacleType _contagiousObstacle)
     {
         SetTargetTile(_targetTile);
         m_contagiousObstacle = _contagiousObstacle;
@@ -1055,8 +1058,10 @@ public class MatchMgr : BaseMgr<MatchMgr>
         StartCoroutine(RandomExplode(_randomType));
     }
 
-    IEnumerator RandomExplode(BlockType _type)
+    IEnumerator RandomExplode(EBlockType _type)
     {
+        SoundMgr.Instance.PlaySFX(ESFX.SPECIAL_MATCH_3);
+
         // 교차 시킨 블록 타입 정보를 알고, 그 타입들을 서치해서 제거
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
 
@@ -1065,27 +1070,24 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
         m_targetTile.GetComponent<Tile>().SetRandomExecute(true);
 
-        // 랜덤 진행 중에는 빈 공간 채우기 잠시 멈추기 -> 다시 실행 신호 보낼 때 까지
-        //MoveMgr.Instance.SetCheckEmptyEnabled(false);
-
         #region 단독으로 실행 됐을 경우
-        if (_type == BlockType.NONE)
+        if (_type == EBlockType.NONE)
         {
             // 일반 블록 중 하나 랜덤으로 지정해주기
             int randomType = Random.Range(0, StageMgr.Instance.GetMaxBlockType());
-            _type = (BlockType)randomType;
+            _type = (EBlockType)randomType;
         }
         #endregion
 
         #region 일반 블록일 경우
-        if (_type < BlockType.CROSS)
+        if (_type < EBlockType.CROSS)
         {
             for (int x = 0; x <= maxMatrix.x; x++)
             {
                 for (int y = 0; y <= maxMatrix.y; y++)
                 {
                     GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(x, y));
-                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+                    EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
                     if (type == _type)
                     {
                         // 해당되는 블록 흔들리는 효과
@@ -1100,22 +1102,22 @@ public class MatchMgr : BaseMgr<MatchMgr>
         #endregion
 
         #region 특수 블록일 경우
-        if (_type >= BlockType.CROSS)
+        if (_type >= EBlockType.CROSS)
         {
-            if (_type == BlockType.RANDOM || _type == BlockType.COSMIC)
+            if (_type == EBlockType.RANDOM || _type == EBlockType.COSMIC)
             {
                 CosmicExplode();
             }
 
             // 제일 많은 블록을 해당하는 특수 블록으로 변경 후 터트림
-            BlockType mostType = StageMgr.Instance.GetMostNormalBlockType();
+            EBlockType mostType = StageMgr.Instance.GetMostNormalBlockType();
 
             for (int x = 0; x <= maxMatrix.x; x++)
             {
                 for (int y = 0; y <= maxMatrix.y; y++)
                 {
                     GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(x, y));
-                    BlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+                    EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
                     if (type == mostType)
                     {
                         // 해당하는 특수 블록으로 전환
@@ -1161,6 +1163,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     void CosmicExplode()
     {
+        SoundMgr.Instance.PlaySFX(ESFX.SPECIAL_MATCH_5);
+
         // 전부 제거
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
 
@@ -1171,9 +1175,9 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(i, j));
                 if (tile != null)
                 {
-                    if (tile.GetComponent<Tile>().GetMyBlockType() != BlockType.NULL)
+                    if (tile.GetComponent<Tile>().GetMyBlockType() != EBlockType.NULL)
                     {
-                        tile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+                        tile.GetComponent<Tile>().SetMyBlockType(EBlockType.NONE);
                         tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
                     }
                 }
@@ -1185,10 +1189,12 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     void MoonExplode()
     {
+        SoundMgr.Instance.PlaySFX(ESFX.SPECIAL_MATCH_2);
+
         // 십자칸 파괴 후 클리어 조건 중 하나 랜덤으로 가서 파괴
         #region 십자칸 파괴
         // 중복 방지
-        m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        m_targetTile.GetComponent<Tile>().SetMyBlockType(EBlockType.NONE);
 
         // 상하좌우 파괴
         GameObject tile = StageMgr.Instance.GetTile(new Vector2Int(m_targetMatrix.x - 1, m_targetMatrix.y));
@@ -1217,15 +1223,17 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
         #region 클리어 조건 중 하나 랜덤으로 가서 파괴
         // 달 추격 프리팹 소환
-        SummonChasingMoon(BlockType.NONE);
+        SummonChasingMoon(EBlockType.NONE);
         #endregion
     }
 
     // 주변 터트림 : Sun 관련 함수에서 사용, 특수 블록 합성 Moon에서도 사용
     void SurroundingsExplode(in int _x, in int _y) 
     {
+        SoundMgr.Instance.PlaySFX(ESFX.SPECIAL_MATCH_4);
+
         // 중복 터짐 방지
-        m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        m_targetTile.GetComponent<Tile>().SetMyBlockType(EBlockType.NONE);
 
         for (int x = -_x; x <= _x; x++)
         {
@@ -1247,10 +1255,12 @@ public class MatchMgr : BaseMgr<MatchMgr>
     // 가로세로 터트림 : Cross 관련 함수에서 사용
     void LengthAndWidthExplode(in int _x, in int _y)
     {
+        SoundMgr.Instance.PlaySFX(ESFX.SPECIAL_MATCH_1);
+
         Vector2Int maxMatrix = StageMgr.Instance.GetMaxMatrix();
 
         // 중복 터짐 방지
-        m_targetTile.GetComponent<Tile>().SetMyBlockType(BlockType.NONE);
+        m_targetTile.GetComponent<Tile>().SetMyBlockType(EBlockType.NONE);
 
         for (int y = -_y; y <= _y; y++)
         {
@@ -1295,7 +1305,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         MoveMgr.Instance.ActiveCheckEmpty();
     }
 
-    public void ChasingMoonExplode(in GameObject _tile, in ObstacleType _contagiousObstacleType = ObstacleType.NONE, in BlockType _explodeType = BlockType.NONE)
+    public void ChasingMoonExplode(in GameObject _tile, in EObstacleType _contagiousObstacleType = EObstacleType.NONE, in EBlockType _explodeType = EBlockType.NONE)
     {
         LogMgr.Instance.ChasingMoonExplodeLog(_tile, _explodeType);
 
@@ -1303,7 +1313,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         LogMgr.Instance.CaptureLog();
 
         // 여기에 특수블록이면 바로 특수 블록을 터트림(장애물 위여도) 아니면 그냥 Explode
-        if (_explodeType >= BlockType.CROSS)
+        if (_explodeType >= EBlockType.CROSS)
         {
             SetTargetTile(_tile);
             m_targetMatrix = _tile.GetComponent<Tile>().GetMatrix();
@@ -1314,6 +1324,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
         else
         {
+            SoundMgr.Instance.PlaySFX(ESFX.NOMAL_MATCH);
+
             _tile.GetComponent<Tile>().Explode(_contagiousObstacleType);
         }
 

@@ -9,7 +9,7 @@ public class Obstacle : MonoBehaviour
     #region 변수
 
     [SerializeField]
-    ObstacleType m_ObstacleType;
+    EObstacleType m_ObstacleType;
 
     Obstacle m_script = null;
 
@@ -22,7 +22,7 @@ public class Obstacle : MonoBehaviour
     // 앞 장애물 비어있으면 true
     public bool GetIsEmpty()
     {
-        if (m_ObstacleType == ObstacleType.NONE)
+        if (m_ObstacleType == EObstacleType.NONE)
         {
             return true;
         }
@@ -35,11 +35,11 @@ public class Obstacle : MonoBehaviour
     {
         return m_ObstacleType.GetContagious();
     }
-    public ObstacleType GetObstacleType() { return m_ObstacleType; }
+    public EObstacleType GetObstacleType() { return m_ObstacleType; }
     #endregion
 
     #region Set함수
-    public void SetObstacle(ObstacleType _type)
+    public void SetObstacle(EObstacleType _type)
     {
         if (_type == m_ObstacleType)
         {
@@ -77,8 +77,12 @@ public class Obstacle : MonoBehaviour
             m_level = 0;
             AddTypeScript();
         }
+        else
+        {
+            PlaySFX();
+        }
     }
-    protected void SetTileType(TileType _type)
+    protected void SetTileType(ETileType _type)
     {
         OnTileType?.Invoke(_type);
     }
@@ -86,7 +90,7 @@ public class Obstacle : MonoBehaviour
 
 
     #region 이벤트
-    public event Action<TileType> OnTileType;
+    public event Action<ETileType> OnTileType;
 
     // 레벨 동기화
     void HandleLevelSync(int _level)
@@ -115,11 +119,26 @@ public class Obstacle : MonoBehaviour
 
     }
 
+    void PlaySFX()
+    {
+        switch (m_ObstacleType)
+        {
+            case EObstacleType.PRISON:
+                SoundMgr.Instance.PlaySFX(ESFX.PRISON);
+                break;
+            case EObstacleType.PAINT:
+                SoundMgr.Instance.PlaySFX(ESFX.PAINT);
+                break;
+            default:
+                break;
+        }
+    }
+
     void AddTypeScript()
     {
         switch (m_ObstacleType)
         {
-            case ObstacleType.PRISON:
+            case EObstacleType.PRISON:
                 {
                     Prison script = m_script as Prison;
                     if (script == null)
@@ -132,7 +151,7 @@ public class Obstacle : MonoBehaviour
                     }
                 }
                 break;
-            case ObstacleType.PAINT:
+            case EObstacleType.PAINT:
                 {
                     Paint script = m_script as Paint;
                     if (script == null)
@@ -150,7 +169,7 @@ public class Obstacle : MonoBehaviour
     {
         switch (m_ObstacleType)
         {
-            case ObstacleType.PRISON:
+            case EObstacleType.PRISON:
                 {
                     Prison script = m_script as Prison;
                     if (script == null)
@@ -163,7 +182,7 @@ public class Obstacle : MonoBehaviour
                     }
                 }
                 break;
-            case ObstacleType.PAINT:
+            case EObstacleType.PAINT:
                 {
                     Paint script = m_script as Paint;
                     if (script == null)

@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_washer_bubble_0: -5991848085107274718
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

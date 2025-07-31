@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FX2_SpinEffect_0: 1328247326090751376
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

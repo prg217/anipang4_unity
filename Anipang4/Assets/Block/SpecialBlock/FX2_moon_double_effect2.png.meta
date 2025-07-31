@@ -247,7 +247,12 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FX2_moon_double_effect2_0: -195965695118549254
+      FX2_moon_double_effect2_1: -6332487344228313756
+      FX2_moon_double_effect2_2: 1797012006424214799
+      FX2_moon_double_effect2_3: 4004945753729674141
+      FX2_moon_double_effect2_4: 2246565439578110306
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      reward_level_lock_open_btn #80445_0: -7006973932430148849
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

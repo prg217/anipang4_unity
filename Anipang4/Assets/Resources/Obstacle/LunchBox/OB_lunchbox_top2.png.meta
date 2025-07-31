@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_lunchbox_top2_0: -2321440217336151944
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

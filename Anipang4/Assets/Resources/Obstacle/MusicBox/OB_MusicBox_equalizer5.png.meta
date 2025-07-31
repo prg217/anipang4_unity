@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      OB_MusicBox_equalizer5_0: 2368560553133681006
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

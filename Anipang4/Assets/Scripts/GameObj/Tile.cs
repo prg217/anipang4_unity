@@ -13,7 +13,7 @@ public class Tile : MonoBehaviour
     #region 변수
 
     [SerializeField]
-    TileType m_tileType = TileType.MOVABLE;
+    ETileType m_tileType = ETileType.MOVABLE;
 
     [SerializeField]
     // 블록이 비었을 때 어떤 타일에서 받아올지
@@ -58,23 +58,23 @@ public class Tile : MonoBehaviour
     #region Get함수
     //public GameObject GetMyBlock() {  return m_myBlock; }
     // -1 : 블록 없음, 0 : 움직일 수 없음, 1 : 움직일 수 있음
-    public TileType GetTileType() { return m_tileType; }
+    public ETileType GetTileType() { return m_tileType; }
     public Vector2Int GetMatrix() { return m_matrix; }
-    public BlockType GetMyBlockType() { return m_myBlock.GetComponent<Block>().GetBlockType(); }
+    public EBlockType GetMyBlockType() { return m_myBlock.GetComponent<Block>().GetBlockType(); }
     public bool IsBlockEmpty()
     {
         if (m_myBlock == null) { return false; }
-        if (GetMyBlockType() == BlockType.NONE) { return true; }
+        if (GetMyBlockType() == EBlockType.NONE) { return true; }
         return false;
     }
     public bool IsEmptyCreateTile()
     {
         if (m_myBlock == null) { return false; }
-        if (GetMyBlockType() == BlockType.NONE && m_createTile) { return true; }
+        if (GetMyBlockType() == EBlockType.NONE && m_createTile) { return true; }
         return false;
     }
     // 전파되는 장애물
-    public ObstacleType GetPropagationObstacle()
+    public EObstacleType GetPropagationObstacle()
     {
         if (m_myFrontObstacle.GetComponent<Obstacle>().IsContagiousObstacle())
         {
@@ -85,16 +85,16 @@ public class Tile : MonoBehaviour
             return m_myBackObstacle.GetComponent<Obstacle>().GetObstacleType();
         }
 
-        return ObstacleType.NONE;
+        return EObstacleType.NONE;
     }
     public bool GetFrontObstacleEmpty() { return m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty(); }
-    public ObstacleType GetMyFrontObstacleType() { return m_myFrontObstacle.GetComponent<Obstacle>().GetObstacleType(); }
-    public ObstacleType GetMyBackObstacleType() { return m_myBackObstacle.GetComponent<Obstacle>().GetObstacleType(); }
+    public EObstacleType GetMyFrontObstacleType() { return m_myFrontObstacle.GetComponent<Obstacle>().GetObstacleType(); }
+    public EObstacleType GetMyBackObstacleType() { return m_myBackObstacle.GetComponent<Obstacle>().GetObstacleType(); }
     public bool GetIsTargeted() { return m_isTargeted; }
     #endregion
 
     #region Set함수
-    public void SetMyBlockType(in BlockType _BlockType)
+    public void SetMyBlockType(in EBlockType _BlockType)
     {
         m_myBlock.GetComponent<Block>().SetBlockType(_BlockType);
     }
@@ -129,9 +129,9 @@ public class Tile : MonoBehaviour
     #endregion
 
     #region 이벤트
-    public event Action<BlockType> OnTileExplode;
+    public event Action<EBlockType> OnTileExplode;
 
-    void HandleSetTileTypeExecution(TileType _type)
+    void HandleSetTileTypeExecution(ETileType _type)
     {
         m_tileType = _type;
     }
@@ -188,11 +188,11 @@ public class Tile : MonoBehaviour
         #region 타일 안의 블록이 움직일 수 있는 상태인가
         if (CheckMove())
         {
-            m_tileType = TileType.MOVABLE;
+            m_tileType = ETileType.MOVABLE;
         }
         else
         {
-            m_tileType = TileType.IMMOVABLE;
+            m_tileType = ETileType.IMMOVABLE;
         }
         #endregion
     }
@@ -213,8 +213,8 @@ public class Tile : MonoBehaviour
         }
 
         // 블록이 NULL인 경우
-        BlockType type = m_myBlock.GetComponent<Block>().GetBlockType();
-        if (type == BlockType.NULL)
+        EBlockType type = m_myBlock.GetComponent<Block>().GetBlockType();
+        if (type == EBlockType.NULL)
         {
             return false;
         }
@@ -238,7 +238,7 @@ public class Tile : MonoBehaviour
         // StageMgr에서 설정된 블록 값으로 랜덤한 값
         int maxRandom = StageMgr.Instance.GetMaxBlockType();
         int random = Random.Range(0, maxRandom);
-        m_myBlock.GetComponent<Block>().SetBlockType((BlockType)random);
+        m_myBlock.GetComponent<Block>().SetBlockType((EBlockType)random);
         // 위에서 내려오는 연출
         m_myBlock.GetComponent<Block>().CreatTileBlockMove(transform.gameObject);
     }
@@ -265,7 +265,7 @@ public class Tile : MonoBehaviour
         StartCoroutine(ExplodeEffect());
     }
 
-    public void Explode(in ObstacleType _contagiousObstacleType, in BlockType _newBlockType = BlockType.NONE)
+    public void Explode(in EObstacleType _contagiousObstacleType, in EBlockType _newBlockType = EBlockType.NONE)
     {
         if (m_isExplodeWaiting)
         {
@@ -299,22 +299,22 @@ public class Tile : MonoBehaviour
         }
 
         // 전달 받은 장애물이 있는 경우
-        if (_contagiousObstacleType != ObstacleType.NONE)
+        if (_contagiousObstacleType != EObstacleType.NONE)
         {
             // BackObstacle 인 경우
-            if (_contagiousObstacleType > ObstacleType.FRONT_END)
+            if (_contagiousObstacleType > EObstacleType.FRONT_END)
             {
-                if (m_tileType == TileType.MOVABLE)
+                if (m_tileType == ETileType.MOVABLE)
                 {
                     m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_contagiousObstacleType);
                 }
             }
         }
 
-        BlockType type = GetMyBlockType();
+        EBlockType type = GetMyBlockType();
 
         // 특수 블록인 경우
-        if (type >= BlockType.CROSS && type != BlockType.NULL)
+        if (type >= EBlockType.CROSS && type != EBlockType.NULL)
         {
             // 딜레이 후 터트림
             StartCoroutine(SpecialExplode());
@@ -337,7 +337,7 @@ public class Tile : MonoBehaviour
         SetMyBlockType(_newBlockType);
     }
 
-    public void ChasingMoonExplode(in ObstacleType _contagiousObstacleType, in BlockType _explodeType = BlockType.NONE)
+    public void ChasingMoonExplode(in EObstacleType _contagiousObstacleType, in EBlockType _explodeType = EBlockType.NONE)
     {
         // StageMgr에 터트린 블록 타입 알려줌
         OnTileExplode?.Invoke(GetMyBlockType());
@@ -354,12 +354,12 @@ public class Tile : MonoBehaviour
         else
         {
             // 전달 받은 장애물이 있는 경우
-            if (_contagiousObstacleType != ObstacleType.NONE)
+            if (_contagiousObstacleType != EObstacleType.NONE)
             {
                 // BackObstacle 인 경우
-                if (_contagiousObstacleType > ObstacleType.FRONT_END)
+                if (_contagiousObstacleType > EObstacleType.FRONT_END)
                 {
-                    if (m_tileType == TileType.MOVABLE)
+                    if (m_tileType == ETileType.MOVABLE)
                     {
                         m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_contagiousObstacleType);
                     }
@@ -367,10 +367,10 @@ public class Tile : MonoBehaviour
             }
         }
 
-        BlockType type = _explodeType;
+        EBlockType type = _explodeType;
 
         // 특수 블록인 경우
-        if (type >= BlockType.CROSS && type != BlockType.NULL)
+        if (type >= EBlockType.CROSS && type != EBlockType.NULL)
         {
             Debug.Log("터짐");
             MatchMgr.Instance.SpecialExplode(transform.gameObject, _explodeType);
@@ -394,18 +394,18 @@ public class Tile : MonoBehaviour
 
         switch (GetMyBlockType())
         {
-            case BlockType.RANDOM:
-            case BlockType.DOUBLE_RANDOM:
-            case BlockType.RANDOM_CROSS:
-            case BlockType.RANDOM_SUN:
-            case BlockType.RANDOM_MOON:
+            case EBlockType.RANDOM:
+            case EBlockType.DOUBLE_RANDOM:
+            case EBlockType.RANDOM_CROSS:
+            case EBlockType.RANDOM_SUN:
+            case EBlockType.RANDOM_MOON:
                 if (!m_randomExecute)
                 {
                     MatchMgr.Instance.SpecialExplode(transform.gameObject, GetMyBlockType());
                 }
                 yield return new WaitUntil(() => m_randomComplete);
                 m_myBlock.GetComponent<Block>().SetEffect(false);
-                SetMyBlockType(BlockType.NONE);
+                SetMyBlockType(EBlockType.NONE);
                 SetRandomExecute(false);
                 break;
             default:

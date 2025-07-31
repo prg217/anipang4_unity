@@ -4,8 +4,8 @@ using UnityEngine;
 public static class StageInfo
 {
     static int m_moveCount;
-    static Dictionary<BlockType, int> m_blockCounts = new Dictionary<BlockType, int>();
-    static Dictionary<ObstacleType, int> m_obstacleCounts = new Dictionary<ObstacleType, int>();
+    static Dictionary<EBlockType, int> m_blockCounts = new Dictionary<EBlockType, int>();
+    static Dictionary<EObstacleType, int> m_obstacleCounts = new Dictionary<EObstacleType, int>();
     static bool m_isInitialized = false;
 
     // Properties로 안전한 접근
@@ -32,7 +32,7 @@ public static class StageInfo
         m_isInitialized = true;
     }
 
-    public static void AddBlock(in BlockType type, in int count)
+    public static void AddBlock(in EBlockType type, in int count)
     {
         if (!m_isInitialized)
         {
@@ -46,13 +46,13 @@ public static class StageInfo
             m_blockCounts[type] = count;
     }
 
-    public static int GetBlockCount(in BlockType type)
+    public static int GetBlockCount(in EBlockType type)
     {
         if (!m_isInitialized) return 0;
         return m_blockCounts.ContainsKey(type) ? m_blockCounts[type] : 0;
     }
 
-    public static void AddObstacle(in ObstacleType type, in int count)
+    public static void AddObstacle(in EObstacleType type, in int count)
     {
         if (!m_isInitialized)
         {
@@ -65,7 +65,7 @@ public static class StageInfo
             m_obstacleCounts[type] = count;
     }
 
-    public static int GetObstacleCount(in ObstacleType type)
+    public static int GetObstacleCount(in EObstacleType type)
     {
         if (!m_isInitialized) return 0;
         return m_obstacleCounts.ContainsKey(type) ? m_obstacleCounts[type] : 0;

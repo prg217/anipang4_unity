@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      moon_02_0: 6222423422991397168
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
