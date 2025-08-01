@@ -247,7 +247,6 @@ public class ChasingMoon : MonoBehaviour
     {
         Destroy(transform.gameObject);
         m_target.GetComponent<Tile>().SetIsTargeted(false);
-        MoveMgr.Instance.ActiveCheckEmpty();
     }
 
     void Move()

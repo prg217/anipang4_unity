@@ -861,7 +861,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 RandomMatch(m_targetTile, EBlockType.MOON, m_contagiousObstacle);
                 break;
             default:
-                MoveMgr.Instance.SetCheckEmptyEnabled(true);
+                //MoveMgr.Instance.SetCheckEmptyEnabled(true);
                 break;
         }
     }
@@ -984,7 +984,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 }
                 break;
             default:
-                MoveMgr.Instance.SetCheckEmptyEnabled(true);
+                //MoveMgr.Instance.SetCheckEmptyEnabled(true);
                 break;
         }
 
@@ -1069,6 +1069,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         List<GameObject> explodeTiles = new List<GameObject>();
 
         m_targetTile.GetComponent<Tile>().SetRandomExecute(true);
+
+        MoveMgr.Instance.SetCheckEmptyEnabled(false);
 
         #region 단독으로 실행 됐을 경우
         if (_type == EBlockType.NONE)
@@ -1183,8 +1185,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 }
             }
         }
-
-        MoveMgr.Instance.ActiveCheckEmpty();
     }
 
     void MoonExplode()
@@ -1248,8 +1248,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         Explode(true);
-
-        MoveMgr.Instance.ActiveCheckEmpty();
     }
 
     // 가로세로 터트림 : Cross 관련 함수에서 사용
@@ -1301,8 +1299,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         Explode(true);
-
-        MoveMgr.Instance.ActiveCheckEmpty();
     }
 
     public void ChasingMoonExplode(in GameObject _tile, in EObstacleType _contagiousObstacleType = EObstacleType.NONE, in EBlockType _explodeType = EBlockType.NONE)
@@ -1328,7 +1324,5 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
             _tile.GetComponent<Tile>().Explode(_contagiousObstacleType);
         }
-
-        MoveMgr.Instance.ActiveCheckEmpty();
     }
 }

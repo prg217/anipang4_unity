@@ -94,6 +94,7 @@ public class Tile : MonoBehaviour
     #endregion
 
     #region Set함수
+    void SetTileType(in ETileType _tileType) { m_tileType = _tileType; }
     public void SetMyBlockType(in EBlockType _BlockType)
     {
         m_myBlock.GetComponent<Block>().SetBlockType(_BlockType);
@@ -113,6 +114,15 @@ public class Tile : MonoBehaviour
     public void SetIsTargeted(in bool _setting)
     {
         m_isTargeted = _setting;
+
+        if (_setting)
+        {
+            SetTileType(ETileType.IMMOVABLE);
+        }
+        else
+        {
+            SetTileType(ETileType.MOVABLE);
+        }
     }
     public void SetRandomComplete(in bool _setting)
     {
@@ -389,8 +399,9 @@ public class Tile : MonoBehaviour
         // 블록 타입에 따라 이펙트 실행
         m_myBlock.GetComponent<Block>().SetEffect(true);
         SetRandomComplete(false);
+        SetTileType(ETileType.IMMOVABLE);
 
-        MoveMgr.Instance.SetCheckEmptyEnabled(false);
+        //MoveMgr.Instance.SetCheckEmptyEnabled(false);
 
         switch (GetMyBlockType())
         {
@@ -416,6 +427,7 @@ public class Tile : MonoBehaviour
                 break;
         }
 
+        SetTileType(ETileType.MOVABLE);
         m_isExplodeWaiting = false;
 
         // 랜덤으로 인해 실행 중이라면 랜덤 쪽에서 StartCheckEmpty를 함

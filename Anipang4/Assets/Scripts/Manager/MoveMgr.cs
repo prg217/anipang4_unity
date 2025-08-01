@@ -1,9 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using Unity.VisualScripting;
-using System;
 using System.Collections.Generic;
-using System.IO;
 
 public class MoveMgr : BaseMgr<MoveMgr>
 {
@@ -37,9 +34,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
     bool m_clickDuringEmptyMoving = false;
     // 빈공간 채우기 활성 여부
     bool m_checkEmptyEnabled = true;
-
-    // 빈공간 채우기 멈춤 시 카운트 증가
-    int m_stopCount = 0;
 
     List<Coroutine> checkEmptyCoroutines = new List<Coroutine>();
     // ==========================
@@ -77,10 +71,24 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
     void CheckClick()
     {
-        // 마우스 왼쪽 클릭
+        Vector2 inputPosition = Vector2.zero;
+        bool hasInput = false;
+        bool isReleased = false;
+
         if (Input.GetMouseButton(0) && !m_moving)
         {
-            Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            inputPosition = Input.mousePosition;
+            hasInput = true;
+        }
+        else if ((Input.touchCount > 0) && !m_moving)
+        {
+            inputPosition = Input.GetTouch(0).position;
+            hasInput = true;
+        }
+
+        if (hasInput)
+        {
+            Vector2 worldPoint = Camera.main.ScreenToWorldPoint(inputPosition);
             RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero);
 
             if (hit.collider != null)
@@ -90,15 +98,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 // 만약 빈자리 채우기 중이라면 빈자리 채우기 움직이던거 멈추고 이쪽 먼저 처리
                 if (m_emptyMoving)
                 {
-                    // 코루틴 중지
-                    foreach (Coroutine coroutine in checkEmptyCoroutines)
-                    {
-                        if (coroutine != null)
-                        {
-                            StopCoroutine(coroutine);
-                        }
-                    }
-                    checkEmptyCoroutines.Clear();
+                    StopCheckEmpty();
 
                     m_emptyMoving = false;
                     m_pClickedTile1 = null;
@@ -134,9 +134,21 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 }
             }
         }
+
         if (Input.GetMouseButtonUp(0) && !m_moving)
         {
-            Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            inputPosition = Input.mousePosition;
+            isReleased = true;      
+        }
+        else if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended) && !m_moving)
+        {
+            inputPosition = Input.GetTouch(0).position;
+            isReleased = true;
+        }
+
+        if (isReleased)
+        {
+            Vector2 worldPoint = Camera.main.ScreenToWorldPoint(inputPosition);
             RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero);
 
             if (hit.collider != null)
@@ -159,7 +171,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
                         {
                             StartCheckEmpty();
                         }
-                    }  
+                    }
                 }
 
                 m_pClickedTile1 = null;
@@ -429,22 +441,15 @@ public class MoveMgr : BaseMgr<MoveMgr>
         }
         checkEmptyCoroutines.Clear();
 
-        m_stopCount++;
-        Debug.Log("멈춤");
+        // 다시 힌트를 줄 수 있게 설정
+        StageMgr.Instance.SetHint(true);
+        m_emptyMoving = false;
     }
 
     public void ActiveCheckEmpty()
     {
-        if (m_stopCount > 1)
-        {
-            m_stopCount--;
-            Debug.Log("m_stopCount : " + m_stopCount);
-            return;
-        }
-        Debug.Log("시작");
         SetCheckEmptyEnabled(true);
         StartCheckEmpty();
-        m_stopCount = 0;
     }
 
     void ConsumeMove()
@@ -794,6 +799,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
     public void StopClickMoving()
     {
+        Debug.Log("못 움직임");
         // 클릭해서 움직이는 행동을 못하게 함
         m_clickOK = false;
     }

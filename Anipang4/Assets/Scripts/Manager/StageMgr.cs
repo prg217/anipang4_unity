@@ -505,7 +505,6 @@ public class StageMgr : BaseMgr<StageMgr>
             if (type != EBlockType.NULL && type >= EBlockType.CROSS)
             {
                 tile.Value.GetComponent<Tile>().Explode(EObstacleType.NONE);
-                MoveMgr.Instance.ActiveCheckEmpty();
                 yield return new WaitForSeconds(0.5f);
             }
         }

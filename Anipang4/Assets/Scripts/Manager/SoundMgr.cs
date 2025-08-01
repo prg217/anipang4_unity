@@ -20,12 +20,11 @@ public class SoundMgr : BaseMgr<SoundMgr>
 
     protected override void OnAwake()
     {
-        Debug.Log($"BGM 데이터 개수: {m_BGMDatas.Count}");
         foreach (var data in m_BGMDatas)
         {
             m_bgms[data.key] = data.value;
         }
-        Debug.Log($"등록된 BGM 개수: {m_bgms.Count}");
+
         foreach (var data in m_SFXDatas)
         {
             m_sfxs[data.key] = data.value;
@@ -34,7 +33,6 @@ public class SoundMgr : BaseMgr<SoundMgr>
 
     public void PlayBGM(EBGM _bgm)
     {
-        Debug.Log($"등록된 BGM 개수: {m_bgms.Count}");
         if (m_bgms.ContainsKey(_bgm))
         {
             m_audioBgm.clip = m_bgms[_bgm];
