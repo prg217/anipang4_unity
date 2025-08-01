@@ -54,6 +54,12 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
     public event System.Action OnEmptyMoveCompleteFunction;
 
+    void SetMoving(in bool _setting)
+    {
+        Debug.Log("moving : " + _setting);
+        m_moving = _setting;
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -190,7 +196,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
         // 직접 클릭해서 할 때만 체크
         if (!m_emptyMoving)
         {
-            m_moving = true;
+            SetMoving(true);
         }
 
         // 둘 중 하나라도 움직일 수 없는 상태인지 확인
@@ -198,7 +204,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
         {
             return;
         }
-        
+
         // 빈자리 채우기가 아닐 때에만 적용
         if (!m_emptyMoving)
         {
@@ -287,6 +293,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
             return true;
         }
 
+        SetMoving(false);
         return false;
     }
 
@@ -298,7 +305,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
         // 둘 중 하나라도 움직일 수 없는 상태라면 움직이지 않음
         if (tileType1 == ETileType.IMMOVABLE || tileType2 == ETileType.IMMOVABLE)
         {
-            m_moving = false;
+            SetMoving(false);
             m_pClickedTile1 = null;
             m_pClickedTile2 = null;
 
@@ -387,7 +394,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
                 Moving();
             }
 
-            m_moving = false;
+            SetMoving(false);
             m_pClickedTile1 = null;
             m_pClickedTile2 = null;
             m_reMoving = false;
