@@ -27,7 +27,7 @@ public class Block : MonoBehaviour
 
     float m_moveSpeed = 1.5f;
     float m_changeSpeed = 1.5f;
-    float m_emptyMovingSpeed = 3.5f;
+    float m_emptyMovingSpeed = 2.5f;
     #endregion
 
     [Header("Èçµé¸² ¼³Á¤")]

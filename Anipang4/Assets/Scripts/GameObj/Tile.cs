@@ -399,9 +399,6 @@ public class Tile : MonoBehaviour
         // 블록 타입에 따라 이펙트 실행
         m_myBlock.GetComponent<Block>().SetEffect(true);
         SetRandomComplete(false);
-        SetTileType(ETileType.IMMOVABLE);
-
-        //MoveMgr.Instance.SetCheckEmptyEnabled(false);
 
         switch (GetMyBlockType())
         {
@@ -412,22 +409,25 @@ public class Tile : MonoBehaviour
             case EBlockType.RANDOM_MOON:
                 if (!m_randomExecute)
                 {
+                    Debug.Log("랜덤 실행");
                     MatchMgr.Instance.SpecialExplode(transform.gameObject, GetMyBlockType());
                 }
                 yield return new WaitUntil(() => m_randomComplete);
+                Debug.Log("랜덤 완료");
                 m_myBlock.GetComponent<Block>().SetEffect(false);
                 SetMyBlockType(EBlockType.NONE);
                 SetRandomExecute(false);
                 break;
             default:
+                SetTileType(ETileType.IMMOVABLE);
                 yield return new WaitForSeconds(0.3f);
                 m_myBlock.GetComponent<Block>().SetEffect(false);
 
                 MatchMgr.Instance.SpecialExplode(transform.gameObject, GetMyBlockType());
+                SetTileType(ETileType.MOVABLE);
                 break;
         }
 
-        SetTileType(ETileType.MOVABLE);
         m_isExplodeWaiting = false;
 
         // 랜덤으로 인해 실행 중이라면 랜덤 쪽에서 StartCheckEmpty를 함

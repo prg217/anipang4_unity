@@ -642,6 +642,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
                         {
                             // 매치 가능하면 그 매치 가능한 타일들 각자를 또 검사
                             // ->제일 많은 매치 카운트를 가진 타일로 터트림
+                            // 하지만 새 특수 블록 생성은 처음 매치 판정을 했던 타일에서
                             GameObject mostMatchCountTile = tile;
 
                             foreach (GameObject matchTile in matchTiles)

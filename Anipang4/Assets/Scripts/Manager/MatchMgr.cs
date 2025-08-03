@@ -635,6 +635,22 @@ public class MatchMgr : BaseMgr<MatchMgr>
         // 로그 추가
         LogMgr.Instance.AddMatchLog(m_targetType, m_targetTile, m_matchTiles, m_newBlock);
 
+        List<GameObject> specialTiles = new List<GameObject>();
+
+        // 특수 블록은 맨 마지막에 터지게 분류하기
+        foreach (GameObject tile in m_matchTiles)
+        {
+            if (tile.GetComponent<Tile>().GetMyBlockType() >= EBlockType.CROSS)
+            {
+                // 따로 빼두기
+                specialTiles.Add(tile);
+            }
+        }
+        foreach (GameObject tile in specialTiles)
+        {
+            m_matchTiles.Remove(tile);
+        }
+
         // 미리 터질 타일에 신호
         m_targetTile.GetComponent<Tile>().StartExplodeEffect();
         foreach (GameObject tile in m_matchTiles)
@@ -683,6 +699,18 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
         // m_matchTiles에 등록된 타일들을 터트림
         foreach (GameObject tile in m_matchTiles)
+        {
+            if (tile != null)
+            {
+                if (tile.GetComponent<Tile>().GetMyBlockType() != EBlockType.NULL)
+                {
+                    tile.GetComponent<Tile>().Explode(m_contagiousObstacle);
+                }
+            }
+        }
+
+        // 특수 블록 터트림
+        foreach (GameObject tile in specialTiles)
         {
             if (tile != null)
             {
@@ -861,7 +889,6 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 RandomMatch(m_targetTile, EBlockType.MOON, m_contagiousObstacle);
                 break;
             default:
-                //MoveMgr.Instance.SetCheckEmptyEnabled(true);
                 break;
         }
     }
