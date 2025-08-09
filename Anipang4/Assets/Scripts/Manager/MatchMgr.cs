@@ -186,7 +186,7 @@ public class MatchMgr : BaseMgr<MatchMgr>
         return false;
     }
 
-    public bool CheckMatchSimulation(in GameObject _tile)
+    bool CheckMatchSimulation(in GameObject _tile)
     {
         if (_tile == null)
         {

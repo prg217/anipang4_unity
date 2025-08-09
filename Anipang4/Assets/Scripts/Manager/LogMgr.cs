@@ -6,6 +6,7 @@ public class LogMgr : BaseMgr<LogMgr>
 {
     #region 변수
 
+    // 사진 로그를 캡쳐해주는 카메라
     [SerializeField]
     Camera m_captureCamera;
 

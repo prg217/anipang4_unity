@@ -197,20 +197,6 @@ public class UIMgr : BaseMgr<UIMgr>
         m_ConditionList.Add(conditionObj);
     }
 
-    void ScanConditions()
-    {
-        m_ConditionList.Clear();
-
-        foreach (Transform child in m_UIInfo.clearConditions.transform)
-        {
-            // 현재 자식의 이름 확인
-            if (child.name == "Condition")
-            {
-                m_ConditionList.Add(child.gameObject);
-            }
-        }
-    }
-
     public void RandomPlacementUI(bool _active)
     {
         m_blackScreen.gameObject.SetActive(_active);

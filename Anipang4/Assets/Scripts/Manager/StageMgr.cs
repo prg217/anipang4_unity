@@ -9,7 +9,7 @@ public class StageMgr : BaseMgr<StageMgr>
 {
     #region 변수
 
-    bool m_gameEnd =false;
+    bool m_gameEnd = false;
 
     [Header("보드 등록")]
     [SerializeField]
@@ -505,7 +505,7 @@ public class StageMgr : BaseMgr<StageMgr>
             if (type != EBlockType.NULL && type >= EBlockType.CROSS)
             {
                 tile.Value.GetComponent<Tile>().Explode(EObstacleType.NONE);
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.8f);
             }
         }
 

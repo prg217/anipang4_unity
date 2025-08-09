@@ -8,7 +8,6 @@ public static class StageInfo
     static Dictionary<EObstacleType, int> m_obstacleCounts = new Dictionary<EObstacleType, int>();
     static bool m_isInitialized = false;
 
-    // Properties로 안전한 접근
     public static int MoveCount
     {
         get => m_moveCount;

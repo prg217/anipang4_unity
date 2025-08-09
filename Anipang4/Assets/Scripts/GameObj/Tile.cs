@@ -382,7 +382,6 @@ public class Tile : MonoBehaviour
         // 특수 블록인 경우
         if (type >= EBlockType.CROSS && type != EBlockType.NULL)
         {
-            Debug.Log("터짐");
             MatchMgr.Instance.SpecialExplode(transform.gameObject, _explodeType);
 
             return;
@@ -409,11 +408,10 @@ public class Tile : MonoBehaviour
             case EBlockType.RANDOM_MOON:
                 if (!m_randomExecute)
                 {
-                    Debug.Log("랜덤 실행");
                     MatchMgr.Instance.SpecialExplode(transform.gameObject, GetMyBlockType());
                 }
+
                 yield return new WaitUntil(() => m_randomComplete);
-                Debug.Log("랜덤 완료");
                 m_myBlock.GetComponent<Block>().SetEffect(false);
                 SetMyBlockType(EBlockType.NONE);
                 SetRandomExecute(false);

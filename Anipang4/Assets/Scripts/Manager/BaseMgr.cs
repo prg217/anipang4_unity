@@ -5,24 +5,24 @@ using UnityEngine;
 public abstract class BaseMgr<T> : MonoBehaviour where T : BaseMgr<T>, new()
 {
     #region ΩÃ±€≈Ê
-    static T _instance;
-    static readonly object _lock = new object();
+    static T m_instance;
+    static readonly object m_lock = new object();
 
     public static T Instance
     {
         get
         {
-            if (_instance == null)
+            if (m_instance == null)
             {
-                lock (_lock)
+                lock (m_lock)
                 {
-                    if (_instance == null)
+                    if (m_instance == null)
                     {
-                        _instance = new T();
+                        m_instance = new T();
                     }
                 }
             }
-            return _instance;
+            return m_instance;
         }
     }
     #endregion
@@ -30,9 +30,9 @@ public abstract class BaseMgr<T> : MonoBehaviour where T : BaseMgr<T>, new()
     void Awake()
     {
         #region ΩÃ±€≈Ê
-        if (_instance == null)
+        if (m_instance == null)
         {
-            _instance = (T)this;
+            m_instance = (T)this;
             DontDestroyOnLoad(gameObject);
 
             OnAwake();
@@ -46,10 +46,10 @@ public abstract class BaseMgr<T> : MonoBehaviour where T : BaseMgr<T>, new()
 
     protected virtual void OnDestroy()
     {
-        if (_instance == this)
+        if (m_instance == this)
         {
             OnDestroyed();
-            _instance = null;
+            m_instance = null;
         }
     }
 
