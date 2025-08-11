@@ -38,25 +38,14 @@ public class Tile : MonoBehaviour
     [SerializeField]
     bool m_createTile = false;
 
-    // ====== 타일 상태 ======(구조체로 만들어야 하나?)
-    // 타겟이 되었는지
-    bool m_isTargeted = false;
-    // 터지기 대기 중인가(대기 중이라면 또 터짐 신호를 받으면 안 됨)
-    bool m_isExplodeWaiting = false;
-    // 랜덤이 끝날 때까지 대기하기 위한 용도
-    bool m_randomComplete = false;
-    // 랜덤으로 인해 터지는 상태인가?
-    bool m_randomExplode = false;
-    // 랜덤이고, 실행중인가?
-    bool m_randomExecute = false;
-    // =======================
+    // 타일 상태
+    STileState m_tileState;
 
     GameObject m_myExplodeEffect;
 
     #endregion 변수 끝
 
     #region Get함수
-    //public GameObject GetMyBlock() {  return m_myBlock; }
     // -1 : 블록 없음, 0 : 움직일 수 없음, 1 : 움직일 수 있음
     public ETileType GetTileType() { return m_tileType; }
     public Vector2Int GetMatrix() { return m_matrix; }
@@ -90,7 +79,7 @@ public class Tile : MonoBehaviour
     public bool GetFrontObstacleEmpty() { return m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty(); }
     public EObstacleType GetMyFrontObstacleType() { return m_myFrontObstacle.GetComponent<Obstacle>().GetObstacleType(); }
     public EObstacleType GetMyBackObstacleType() { return m_myBackObstacle.GetComponent<Obstacle>().GetObstacleType(); }
-    public bool GetIsTargeted() { return m_isTargeted; }
+    public bool GetIsTargeted() { return m_tileState.isTargeted; }
     #endregion
 
     #region Set함수
@@ -113,7 +102,7 @@ public class Tile : MonoBehaviour
     }
     public void SetIsTargeted(in bool _setting)
     {
-        m_isTargeted = _setting;
+        m_tileState.isTargeted = _setting;
 
         if (_setting)
         {
@@ -126,15 +115,15 @@ public class Tile : MonoBehaviour
     }
     public void SetRandomComplete(in bool _setting)
     {
-        m_randomComplete = _setting;
+        m_tileState.randomComplete = _setting;
     }
     public void SetRandomExplode(in bool _setting)
     {
-        m_randomExplode = _setting;
+        m_tileState.randomExplode = _setting;
     }
     public void SetRandomExecute(in bool _setting)
     {
-        m_randomExecute = _setting;
+        m_tileState.randomExecute = _setting;
     }
     #endregion
 
@@ -149,6 +138,13 @@ public class Tile : MonoBehaviour
 
     void Awake()
     {
+        // 구조체 안 데이터 초기화
+        m_tileState.isTargeted = false;
+        m_tileState.isExplodeWaiting = false;
+        m_tileState.randomComplete = false;
+        m_tileState.randomExplode = false;
+        m_tileState.randomExecute = false;
+
         Refresh();
     }
 
@@ -277,12 +273,12 @@ public class Tile : MonoBehaviour
 
     public void Explode(in EObstacleType _contagiousObstacleType, in EBlockType _newBlockType = EBlockType.NONE)
     {
-        if (m_isExplodeWaiting)
+        if (m_tileState.isExplodeWaiting)
         {
             return;
         }
 
-        m_isExplodeWaiting = true;
+        m_tileState.isExplodeWaiting = true;
 
         // StageMgr에 터트린 블록 타입 알려줌
         OnTileExplode?.Invoke(GetMyBlockType());
@@ -298,12 +294,12 @@ public class Tile : MonoBehaviour
 
             if (fo.GetLevel() >= 0)
             {
-                if (m_randomExplode)
+                if (m_tileState.randomExplode)
                 {
                     SetRandomExplode(false);
                     MatchMgr.Instance.RandomExplodeComplete();
                 }
-                m_isExplodeWaiting = false;
+                m_tileState.isExplodeWaiting = false;
                 return;
             }
         }
@@ -329,7 +325,7 @@ public class Tile : MonoBehaviour
             // 딜레이 후 터트림
             StartCoroutine(SpecialExplode());
 
-            if (m_randomExplode)
+            if (m_tileState.randomExplode)
             {
                 SetRandomExplode(false);
                 MatchMgr.Instance.RandomExplodeComplete();
@@ -337,13 +333,13 @@ public class Tile : MonoBehaviour
             return;
         }
 
-        if (m_randomExplode)
+        if (m_tileState.randomExplode)
         {
             SetRandomExplode(false);
             MatchMgr.Instance.RandomExplodeComplete();
         }
 
-        m_isExplodeWaiting = false;
+        m_tileState.isExplodeWaiting = false;
         SetMyBlockType(_newBlockType);
     }
 
@@ -406,12 +402,12 @@ public class Tile : MonoBehaviour
             case EBlockType.RANDOM_CROSS:
             case EBlockType.RANDOM_SUN:
             case EBlockType.RANDOM_MOON:
-                if (!m_randomExecute)
+                if (!m_tileState.randomExecute)
                 {
                     MatchMgr.Instance.SpecialExplode(transform.gameObject, GetMyBlockType());
                 }
 
-                yield return new WaitUntil(() => m_randomComplete);
+                yield return new WaitUntil(() => m_tileState.randomComplete);
                 m_myBlock.GetComponent<Block>().SetEffect(false);
                 SetMyBlockType(EBlockType.NONE);
                 SetRandomExecute(false);
@@ -426,14 +422,14 @@ public class Tile : MonoBehaviour
                 break;
         }
 
-        m_isExplodeWaiting = false;
+        m_tileState.isExplodeWaiting = false;
 
         // 랜덤으로 인해 실행 중이라면 랜덤 쪽에서 StartCheckEmpty를 함
-        if (!m_randomExplode && !m_randomComplete)
+        if (!m_tileState.randomExplode && !m_tileState.randomComplete)
         {
             MoveMgr.Instance.StartCheckEmpty();
         }
-        if (m_randomExplode)
+        if (m_tileState.randomExplode)
         {
             SetRandomExplode(false);
 

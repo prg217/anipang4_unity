@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 
-public class Obstacle : MonoBehaviour
+public abstract class Obstacle : MonoBehaviour
 {
     #region º¯¼ö
 
@@ -198,5 +198,7 @@ public class Obstacle : MonoBehaviour
         Destroy(m_script);
         m_script = null;
     }
+
+    protected abstract void ChangeSprite();
 }
 

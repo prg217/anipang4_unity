@@ -15,7 +15,7 @@ public class Paint : Obstacle
         
     }
 
-    void ChangeSprite()
+    protected override void ChangeSprite()
     {
         string spritePath = "Obstacle/Paint/OB_board_paint_base";
 

@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using TMPro;
+using static UnityEngine.Rendering.DebugUI;
+using System.Xml.Linq;
 
 #region 스테이지 클리어 조건
 [Serializable]
@@ -112,6 +114,20 @@ public struct SUIInfo
     public TextMeshProUGUI tensPlace;
     [SerializeField]
     public GameObject clearConditions; // 클리어 조건 표시 UI(그리드)
+}
+
+public struct STileState
+{
+    // 타겟이 되었는지
+    public bool isTargeted;
+    // 터지기 대기 중인가(대기 중이라면 또 터짐 신호를 받으면 안 됨)
+    public bool isExplodeWaiting;
+    // 랜덤이 끝날 때까지 대기하기 위한 용도
+    public bool randomComplete;
+    // 랜덤으로 인해 터지는 상태인가?
+    public bool randomExplode;
+    // 랜덤이고, 실행중인가?
+    public bool randomExecute;
 }
 
 [Serializable]
