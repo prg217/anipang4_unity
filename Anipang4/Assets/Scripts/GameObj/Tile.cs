@@ -287,6 +287,9 @@ public class Tile : MonoBehaviour
         if (!m_myFrontObstacle.GetComponent<Obstacle>().GetIsEmpty())
         {
             Obstacle fo = m_myFrontObstacle.GetComponent<Obstacle>();
+
+            // 이전에 구독한 이벤트 해제
+            fo.GetChildObstacle().OnTileType -= HandleSetTileTypeExecution;
             // Obstacle이 가지고 있는 자식 장애물 쪽으로 이벤트를 연결해줌
             fo.GetChildObstacle().OnTileType += HandleSetTileTypeExecution;
 
@@ -352,6 +355,9 @@ public class Tile : MonoBehaviour
         if (!GetFrontObstacleEmpty())
         {
             Obstacle fo = m_myFrontObstacle.GetComponent<Obstacle>();
+
+            // 이전에 구독한 이벤트 해제
+            fo.GetChildObstacle().OnTileType -= HandleSetTileTypeExecution;
             // Obstacle이 가지고 있는 자식 장애물 쪽으로 이벤트를 연결해줌
             fo.GetChildObstacle().OnTileType += HandleSetTileTypeExecution;
 
@@ -435,5 +441,12 @@ public class Tile : MonoBehaviour
 
             MatchMgr.Instance.RandomExplodeComplete();
         }
+    }
+
+    void OnDestroy()
+    {
+        Obstacle fo = m_myFrontObstacle.GetComponent<Obstacle>();
+        // 구독한 이벤트 해제
+        fo.GetChildObstacle().OnTileType -= HandleSetTileTypeExecution;
     }
 }

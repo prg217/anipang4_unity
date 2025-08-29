@@ -56,7 +56,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
 
     void SetMoving(in bool _setting)
     {
-        Debug.Log("moving : " + _setting);
         m_moving = _setting;
     }
 

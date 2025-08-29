@@ -8,7 +8,7 @@ public interface IObstacleBehavior
     void ChangeSprite();
 }
 
-public abstract class Obstacle : MonoBehaviour, IObstacleBehavior
+public class Obstacle : MonoBehaviour, IObstacleBehavior
 {
     #region º¯¼ö
 
