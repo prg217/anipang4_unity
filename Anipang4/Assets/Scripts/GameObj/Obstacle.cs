@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
+public interface IObstacleBehavior
+{
+    void ChangeSprite();
+}
 
-public abstract class Obstacle : MonoBehaviour
+public abstract class Obstacle : MonoBehaviour, IObstacleBehavior
 {
     #region º¯¼ö
 
@@ -199,6 +203,6 @@ public abstract class Obstacle : MonoBehaviour
         m_script = null;
     }
 
-    protected abstract void ChangeSprite();
+    public virtual void ChangeSprite() {  }
 }
 
