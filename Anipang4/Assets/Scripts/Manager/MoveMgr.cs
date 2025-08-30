@@ -52,8 +52,6 @@ public class MoveMgr : BaseMgr<MoveMgr>
     }
     #endregion
 
-    public event System.Action OnEmptyMoveCompleteFunction;
-
     void SetMoving(in bool _setting)
     {
         m_moving = _setting;
@@ -681,7 +679,7 @@ public class MoveMgr : BaseMgr<MoveMgr>
         StageMgr.Instance.CheckStageClear();
 
         // 스테이지 클리어, 게임 오버 시 완료 신호 보냄
-        OnEmptyMoveCompleteFunction?.Invoke();
+        StageMgr.Instance.MoveCompleted();
 
         // 앞으로 매치가 가능한지 체크
         StageMgr.Instance.StartCheckPossibleMatch();

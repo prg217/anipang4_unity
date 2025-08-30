@@ -3,13 +3,6 @@ using UnityEngine;
 
 public class Prison : Obstacle
 {
-    #region 이벤트
-    // 레벨 동기화
-    public event Action<int> OnLevelSync;
-    // 장애물 삭제
-    public event Action<EObstacleType> OnDestroyObstacle;
-    #endregion
-
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -28,7 +21,7 @@ public class Prison : Obstacle
         m_level = _level;
 
         ChangeSprite();
-        OnLevelSync?.Invoke(m_level);
+        SyncLevel(m_level);
     }
 
     public override void AddLevel(int _addLevel)
@@ -36,7 +29,7 @@ public class Prison : Obstacle
         m_level += _addLevel;
 
         ChangeSprite();
-        OnLevelSync?.Invoke(m_level);
+        SyncLevel(m_level);
     }
 
     public override void ChangeSprite()
@@ -50,7 +43,7 @@ public class Prison : Obstacle
             SetTileType(ETileType.MOVABLE);
 
             // 스스로를 제거
-            OnDestroyObstacle?.Invoke(EObstacleType.NONE);
+            SetObstacle(EObstacleType.NONE);
 
             return;
         }

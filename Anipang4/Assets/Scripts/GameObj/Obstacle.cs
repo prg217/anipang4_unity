@@ -95,12 +95,6 @@ public class Obstacle : MonoBehaviour, IObstacleBehavior
 
     #region 이벤트
     public event Action<ETileType> OnTileType;
-
-    // 레벨 동기화
-    void HandleLevelSync(int _level)
-    {
-        m_level = _level;
-    }
     #endregion
 
     private void Awake()
@@ -123,6 +117,11 @@ public class Obstacle : MonoBehaviour, IObstacleBehavior
 
     }
 
+    // 레벨 동기화
+    protected void SyncLevel(int _level)
+    {
+        m_level = _level;
+    }
     void PlaySFX()
     {
         switch (m_ObstacleType)
@@ -150,8 +149,6 @@ public class Obstacle : MonoBehaviour, IObstacleBehavior
                         m_script = transform.AddComponent<Prison>();
 
                         Prison prison = m_script as Prison;
-                        prison.OnLevelSync += HandleLevelSync;
-                        prison.OnDestroyObstacle += SetObstacle;
                     }
                 }
                 break;
@@ -181,8 +178,6 @@ public class Obstacle : MonoBehaviour, IObstacleBehavior
                         Destroy(m_script);
 
                         Prison prison = m_script as Prison;
-                        prison.OnLevelSync -= HandleLevelSync;
-                        prison.OnDestroyObstacle -= SetObstacle;
                     }
                 }
                 break;

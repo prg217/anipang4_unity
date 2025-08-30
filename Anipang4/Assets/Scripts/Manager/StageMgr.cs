@@ -438,8 +438,6 @@ public class StageMgr : BaseMgr<StageMgr>
 
         // 움직임이 있다면 움직임이 다 할 때까지 기다림
         m_waitingMoveComplete = true;
-        // 이벤트 구독
-        MoveMgr.Instance.OnEmptyMoveCompleteFunction += OnMoveCompleted;
 
         // MoveMgr에서 빈 공간 채우기 함수 완료까지 대기
         yield return new WaitUntil(() => !m_waitingMoveComplete);
@@ -526,8 +524,6 @@ public class StageMgr : BaseMgr<StageMgr>
 
         // 움직임이 있다면 움직임이 다 할 때까지 기다림
         m_waitingMoveComplete = true;
-        // 이벤트 구독
-        MoveMgr.Instance.OnEmptyMoveCompleteFunction += OnMoveCompleted;
 
         // MoveMgr에서 빈 공간 채우기 함수 완료까지 대기
         yield return new WaitUntil(() => !m_waitingMoveComplete);
@@ -537,11 +533,9 @@ public class StageMgr : BaseMgr<StageMgr>
     }
 
     // MoveMgr에서 빈 공간 채우기 함수 완료
-    void OnMoveCompleted()
+    public void MoveCompleted()
     {
         m_waitingMoveComplete = false;
-        // 구독 해제
-        MoveMgr.Instance.OnEmptyMoveCompleteFunction -= OnMoveCompleted;
     }
 
     // 스테이지 정보 갱신
