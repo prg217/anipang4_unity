@@ -63,6 +63,8 @@ public class LogMgr : BaseMgr<LogMgr>
 
         // 로그 저장
         m_matchLogs.Add(log);
+
+        UpdateLog();
     }
 
     public void ChasingMoonExplodeLog(in GameObject _targetTile, in EBlockType _explodeType)
@@ -76,6 +78,8 @@ public class LogMgr : BaseMgr<LogMgr>
 
         // 로그 저장
         m_matchLogs.Add(log);
+
+        UpdateLog();
     }
 
     public void CaptureLog()
@@ -86,10 +90,11 @@ public class LogMgr : BaseMgr<LogMgr>
             {
                 m_captureLogs = new List<Texture2D>(m_captureCamera.GetComponent<CaptureCamera>().Capture());
             }
+            UpdateLog();
         }
     }
 
-    public void UpdateLog()
+    void UpdateLog()
     {
         UIMgr.Instance.LogUpdate(m_matchLogs);
     }
