@@ -447,6 +447,9 @@ public class Tile : MonoBehaviour
     {
         Obstacle fo = m_myFrontObstacle.GetComponent<Obstacle>();
         // 구독한 이벤트 해제
-        fo.GetChildObstacle().OnTileType -= HandleSetTileTypeExecution;
+        if (fo.GetChildObstacle() != null)
+        {
+            fo.GetChildObstacle().OnTileType -= HandleSetTileTypeExecution;
+        }
     }
 }
