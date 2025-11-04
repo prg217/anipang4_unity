@@ -19,6 +19,8 @@ public class Obstacle : MonoBehaviour, IObstacleBehavior
 
     [SerializeField]
     protected int m_level = 1; // 장애물 단계
+    [SerializeField]
+    protected Obstacle m_obstacleScript; // 생성한 자식 장애물이 가질 ObstacleScript
 
     #endregion 변수 끝
 
@@ -43,7 +45,12 @@ public class Obstacle : MonoBehaviour, IObstacleBehavior
     #endregion
 
     #region Set함수
-    public void SetObstacle(EObstacleType _type)
+    protected virtual void SetObstacleScript(in Obstacle _script)
+    {
+        m_obstacleScript = _script;
+    }
+
+    public void SetObstacleType(in EObstacleType _type)
     {
         if (_type == m_ObstacleType)
         {
@@ -147,8 +154,7 @@ public class Obstacle : MonoBehaviour, IObstacleBehavior
                     if (script == null)
                     {
                         m_script = transform.AddComponent<Prison>();
-
-                        Prison prison = m_script as Prison;
+                        m_script.SetObstacleScript(this);
                     }
                 }
                 break;
@@ -158,6 +164,7 @@ public class Obstacle : MonoBehaviour, IObstacleBehavior
                     if (script == null)
                     {
                         m_script = transform.AddComponent<Paint>();
+                        m_script.SetObstacleScript(this);
                     }
                 }
                 break;

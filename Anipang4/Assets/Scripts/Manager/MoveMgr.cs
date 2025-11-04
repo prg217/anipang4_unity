@@ -1,6 +1,7 @@
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class MoveMgr : BaseMgr<MoveMgr>
 {
@@ -78,14 +79,14 @@ public class MoveMgr : BaseMgr<MoveMgr>
         bool hasInput = false;
         bool isReleased = false;
 
-        if (Input.GetMouseButton(0) && !m_moving)
-        {
-            inputPosition = Input.mousePosition;
-            hasInput = true;
-        }
-        else if ((Input.touchCount > 0) && !m_moving)
+        if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved) && !m_moving)
         {
             inputPosition = Input.GetTouch(0).position;
+            hasInput = true;
+        }
+        else if (Input.GetMouseButton(0) && !m_moving)
+        {
+            inputPosition = Input.mousePosition;
             hasInput = true;
         }
 
@@ -138,14 +139,14 @@ public class MoveMgr : BaseMgr<MoveMgr>
             }
         }
 
-        if (Input.GetMouseButtonUp(0) && !m_moving)
-        {
-            inputPosition = Input.mousePosition;
-            isReleased = true;      
-        }
-        else if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended) && !m_moving)
+        if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended) && !m_moving)
         {
             inputPosition = Input.GetTouch(0).position;
+            isReleased = true;
+        }
+        else if (Input.GetMouseButtonUp(0) && !m_moving)
+        {
+            inputPosition = Input.mousePosition;
             isReleased = true;
         }
 

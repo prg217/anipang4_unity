@@ -43,7 +43,7 @@ public class Prison : Obstacle
             SetTileType(ETileType.MOVABLE);
 
             // 스스로를 제거
-            SetObstacle(EObstacleType.NONE);
+            m_obstacleScript.SetObstacleType(EObstacleType.NONE);
 
             return;
         }

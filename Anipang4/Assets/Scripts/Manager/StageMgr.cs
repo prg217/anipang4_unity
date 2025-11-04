@@ -154,6 +154,9 @@ public class StageMgr : BaseMgr<StageMgr>
 
     protected override void OnAwake()
     {
+        // 프레임 제한
+        Application.targetFrameRate = 60;
+
         #region 타일 정보 등록
         // 보드의 자식인 라인들 불러오기
         for (int i = 0; i < m_board.transform.childCount; i++)

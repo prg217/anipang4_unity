@@ -83,7 +83,10 @@ public class Tile : MonoBehaviour
     #endregion
 
     #region Set함수
-    void SetTileType(in ETileType _tileType) { m_tileType = _tileType; }
+    void SetTileType(in ETileType _tileType)
+    {
+        m_tileType = _tileType;
+    }
     public void SetMyBlockType(in EBlockType _BlockType)
     {
         m_myBlock.GetComponent<Block>().SetBlockType(_BlockType);
@@ -132,7 +135,7 @@ public class Tile : MonoBehaviour
 
     void HandleSetTileTypeExecution(ETileType _type)
     {
-        m_tileType = _type;
+        SetTileType(_type);
     }
     #endregion
 
@@ -157,7 +160,7 @@ public class Tile : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // 블록이 비었는지 체크 후 MoveMgr에 신호?
+        
     }
 
     // 자신의 정보 새로고침
@@ -194,11 +197,11 @@ public class Tile : MonoBehaviour
         #region 타일 안의 블록이 움직일 수 있는 상태인가
         if (CheckMove())
         {
-            m_tileType = ETileType.MOVABLE;
+            SetTileType(ETileType.MOVABLE);
         }
         else
         {
-            m_tileType = ETileType.IMMOVABLE;
+            SetTileType(ETileType.IMMOVABLE);
         }
         #endregion
     }
@@ -315,7 +318,7 @@ public class Tile : MonoBehaviour
             {
                 if (m_tileType == ETileType.MOVABLE)
                 {
-                    m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_contagiousObstacleType);
+                    m_myBackObstacle.GetComponent<Obstacle>().SetObstacleType(_contagiousObstacleType);
                 }
             }
         }
@@ -373,7 +376,7 @@ public class Tile : MonoBehaviour
                 {
                     if (m_tileType == ETileType.MOVABLE)
                     {
-                        m_myBackObstacle.GetComponent<Obstacle>().SetObstacle(_contagiousObstacleType);
+                        m_myBackObstacle.GetComponent<Obstacle>().SetObstacleType(_contagiousObstacleType);
                     }
                 }
             }

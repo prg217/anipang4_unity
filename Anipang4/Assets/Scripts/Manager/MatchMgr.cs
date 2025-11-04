@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.UI;
+using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 public class MatchMgr : BaseMgr<MatchMgr>
 {
@@ -102,7 +104,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         // 상하 검사
-        UpDownInspect();
+        FindMatches(false);
+
         // 특수 블록 조건 맞으면 일단 저장
         m_saveMatchCount = m_matchCount;
         m_saveMatchTiles.Clear();
@@ -120,7 +123,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         // 좌우 검사
-        LeftRightInspect();
+        FindMatches(true);
+
         switch (m_matchCount)
         {
             case 4:
@@ -214,7 +218,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         // 상하 검사
-        UpDownInspect();
+        FindMatches(false);
+
         // 특수 블록 조건 맞으면 일단 저장
         m_saveMatchCount = m_matchCount;
         m_saveMatchTiles.Clear();
@@ -232,7 +237,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         // 좌우 검사
-        LeftRightInspect();
+        FindMatches(true);
+
         switch (m_matchCount)
         {
             case 4:
@@ -321,7 +327,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         // 상하 검사
-        UpDownInspect();
+        FindMatches(false);
+
         // 특수 블록 조건 맞으면 일단 저장
         m_saveMatchCount = m_matchCount;
         m_saveMatchTiles.Clear();
@@ -339,7 +346,8 @@ public class MatchMgr : BaseMgr<MatchMgr>
         }
 
         // 좌우 검사
-        LeftRightInspect();
+        FindMatches(true);
+
         switch (m_matchCount)
         {
             case 4:
@@ -403,125 +411,44 @@ public class MatchMgr : BaseMgr<MatchMgr>
         return (false, 0, null);
     }
 
-    void UpDownInspect()
+    void FindMatches(bool _isHorizontal)
     {
-        for (int i = 1; i <= 4; i++)
+        Vector2Int[] searchDirections = _isHorizontal
+            ? new Vector2Int[] { new Vector2Int(1, 0), new Vector2Int(-1, 0) }  // 가로
+            : new Vector2Int[] { new Vector2Int(0, 1), new Vector2Int(0, -1) }; // 세로
+
+        foreach (var direction in searchDirections)
         {
-            Vector2Int matrix = m_targetMatrix;
-            matrix.y = m_targetMatrix.y + i;
+            Vector2Int currentMatrix = m_targetMatrix;
 
-            GameObject tile = StageMgr.Instance.GetTile(matrix);
-            // 타일이 없을 경우 패스
-            if (tile == null)
+            while (true)
             {
-                break;
-            }
+                currentMatrix += direction;
+                GameObject tile = StageMgr.Instance.GetTile(currentMatrix);
 
-            EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-            if (type == m_targetType)
-            {
+                // 타일이 없을 경우 빠져나옴
+                if (tile == null)
+                {
+                    break;
+                }
+
+                EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+                // 타입이 다를 경우 빠져나옴
+                if (type != m_targetType)
+                {
+                    break;
+                }
+
                 m_matchTiles.Add(tile);
                 m_matchCount++;
             }
-            else
-            {
-                break;
-            }
-        }
 
-        for (int i = 1; i <= 4; i++)
-        {
-            Vector2Int matrix = m_targetMatrix;
-            matrix.y = m_targetMatrix.y - i;
-
-            GameObject tile = StageMgr.Instance.GetTile(matrix);
-            // 타일이 없을 경우 패스
-            if (tile == null)
+            // 매치가 안 되는 상황이라면 m_matchTiles를 이전 상태로 돌림
+            if (m_matchCount < 3 && m_matchCount > 1)
             {
-                break;
+                m_matchTiles.Clear();
+                m_matchCount = 1;
             }
-
-            EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-            if (type == m_targetType)
-            {
-                m_matchTiles.Add(tile);
-                m_matchCount++;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        // 매치가 안 되는 상황이라면 m_matchTiles를 이전 상태로 돌림
-        if (m_matchCount < 3 && m_matchCount > 1)
-        {
-            m_matchTiles.Clear();
-            m_matchCount = 1;
-        }
-    }
-
-    void LeftRightInspect()
-    {
-        int count = 1;
-        for (int i = 1; i <= 4; i++)
-        {
-            Vector2Int matrix = m_targetMatrix;
-            matrix.x = m_targetMatrix.x - i;
-
-            GameObject tile = StageMgr.Instance.GetTile(matrix);
-            // 타일이 없을 경우 패스
-            if (tile == null)
-            {
-                break;
-            }
-
-            EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-            if (type == m_targetType)
-            {
-                m_matchTiles.Add(tile);
-                m_matchCount++;
-                count++;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        for (int i = 1; i <= 4; i++)
-        {
-            Vector2Int matrix = m_targetMatrix;
-            matrix.x = m_targetMatrix.x + i;
-
-            GameObject tile = StageMgr.Instance.GetTile(matrix);
-            // 타일이 없을 경우 패스
-            if (tile == null)
-            {
-                break;
-            }
-
-            EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
-            if (type == m_targetType)
-            {
-                m_matchTiles.Add(tile);
-                m_matchCount++;
-                count++;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        // 매치가 안 되는 상황이라면 m_matchTiles를 이전 상태로 돌림
-        if (count < 3 && count > 1)
-        {
-            if (m_matchCount > 1)
-            {
-                m_matchTiles = new List<GameObject>(m_saveMatchTiles);
-            }
-            m_matchCount = m_saveMatchCount;
         }
     }
 
