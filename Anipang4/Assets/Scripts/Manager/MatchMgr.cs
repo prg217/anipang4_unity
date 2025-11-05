@@ -29,6 +29,18 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     int m_randomExplodeCompleteCount = 0;
 
+    private static readonly Vector2Int[] m_horizontalDirections = new Vector2Int[]
+    {
+        new Vector2Int(1, 0),   // 오른쪽
+        new Vector2Int(-1, 0)   // 왼쪽
+    };
+
+    private static readonly Vector2Int[] m_verticalDirections = new Vector2Int[]
+    {
+        new Vector2Int(0, 1),   // 위
+        new Vector2Int(0, -1)   // 아래
+    };
+
     #endregion 변수 끝
 
     public int GetMatchCount() { return m_matchCount; }
@@ -413,11 +425,17 @@ public class MatchMgr : BaseMgr<MatchMgr>
 
     void FindMatches(bool _isHorizontal)
     {
-        Vector2Int[] searchDirections = _isHorizontal
-            ? new Vector2Int[] { new Vector2Int(1, 0), new Vector2Int(-1, 0) }  // 가로
-            : new Vector2Int[] { new Vector2Int(0, 1), new Vector2Int(0, -1) }; // 세로
+        Vector2Int[] directions;
+        if (_isHorizontal)
+        {
+            directions = m_horizontalDirections;
+        }
+        else
+        {
+            directions = m_verticalDirections;
+        }
 
-        foreach (var direction in searchDirections)
+        foreach (var direction in directions)
         {
             Vector2Int currentMatrix = m_targetMatrix;
 
