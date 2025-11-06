@@ -460,13 +460,13 @@ public class MatchMgr : BaseMgr<MatchMgr>
                 m_matchTiles.Add(tile);
                 m_matchCount++;
             }
+        }
 
-            // 매치가 안 되는 상황이라면 m_matchTiles를 이전 상태로 돌림
-            if (m_matchCount < 3 && m_matchCount > 1)
-            {
-                m_matchTiles.Clear();
-                m_matchCount = 1;
-            }
+        // 매치가 안 되는 상황이라면 m_matchTiles를 이전 상태로 돌림
+        if (m_matchCount < 3 && m_matchCount > 1)
+        {
+            m_matchTiles.Clear();
+            m_matchCount = 1;
         }
     }
 
