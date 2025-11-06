@@ -1,8 +1,7 @@
-using UnityEngine;
-using System.Collections.Generic;
-using System.Collections;
 using System;
-
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class StageMgr : BaseMgr<StageMgr>
@@ -307,6 +306,28 @@ public class StageMgr : BaseMgr<StageMgr>
         }
     }
 
+    bool IsPossibleMatch()
+    {
+        // 움직일 수 있는 타일의 블록을 상하좌우로 움직인(임시로) 다음 매치가 되는지 체크
+        for (int i = 0; i <= m_maxMatrix.y; i++)
+        {
+            for (int j = 0; j <= m_maxMatrix.x; j++)
+            {
+                Vector2Int matrix = new Vector2Int(j, i);
+                GameObject tile = GetTile(matrix);
+
+                var (result, matchOK) = MatchMgr.Instance.SimulateBlockMove(tile);
+
+                if (result)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     // 무작위 배치
     void RandomPlacement()
     {
@@ -330,6 +351,12 @@ public class StageMgr : BaseMgr<StageMgr>
                 // 타일 타입이 움직일 수 있는 경우에만 저장
                 if (tileType == ETileType.MOVABLE)
                 {
+                    // 블록 타입이 NONE이면 패스
+                    if (tile.GetComponent<Tile>().GetMyBlockType() == EBlockType.NONE)
+                    {
+                        break;
+                    }
+
                     // 움직일 수 있는 타일 저장
                     tiles.Add(tile);
 
@@ -341,29 +368,133 @@ public class StageMgr : BaseMgr<StageMgr>
         }
         saveBlockTypes = new List<EBlockType>(blockTypes);
 
-        bool loof = false;
-        do
-        {
-            // 무작위 배치 실행
-            foreach (GameObject tile in tiles)
-            {
-                int random = Random.Range(0, blockTypes.Count);
-                tile.GetComponent<Tile>().SetMyBlockType(blockTypes[random]);
-                blockTypes.RemoveAt(random);
+        int loopCount = 0;
 
-                // 만약 바로 매치가 된다면 재실행
-                if (MatchMgr.Instance.CheckMatch(tile, false))
+        while (true)
+        {
+            loopCount++;
+            bool loop = false;
+            do
+            {
+                loop = false;
+                // 무작위 배치 실행
+                foreach (GameObject tile in tiles)
                 {
-                    blockTypes = new List<EBlockType>(saveBlockTypes);
-                    loof = true;
-                    break;
+                    int random = Random.Range(0, blockTypes.Count);
+                    tile.GetComponent<Tile>().SetMyBlockType(blockTypes[random]);
+                    blockTypes.RemoveAt(random);
+
+                    // 만약 바로 매치가 된다면 재실행
+                    if (MatchMgr.Instance.CheckMatch(tile, false))
+                    {
+                        blockTypes = new List<EBlockType>(saveBlockTypes);
+                        loop = true;
+                        break;
+                    }
+                }
+            } while (loop);
+
+            // 다시 움직여서 매치가 될 수 있는지 확인
+            if (IsPossibleMatch())
+            {
+                // 매치 가능 : 루프 탈출
+                break;
+            }
+            else
+            {
+                // 만약 반복 횟수가 50번이 넘은 경우
+                if (loopCount >= 50)
+                {
+                    // 강제로 매치 가능하게 조정
+                    CreatePossibleMatch(tiles);
                 }
             }
-            loof = false;
-        } while (loof);
+        }   
 
-        // 다시 움직여서 매치가 될 수 있는지 확인
+        // 최종 확인 + 힌트 추가
         StartCheckPossibleMatch();
+    }
+
+    void CreatePossibleMatch(in List<GameObject> _tiles)
+    {
+        while (true)
+        {
+            // 임의의 타일 선택
+            int random = Random.Range(0, _tiles.Count);
+            GameObject tile = _tiles[random];
+            Vector2Int startMatrix = tile.GetComponent<Tile>().GetMatrix();
+            EBlockType type = tile.GetComponent<Tile>().GetMyBlockType();
+
+            // 바꿀 타일들 저장
+            List<GameObject> saveChangeTiles = new List<GameObject>();
+
+            Vector2Int[] directions = new Vector2Int[]
+            {
+                    new Vector2Int(0, 1),   // 아래
+                    new Vector2Int(0, -1),   // 위
+                    new Vector2Int(1, 0),   // 오른쪽
+                    new Vector2Int(-1, 0)   // 왼쪽
+            };
+
+            foreach (var direction in directions)
+            {
+                Vector2Int matrix = startMatrix;
+
+                for (int i = 1; i <= 3; i++)
+                {
+                    matrix += direction;
+
+                    // 범위 초과라면
+                    if (matrix.x < 0 || matrix.x > m_maxMatrix.x
+                        || matrix.y < 0 || matrix.y > m_maxMatrix.y)
+                    {
+                        break;
+                    }
+
+                    GameObject changeTile = GetTile(matrix);
+
+                    // changeTile이 null이거나 tileType이 IMMOVABLE인 경우
+                    if (changeTile == null
+                        || changeTile.GetComponent<Tile>().GetTileType() == ETileType.IMMOVABLE)
+                    {
+                        break;
+                    }
+
+                    // blockType이 NONE일 경우(1칸(어차피 움직여서 바꿀 타일이 아닌) 제외)
+                    if (i != 1 && changeTile.GetComponent<Tile>().GetMyBlockType() == EBlockType.NONE)
+                    {
+                        break;
+                    }
+
+                    if (i != 1)
+                    {
+                        saveChangeTiles.Add(changeTile);
+                    }
+                }
+
+                // 타입을 바꿔서 
+                if (saveChangeTiles.Count >= 2)
+                {
+                    break;
+                }
+
+                saveChangeTiles.Clear();
+            }
+
+            // 모든 방향에서 매치로 못 만들 경우 다시 처음부터
+            if (saveChangeTiles.Count < 2)
+            {
+                continue;
+            }
+
+            // 블록 타입 강제 변경
+            foreach (GameObject changeTile in saveChangeTiles)
+            {
+                changeTile.GetComponent<Tile>().SetMyBlockType(type);
+            }
+
+            break;
+        }
     }
 
     // 클리어 조건 확인
