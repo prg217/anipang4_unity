@@ -1,9 +1,17 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MatchLog : MonoBehaviour
 {
+    GameObject m_matchCaptureUI;
+
     int m_index = -1;
+
+    public void SetMatchCaptureUI(GameObject _obj)
+    {
+        m_matchCaptureUI = _obj;
+    }
 
     public void SetIndex(in int _index)
     {
@@ -18,6 +26,9 @@ public class MatchLog : MonoBehaviour
 
     void LogButton()
     {
-        UIMgr.Instance.ShowCaptureLog(m_index);
+        if (m_matchCaptureUI != null)
+        {
+            m_matchCaptureUI.GetComponent<LogUI>().ShowCaptureLog(m_index);
+        }
     }
 }

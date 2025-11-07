@@ -5,6 +5,10 @@ using UnityEngine;
 public class LogMgr : BaseMgr<LogMgr>
 {
     #region 변수
+    [SerializeField]
+    GameObject m_matchLogViewUI;
+    [SerializeField]
+    GameObject m_matchCaptureUI;
 
     // 사진 로그를 캡쳐해주는 카메라
     [SerializeField]
@@ -90,12 +94,12 @@ public class LogMgr : BaseMgr<LogMgr>
             {
                 m_captureLogs = new List<Texture2D>(m_captureCamera.GetComponent<CaptureCamera>().Capture());
             }
-            UpdateLog();
         }
     }
 
     void UpdateLog()
     {
-        UIMgr.Instance.LogUpdate(m_matchLogs);
+        m_matchLogViewUI.GetComponent<LogUI>().LogUpdate(m_matchLogs);
+        //m_matchCaptureUI.GetComponent<LogUI>().LogUpdate(m_matchLogs);
     }
 }

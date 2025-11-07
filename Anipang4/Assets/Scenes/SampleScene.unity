@@ -733,8 +733,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 70911196}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 90}
-  m_LocalScale: {x: 1.476923, y: 1.476923, z: 1.2307692}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 147.69229, y: 147.69229, z: 123.076904}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1752587495}
@@ -746,7 +746,7 @@ RectTransform:
   - {fileID: 955881221}
   - {fileID: 1216709198}
   - {fileID: 644877681}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 2071748456}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -11172,6 +11172,7 @@ GameObject:
   - component: {fileID: 688003558}
   - component: {fileID: 688003557}
   - component: {fileID: 688003556}
+  - component: {fileID: 688003559}
   m_Layer: 5
   m_Name: MatchLogView
   m_TagString: Untagged
@@ -11269,6 +11270,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 688003554}
   m_CullTransparentMesh: 1
+--- !u!114 &688003559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688003554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e04561fab2a5d94384e7776bb35becf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_logContent: {fileID: 1481956402}
+  m_logPrefab: {fileID: 6033093059120115273, guid: c3bf610670abd7f4d9e294c49cef06a0, type: 3}
+  m_matchCaptureImg: {fileID: 0}
+  m_matchCaptureLogText: {fileID: 0}
+  m_matchLogViewUI: {fileID: 0}
+  m_matchCaptureUI: {fileID: 1821997811}
 --- !u!1001 &694755430
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14928,12 +14947,6 @@ MonoBehaviour:
   m_stageClear: {fileID: 594152792}
   m_clearResult: {fileID: 1870134681}
   m_gameOver: {fileID: 1626850739}
-  m_matchLogViewUI: {fileID: 688003554}
-  m_logContent: {fileID: 1481956402}
-  m_matchCaptureUI: {fileID: 1821997811}
-  m_matchCaptureImg: {fileID: 725366874}
-  m_matchCaptureLogText: {fileID: 993627050}
-  m_logPrefab: {fileID: 6033093059120115273, guid: c3bf610670abd7f4d9e294c49cef06a0, type: 3}
 --- !u!4 &891337934
 Transform:
   m_ObjectHideFlags: 0
@@ -26789,6 +26802,7 @@ GameObject:
   - component: {fileID: 1793160507}
   - component: {fileID: 1793160506}
   - component: {fileID: 1793160505}
+  - component: {fileID: 1793160508}
   m_Layer: 5
   m_Name: MatchLogButton
   m_TagString: Untagged
@@ -26860,8 +26874,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 891337933}
-        m_TargetAssemblyTypeName: UIMgr, Assembly-CSharp
+      - m_Target: {fileID: 1793160508}
+        m_TargetAssemblyTypeName: LogUI, Assembly-CSharp
         m_MethodName: LogCaptureChangesButton
         m_Mode: 1
         m_Arguments:
@@ -26910,6 +26924,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1793160503}
   m_CullTransparentMesh: 1
+--- !u!114 &1793160508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1793160503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e04561fab2a5d94384e7776bb35becf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_logContent: {fileID: 0}
+  m_logPrefab: {fileID: 0}
+  m_matchCaptureImg: {fileID: 0}
+  m_matchCaptureLogText: {fileID: 0}
+  m_matchLogViewUI: {fileID: 688003554}
+  m_matchCaptureUI: {fileID: 1821997811}
 --- !u!1001 &1796498521
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27140,9 +27172,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1821997812}
+  - component: {fileID: 1821997813}
   m_Layer: 5
   m_Name: MatchCapture
-  m_TagString: Untagged
+  m_TagString: Log
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -27168,6 +27201,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 265.7}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1821997813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1821997811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e04561fab2a5d94384e7776bb35becf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_logContent: {fileID: 0}
+  m_logPrefab: {fileID: 0}
+  m_matchCaptureImg: {fileID: 725366874}
+  m_matchCaptureLogText: {fileID: 993627050}
+  m_matchLogViewUI: {fileID: 0}
+  m_matchCaptureUI: {fileID: 0}
 --- !u!1 &1823295381
 GameObject:
   m_ObjectHideFlags: 0
@@ -30369,6 +30420,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3480ff3ec740bb544abf994eabcdeea6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_matchLogViewUI: {fileID: 688003554}
+  m_matchCaptureUI: {fileID: 1821997811}
   m_captureCamera: {fileID: 375979441}
 --- !u!4 &2027553831
 Transform:
@@ -30894,6 +30947,7 @@ RectTransform:
   - {fileID: 1793160504}
   - {fileID: 688003555}
   - {fileID: 1821997812}
+  - {fileID: 70911198}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -31618,7 +31672,6 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 619394802}
   - {fileID: 3878168}
-  - {fileID: 70911198}
   - {fileID: 2071748456}
   - {fileID: 134265398}
   - {fileID: 375979442}
